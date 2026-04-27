@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 import sensible from '@fastify/sensible'
 import { prismaPlugin } from './plugins/prisma.js'
 import { authPlugin } from './plugins/auth.js'
+import { swaggerPlugin } from './plugins/swagger.js'
 import { authRoutes } from './routes/auth/index.js'
 
 export function buildServer() {
@@ -13,6 +14,7 @@ export function buildServer() {
 
   // ── Plugins ──────────────────────────────────────────────────────────────
   app.register(sensible)
+  app.register(swaggerPlugin)
   app.register(prismaPlugin)
   app.register(authPlugin)
 

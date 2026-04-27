@@ -1,7 +1,30 @@
 import type { FastifyInstance } from 'fastify'
 
 export async function meRoute(app: FastifyInstance) {
-  app.get('/me', { preHandler: [app.authenticate] }, async (req, reply) => {
+  app.get('/me', {
+    preHandler: [app.authenticate],
+    schema: {
+      tags:     ['auth'],
+      summary:  'Perfil del dueño autenticado',
+      security: [{ bearerAuth: [] }],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            id:           { type: 'string' },
+            email:        { type: 'string' },
+            role:         { type: 'string' },
+            businessId:   { type: 'string' },
+            businessSlug: { type: 'string' },
+          },
+        },
+        401: {
+          type: 'object',
+          properties: { error: { type: 'string' } },
+        },
+      },
+    },
+  }, async (req, reply) => {
     const userId = req.user.sub
 
     const user = await app.prisma.user.findUnique({
