@@ -1,13 +1,7 @@
 import { PrismaClient } from '@prisma/client'
-import { createHash } from 'node:crypto'
+import { hash } from '@node-rs/argon2'
 
 const prisma = new PrismaClient()
-
-// Bcrypt simple para seed (no usar en producción sin bcrypt real)
-function hashPassword(plain: string): string {
-  // En producción usar: import bcrypt from 'bcryptjs'; return bcrypt.hashSync(plain, 12)
-  return createHash('sha256').update(plain).digest('hex')
-}
 
 async function main() {
   console.log('🌱 Seeding ColaCero...')
@@ -26,13 +20,14 @@ async function main() {
   console.log(`  ✓ Business: ${business.name} (${business.slug})`)
 
   // 2. Usuario owner
+  const ownerHash = await hash('test1234')
   const owner = await prisma.user.upsert({
-    where: { businessId_email: { businessId: business.id, email: 'ariel@elfogon.cu' } },
-    update: {},
+    where:  { businessId_email: { businessId: business.id, email: 'ariel@elfogon.cu' } },
+    update: { passwordHash: ownerHash },
     create: {
       businessId:   business.id,
       email:        'ariel@elfogon.cu',
-      passwordHash: hashPassword('test1234'),
+      passwordHash: ownerHash,
       role:         'OWNER',
     },
   })
