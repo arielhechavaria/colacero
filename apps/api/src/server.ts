@@ -1,6 +1,8 @@
 import Fastify from 'fastify'
 import sensible from '@fastify/sensible'
 import { prismaPlugin } from './plugins/prisma.js'
+import { authPlugin } from './plugins/auth.js'
+import { authRoutes } from './routes/auth/index.js'
 
 export function buildServer() {
   const app = Fastify({
@@ -12,6 +14,10 @@ export function buildServer() {
   // ── Plugins ──────────────────────────────────────────────────────────────
   app.register(sensible)
   app.register(prismaPlugin)
+  app.register(authPlugin)
+
+  // ── Routes ───────────────────────────────────────────────────────────────
+  app.register(authRoutes, { prefix: '/api/auth/owner' })
 
   // ── Health check — sin auth, sin DB ──────────────────────────────────────
   app.get('/health', async () => ({
