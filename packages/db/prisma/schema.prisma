@@ -1,0 +1,198 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Business ────────────────────────────────────────────────────────────────
+
+model Business {
+  id                 String             @id @default(cuid())
+  slug               String             @unique
+  name               String
+  description        String?
+  timezone           String             @default("America/Havana")
+  subscriptionStatus SubscriptionStatus @default(TRIAL)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  users         User[]
+  products      Product[]
+  pickupWindows PickupWindow[]
+  orders        Order[]
+}
+
+// ─── User (staff del negocio) ────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  businessId   String
+  email        String
+  passwordHash String
+  role         UserRole @default(STAFF)
+  createdAt    DateTime @default(now())
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, email])
+  @@index([businessId])
+}
+
+// ─── Customer (auth via WhatsApp OTP) ────────────────────────────────────────
+
+model Customer {
+  id            String    @id @default(cuid())
+  whatsappPhone String    @unique
+  displayName   String?
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+
+  orders Order[]
+}
+
+// ─── Product ─────────────────────────────────────────────────────────────────
+
+model Product {
+  id          String   @id @default(cuid())
+  businessId  String
+  sku         String?
+  name        String
+  description String?
+  unitPrice   Decimal  @db.Decimal(10, 2)
+  unitLabel   String   @default("unidad")
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  business   Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  inventory  Inventory?
+  orderItems OrderItem[]
+
+  @@unique([businessId, sku])
+  @@index([businessId, isActive])
+}
+
+// ─── Inventory (optimistic locking via version) ──────────────────────────────
+
+model Inventory {
+  productId          String   @id
+  quantityAvailable  Int      @default(0)
+  quantityReserved   Int      @default(0)
+  lowStockThreshold  Int      @default(5)
+  version            Int      @default(0)
+  updatedAt          DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// ─── PickupWindow ────────────────────────────────────────────────────────────
+
+model PickupWindow {
+  id          String   @id @default(cuid())
+  businessId  String
+  date        DateTime @db.Date
+  startTime   String
+  endTime     String
+  capacity    Int
+  ordersCount Int      @default(0)
+  isOpen      Boolean  @default(true)
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  orders   Order[]
+
+  @@index([businessId, date, isOpen])
+}
+
+// ─── Order ───────────────────────────────────────────────────────────────────
+
+model Order {
+  id             String      @id @default(cuid())
+  businessId     String
+  customerId     String
+  pickupWindowId String?
+  status         OrderStatus @default(DRAFT)
+  subtotal       Decimal     @db.Decimal(10, 2)
+  pickupCode     String?     @db.VarChar(6)
+  notes          String?
+  createdAt      DateTime    @default(now())
+  confirmedAt    DateTime?
+  readyAt        DateTime?
+  pickedUpAt     DateTime?
+  expiresAt      DateTime?
+
+  business      Business      @relation(fields: [businessId], references: [id])
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  pickupWindow  PickupWindow? @relation(fields: [pickupWindowId], references: [id])
+  items         OrderItem[]
+  notifications Notification[]
+
+  @@index([businessId, status, pickupWindowId])
+  @@index([customerId, createdAt(sort: Desc)])
+}
+
+// ─── OrderItem ───────────────────────────────────────────────────────────────
+
+model OrderItem {
+  id                String  @id @default(cuid())
+  orderId           String
+  productId         String
+  quantity          Int
+  unitPriceSnapshot Decimal @db.Decimal(10, 2)
+  subtotal          Decimal @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+}
+
+// ─── Notification ────────────────────────────────────────────────────────────
+
+model Notification {
+  id           String             @id @default(cuid())
+  orderId      String
+  channel      String             @default("whatsapp")
+  templateName String
+  payload      Json
+  status       NotificationStatus @default(PENDING)
+  sentAt       DateTime?
+  errorMessage String?
+  retryCount   Int                @default(0)
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum OrderStatus {
+  DRAFT
+  CONFIRMED
+  PREPARING
+  READY
+  PICKED_UP
+  CANCELLED
+  EXPIRED
+}
+
+enum UserRole {
+  OWNER
+  STAFF
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}

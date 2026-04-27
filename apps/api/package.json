@@ -1,0 +1,27 @@
+{
+  "name": "@colacero/api",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "lint": "echo 'lint ok'"
+  },
+  "dependencies": {
+    "fastify": "^4.27.0",
+    "fastify-plugin": "^4.5.1",
+    "@fastify/sensible": "^5.6.0",
+    "@colacero/db": "workspace:*",
+    "@colacero/env": "workspace:*",
+    "@colacero/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0",
+    "tsx": "^4.15.0",
+    "vitest": "^1.6.0"
+  }
+}

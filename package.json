@@ -1,0 +1,22 @@
+{
+  "name": "colacero",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:generate": "pnpm --filter @colacero/db run generate",
+    "db:migrate": "pnpm --filter @colacero/db run migrate:dev",
+    "db:seed": "pnpm --filter @colacero/db run seed",
+    "db:studio": "pnpm --filter @colacero/db run studio",
+    "infra:up": "docker compose -f infra/docker-compose.yml up -d",
+    "infra:down": "docker compose -f infra/docker-compose.yml down"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "typescript": "^5.4.0"
+  }
+}
