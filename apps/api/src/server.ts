@@ -6,6 +6,7 @@ import { redisPlugin } from './plugins/redis.js'
 import { swaggerPlugin } from './plugins/swagger.js'
 import { authRoutes } from './routes/auth/index.js'
 import { customerAuthRoutes } from './routes/auth/customer/index.js'
+import { productRoutes } from './routes/owner/products/index.js'
 
 export function buildServer() {
   const app = Fastify({
@@ -24,6 +25,7 @@ export function buildServer() {
   // ── Routes ───────────────────────────────────────────────────────────────
   app.register(authRoutes, { prefix: '/api/auth/owner' })
   app.register(customerAuthRoutes, { prefix: '/api/auth/customer' })
+  app.register(productRoutes, { prefix: '/api/owner/products' })
 
   // ── Health check — sin auth, sin DB ──────────────────────────────────────
   app.get('/health', async () => ({
