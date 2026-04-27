@@ -1,22 +1,23 @@
-name: CI
+﻿name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
 
 jobs:
   ci:
+    name: Lint · Typecheck · Test
     runs-on: ubuntu-latest
 
     services:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER:     colacero
-          POSTGRES_PASSWORD: colacero_test
-          POSTGRES_DB:       colacero_test
+          POSTGRES_USER: colacero
+          POSTGRES_PASSWORD: colacero_dev
+          POSTGRES_DB: colacero_dev
         ports:
           - 5432:5432
         options: >-
@@ -25,38 +26,56 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-    env:
-      DATABASE_URL: postgresql://colacero:colacero_test@localhost:5432/colacero_test
-      REDIS_URL:    redis://localhost:6379
-      JWT_SECRET:   ci-secret-de-prueba-minimo-32-caracteres-ok
-      NODE_ENV:     test
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10.33.0
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: pnpm
+          node-version: '20'
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck
-        run: pnpm typecheck
+      - name: Create .env for CI
+        run: |
+          cat > .env << 'ENVEOF'
+          NODE_ENV=test
+          DATABASE_URL=postgresql://colacero:colacero_dev@localhost:5432/colacero_dev
+          REDIS_URL=redis://localhost:6379
+          JWT_SECRET=ci-jwt-secret-minimum-32-characters!!
+          JWT_EXPIRES_IN=7d
+          OTP_TTL_SECONDS=600
+          WHATSAPP_PROVIDER=mock
+          API_PORT=3000
+          API_HOST=0.0.0.0
+          ENVEOF
+
+      - name: Generate Prisma client
+        run: pnpm --filter @colacero/db run generate
+
+      - name: Run database migrations
+        run: pnpm --filter @colacero/db run migrate:deploy
 
       - name: Lint
         run: pnpm lint
 
-      - name: Prisma validate
-        run: pnpm --filter @colacero/db exec prisma validate
+      - name: Typecheck
+        run: pnpm typecheck
 
-      - name: Prisma migrate (test DB)
-        run: pnpm --filter @colacero/db exec prisma migrate deploy
-
-      - name: Unit tests (env)
-        run: pnpm --filter @colacero/env test
+      - name: Test
+        run: pnpm --filter @colacero/api run test
