@@ -81,6 +81,22 @@ export async function inventoryRoutes(app: FastifyInstance) {
     const inventory = await app.prisma.inventory.findUnique({
       where: { productId: req.params.productId },
     })
+
+    // Alerta de stock bajo
+    if (
+      inventory &&
+      inventory.quantityAvailable <= inventory.lowStockThreshold
+    ) {
+      app.log.warn(
+        {
+          productId:         req.params.productId,
+          quantityAvailable: inventory.quantityAvailable,
+          lowStockThreshold: inventory.lowStockThreshold,
+        },
+        'low-stock alert',
+      )
+    }
+
     return reply.send(inventory)
   })
 }
