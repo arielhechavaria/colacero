@@ -5,8 +5,8 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js",
+    "dev": "dotenv -e ../../.env -- tsx watch src/index.ts",
+    "start": "dotenv -e ../../.env -- node dist/index.js",
     "test": "dotenv -e ../../.env -- vitest run",
     "lint": "echo 'lint ok'"
   },
