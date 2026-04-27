@@ -9,12 +9,39 @@ interface LoginBody {
 export async function loginRoute(app: FastifyInstance) {
   app.post<{ Body: LoginBody }>('/login', {
     schema: {
+      tags:    ['auth'],
+      summary: 'Login del dueño — retorna JWT de acceso',
       body: {
         type:       'object',
         required:   ['email', 'password'],
         properties: {
           email:    { type: 'string', format: 'email' },
           password: { type: 'string', minLength: 8 },
+        },
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            token: { type: 'string' },
+            user: {
+              type: 'object',
+              properties: {
+                id:         { type: 'string' },
+                email:      { type: 'string' },
+                role:       { type: 'string' },
+                businessId: { type: 'string' },
+              },
+            },
+          },
+        },
+        401: {
+          type: 'object',
+          properties: { error: { type: 'string', enum: ['invalid_credentials'] } },
+        },
+        422: {
+          type: 'object',
+          properties: { error: { type: 'string', enum: ['validation_error'] } },
         },
       },
     },
