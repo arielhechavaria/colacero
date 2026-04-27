@@ -1,4 +1,5 @@
 import type { FastifyInstance } from 'fastify'
+import '@fastify/multipart'   // type augmentation → req.file()
 import { createWriteStream } from 'node:fs'
 import { mkdir } from 'node:fs/promises'
 import { resolve, extname } from 'node:path'
