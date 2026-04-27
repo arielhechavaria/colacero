@@ -11,8 +11,8 @@ declare module 'fastify' {
 
 declare module '@fastify/jwt' {
   interface FastifyJWT {
-    payload: { sub: string; businessId: string; role: string }
-    user:    { sub: string; businessId: string; role: string }
+    payload: { sub: string; businessId?: string; role?: string; phone?: string }
+    user:    { sub: string; businessId?: string; role?: string; phone?: string }
   }
 }
 
