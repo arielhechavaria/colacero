@@ -3,12 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "dotenv -e ../../.env -- next dev -p 3001",
-    "build": "dotenv -e ../../.env -- next build",
-    "start": "dotenv -e ../../.env -- next start -p 3001",
+    "dev":       "dotenv -e ../../.env -- next dev -p 3001",
+    "build":     "dotenv -e ../../.env -- next build",
+    "start":     "dotenv -e ../../.env -- next start -p 3001",
     "typecheck": "tsc --noEmit",
-    "lint": "echo 'lint ok'",
-    "test": "dotenv -e ../../.env -- vitest run"
+    "lint":      "echo 'lint ok'",
+    "test":      "dotenv -e ../../.env -- vitest run"
   },
   "dependencies": {
     "next": "14.2.29",
@@ -16,15 +16,12 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20.0.0",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "dotenv-cli": "^8.0.0",
-    "jsdom": "^29.1.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.4.0",
