@@ -54,9 +54,10 @@ export async function catalogRoutes(app: FastifyInstance) {
 
     return reply.send({
       business: {
-        id:   business.id,
-        name: business.name,
-        slug: business.slug,
+        id:          business.id,
+        name:        business.name,
+        slug:        business.slug,
+        description: business.description ?? null,
       },
       products,
     })
