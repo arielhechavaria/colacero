@@ -1,4 +1,4 @@
-lockfileVersion: '9.0'
+﻿lockfileVersion: '9.0'
 
 settings:
   autoInstallPeers: true
@@ -3873,7 +3873,8 @@ snapshots:
 
   stream-wormhole@1.1.0: {}
 
-streamsearch@1.1.0: {}
+  streamsearch@1.1.0: {}
+
   string-width@4.2.3:
     dependencies:
       emoji-regex: 8.0.0
