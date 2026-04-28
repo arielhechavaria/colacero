@@ -26,6 +26,10 @@ export const envSchema = z.object({
   WHATSAPP_PROVIDER:        z.enum(['meta-cloud', 'mock']).default('mock'),
   WHATSAPP_API_TOKEN:       z.string().optional(),
   WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
+
+  // ── Upload de archivos ────────────────────────────────────────────
+  UPLOAD_DIR:      z.string().default('./uploads'),
+  API_PUBLIC_URL:  z.string().url().default('http://localhost:3000'),
 })
 
 export type EnvSchema = z.infer<typeof envSchema>
