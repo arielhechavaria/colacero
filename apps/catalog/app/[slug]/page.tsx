@@ -8,60 +8,76 @@ interface Props {
   params: { slug: string }
 }
 
-function ProductCard({ product }: { product: CatalogProduct }) {
+function StockLabel({ inventory }: { inventory: CatalogProduct['inventory'] }) {
+  if (inventory == null) return null
+
+  const { quantityAvailable, lowStockThreshold } = inventory
+
+  if (quantityAvailable === 0) {
+    return <span className="text-sm font-medium text-red-500">Sin stock</span>
+  }
+  if (quantityAvailable <= lowStockThreshold) {
+    return (
+      <span className="text-sm font-medium text-amber-500">
+        Últimas {quantityAvailable}
+      </span>
+    )
+  }
+  return (
+    <span className="text-sm font-medium text-emerald-600">
+      {quantityAvailable} disponibles
+    </span>
+  )
+}
+
+function ProductRow({ product }: { product: CatalogProduct }) {
   const outOfStock = product.inventory?.quantityAvailable === 0
-  const lowStock =
-    !outOfStock &&
-    product.inventory != null &&
-    product.inventory.quantityAvailable <= product.inventory.lowStockThreshold
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm">
+    <article
+      className={`flex gap-4 rounded-2xl bg-white p-4 shadow-sm${
+        outOfStock ? ' opacity-60' : ''
+      }`}
+    >
       {/* Imagen */}
-      <div className="relative aspect-square w-full bg-gray-100">
+      <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
         {product.imageUrl != null ? (
           <Image
             src={product.imageUrl}
             alt={product.name}
             fill
-            sizes="(max-width: 640px) 50vw, 33vw"
+            sizes="80px"
             className="object-cover"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-4xl text-gray-300">
+          <div className="flex h-full items-center justify-center text-3xl">
             📦
           </div>
-        )}
-
-        {/* Badges de stock */}
-        {outOfStock && (
-          <span className="absolute right-2 top-2 rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">
-            Sin stock
-          </span>
-        )}
-        {lowStock && (
-          <span className="absolute right-2 top-2 rounded-full bg-amber-400 px-2 py-0.5 text-xs font-semibold text-white">
-            Últimas unidades
-          </span>
         )}
       </div>
 
       {/* Info */}
-      <div className="flex flex-1 flex-col gap-1 p-3">
-        <h2 className="line-clamp-2 text-sm font-semibold leading-snug">
-          {product.name}
-        </h2>
-        {product.description != null && (
-          <p className="line-clamp-2 text-xs text-gray-500">
-            {product.description}
-          </p>
-        )}
-        <p className="mt-auto pt-2 text-base font-bold text-emerald-600">
-          ${Number(product.unitPrice).toFixed(2)}{' '}
-          <span className="text-xs font-normal text-gray-400">
-            / {product.unitLabel}
-          </span>
-        </p>
+      <div className="flex flex-1 flex-col justify-between">
+        <div>
+          <h2 className="font-semibold leading-snug text-gray-900">
+            {product.name}
+          </h2>
+          {product.description != null && (
+            <p className="mt-0.5 text-xs text-gray-400 line-clamp-1">
+              {product.description}
+            </p>
+          )}
+        </div>
+
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="text-lg font-bold text-teal-700">
+              ${Number(product.unitPrice).toFixed(2)}
+            </p>
+            <p className="text-xs text-gray-400">por {product.unitLabel}</p>
+          </div>
+          <StockLabel inventory={product.inventory ?? null} />
+        </div>
       </div>
     </article>
   )
@@ -72,25 +88,34 @@ export default async function CatalogPage({ params }: Props) {
   if (data == null) notFound()
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
-      {/* Header */}
-      <header className="mb-8 text-center">
-        <h1 className="text-3xl font-bold">{data.business.name}</h1>
-        <p className="mt-1 text-sm text-gray-500">Catálogo online</p>
+    <main className="min-h-screen bg-gray-50">
+      {/* Header con color de marca */}
+      <header className="bg-teal-700 px-4 pb-6 pt-8 text-white">
+        <p className="mb-1 text-sm font-medium text-teal-200">Catálogo online</p>
+        <h1 className="text-2xl font-bold">{data.business.name}</h1>
+        {data.business.description != null && (
+          <p className="mt-1 text-sm text-teal-100">{data.business.description}</p>
+        )}
       </header>
 
-      {/* Grid de productos */}
-      {data.products.length === 0 ? (
-        <p className="text-center text-gray-400">
-          Este negocio aún no tiene productos publicados.
-        </p>
-      ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {data.products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      )}
+      {/* Lista de productos */}
+      <div className="mx-auto max-w-lg px-4 py-6">
+        {data.products.length === 0 ? (
+          <p className="py-16 text-center text-gray-400">
+            Este negocio aún no tiene productos publicados.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              {data.products.length}{' '}
+              {data.products.length === 1 ? 'producto disponible' : 'productos disponibles'}
+            </p>
+            {data.products.map((product) => (
+              <ProductRow key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+      </div>
     </main>
   )
 }

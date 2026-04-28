@@ -19,6 +19,7 @@ export interface CatalogData {
     id: string
     name: string
     slug: string
+    description?: string | null
   }
   products: CatalogProduct[]
 }
