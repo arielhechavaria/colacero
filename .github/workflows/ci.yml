@@ -63,6 +63,8 @@ jobs:
           WHATSAPP_PROVIDER=mock
           API_PORT=3000
           API_HOST=0.0.0.0
+          UPLOAD_DIR=/tmp/colacero-uploads
+          API_PUBLIC_URL=http://localhost:3000
           ENVEOF
 
       - name: Generate Prisma client
