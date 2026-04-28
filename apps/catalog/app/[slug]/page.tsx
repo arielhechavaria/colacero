@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { getCatalog, type CatalogProduct } from '../../lib/api'
+import { AddToCartButton } from '../../components/add-to-cart-button'
 
 export const revalidate = 60 // ISR — revalida cada 60s
 
@@ -76,7 +77,10 @@ function ProductRow({ product }: { product: CatalogProduct }) {
             </p>
             <p className="text-xs text-gray-400">por {product.unitLabel}</p>
           </div>
-          <StockLabel inventory={product.inventory ?? null} />
+          <div className="flex flex-col items-end gap-1">
+            <StockLabel inventory={product.inventory ?? null} />
+            <AddToCartButton product={product} disabled={outOfStock} />
+          </div>
         </div>
       </div>
     </article>
