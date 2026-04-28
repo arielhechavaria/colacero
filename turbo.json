@@ -27,7 +27,8 @@
         "DATABASE_URL",
         "REDIS_URL",
         "NODE_ENV",
-        "JWT_SECRET"
+        "JWT_SECRET",
+        "CATALOG_API_URL"
       ]
     },
     "dev": {
