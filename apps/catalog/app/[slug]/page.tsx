@@ -1,11 +1,12 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { getCatalog, type CatalogProduct } from '../../lib/api'
+import { AddToCartButton } from '../../components/add-to-cart-button'
 
 export const revalidate = 60 // ISR — revalida cada 60s
 
 interface Props {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 function StockLabel({ inventory }: { inventory: CatalogProduct['inventory'] }) {
@@ -76,7 +77,10 @@ function ProductRow({ product }: { product: CatalogProduct }) {
             </p>
             <p className="text-xs text-gray-400">por {product.unitLabel}</p>
           </div>
-          <StockLabel inventory={product.inventory ?? null} />
+          <div className="flex flex-col items-end gap-1">
+            <StockLabel inventory={product.inventory ?? null} />
+            <AddToCartButton product={product} disabled={outOfStock} />
+          </div>
         </div>
       </div>
     </article>
@@ -84,7 +88,8 @@ function ProductRow({ product }: { product: CatalogProduct }) {
 }
 
 export default async function CatalogPage({ params }: Props) {
-  const data = await getCatalog(params.slug)
+  const { slug } = await params
+  const data = await getCatalog(slug)
   if (data == null) notFound()
 
   return (
