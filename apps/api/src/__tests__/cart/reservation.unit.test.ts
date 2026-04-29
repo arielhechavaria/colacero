@@ -3,7 +3,12 @@ import { reserveStock, releaseReservation, RESERVATION_TTL } from '../../service
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
-function makePrisma(overrides: Record<string, unknown> = {}) {
+interface PrismaOverrides {
+  product?:   Record<string, unknown>
+  inventory?: Record<string, unknown>
+}
+
+function makePrisma(overrides: PrismaOverrides = {}) {
   return {
     product: {
       findUnique: vi.fn().mockResolvedValue({
