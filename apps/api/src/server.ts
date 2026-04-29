@@ -8,6 +8,7 @@ import { swaggerPlugin } from './plugins/swagger.js'
 import { authRoutes } from './routes/auth/index.js'
 import { customerAuthRoutes } from './routes/auth/customer/index.js'
 import { productRoutes } from './routes/owner/products/index.js'
+import { ownerOrderRoutes } from './routes/owner/orders/index.js'
 import { catalogRoutes } from './routes/catalog/index.js'
 import { cartRoutes } from './routes/cart/index.js'
 import { uploadPlugin } from './plugins/upload.js'
@@ -20,8 +21,18 @@ export function buildServer() {
   })
 
   // ── Plugins ──────────────────────────────────────────────────────────────
+  // Support comma-separated origins: CORS_ORIGIN=http://localhost:3001,http://localhost:3002
+  const rawOrigins = process.env['CORS_ORIGIN'] ?? 'http://localhost:3001,http://localhost:3002'
+  const allowedOrigins = rawOrigins.split(',').map((o) => o.trim())
+
   app.register(cors, {
-    origin:      process.env['CORS_ORIGIN'] ?? 'http://localhost:3001',
+    origin: (origin, cb) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        cb(null, true)
+      } else {
+        cb(new Error('Not allowed by CORS'), false)
+      }
+    },
     credentials: true,
   })
   app.register(sensible)
@@ -34,7 +45,8 @@ export function buildServer() {
   // ── Routes ───────────────────────────────────────────────────────────────
   app.register(authRoutes, { prefix: '/api/auth/owner' })
   app.register(customerAuthRoutes, { prefix: '/api/auth/customer' })
-  app.register(productRoutes, { prefix: '/api/owner/products' })
+  app.register(productRoutes,    { prefix: '/api/owner/products' })
+  app.register(ownerOrderRoutes, { prefix: '/api/owner/orders' })
   app.register(catalogRoutes, { prefix: '/api/catalog' })
   app.register(cartRoutes,    { prefix: '/api/cart' })
 
