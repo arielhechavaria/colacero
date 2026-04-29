@@ -88,6 +88,80 @@ export async function getOrders(token: string, date?: string): Promise<DayOrders
   return res.json() as Promise<DayOrders>
 }
 
+// ── Pickup Windows ────────────────────────────────────────────────────────────
+
+export interface PickupWindow {
+  id:          string
+  date:        string
+  startTime:   string
+  endTime:     string
+  capacity:    number
+  ordersCount: number
+  spotsLeft:   number
+  isOpen:      boolean
+}
+
+export interface CreateWindowInput {
+  date:      string
+  startTime: string
+  endTime:   string
+  capacity:  number
+  isOpen?:   boolean
+}
+
+export async function getWindows(token: string): Promise<PickupWindow[]> {
+  const res = await fetch(`${API_BASE}/api/owner/pickup-windows`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+    cache:   'no-store',
+  })
+  if (!res.ok) throw new Error('fetch_windows_failed')
+  return res.json() as Promise<PickupWindow[]>
+}
+
+export async function createWindow(
+  token: string,
+  input: CreateWindowInput,
+): Promise<PickupWindow> {
+  const res = await fetch(`${API_BASE}/api/owner/pickup-windows`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body:    JSON.stringify(input),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'create_window_failed')
+  }
+  return res.json() as Promise<PickupWindow>
+}
+
+export async function patchWindow(
+  token: string,
+  windowId: string,
+  data: Partial<Pick<PickupWindow, 'startTime' | 'endTime' | 'capacity' | 'isOpen'>>,
+): Promise<PickupWindow> {
+  const res = await fetch(`${API_BASE}/api/owner/pickup-windows/${windowId}`, {
+    method:  'PATCH',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body:    JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'patch_window_failed')
+  }
+  return res.json() as Promise<PickupWindow>
+}
+
+export async function deleteWindow(token: string, windowId: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/owner/pickup-windows/${windowId}`, {
+    method:  'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'delete_window_failed')
+  }
+}
+
 export async function patchOrderStatus(
   token: string,
   orderId: string,
