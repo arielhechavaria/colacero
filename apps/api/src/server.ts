@@ -8,6 +8,7 @@ import { authRoutes } from './routes/auth/index.js'
 import { customerAuthRoutes } from './routes/auth/customer/index.js'
 import { productRoutes } from './routes/owner/products/index.js'
 import { catalogRoutes } from './routes/catalog/index.js'
+import { cartRoutes } from './routes/cart/index.js'
 import { uploadPlugin } from './plugins/upload.js'
 
 export function buildServer() {
@@ -30,6 +31,7 @@ export function buildServer() {
   app.register(customerAuthRoutes, { prefix: '/api/auth/customer' })
   app.register(productRoutes, { prefix: '/api/owner/products' })
   app.register(catalogRoutes, { prefix: '/api/catalog' })
+  app.register(cartRoutes,    { prefix: '/api/cart' })
 
   // ── Health check — sin auth, sin DB ──────────────────────────────────────
   app.get('/health', async () => ({
