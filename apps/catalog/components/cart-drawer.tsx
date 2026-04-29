@@ -1,11 +1,45 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter, useParams } from 'next/navigation'
 import { useCartContext } from '../context/cart-context'
+import { reserveStock } from '../lib/client-api'
 
 export function CartDrawer() {
   const { items, total, itemCount, remove, clear } = useCartContext()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen]       = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState<string | null>(null)
+  const router = useRouter()
+  const params = useParams<{ slug: string }>()
+
+  async function handleCheckout() {
+    if (items.length === 0) return
+    setLoading(true)
+    setError(null)
+
+    try {
+      // Reservar stock para todos los items del carrito
+      const reservations = await Promise.all(
+        items.map((item) => reserveStock(item.productId, item.quantity)),
+      )
+      const reservationIds = reservations.map((r) => r.reservationId)
+
+      // Guardar en sessionStorage para que la página de checkout lo lea
+      sessionStorage.setItem('colacero_reservation_ids', JSON.stringify(reservationIds))
+
+      router.push(`/${params.slug}/checkout`)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'reserve_failed'
+      setError(
+        msg === 'insufficient_stock'
+          ? 'No hay suficiente stock para algunos productos. Revisá el carrito.'
+          : 'Hubo un problema al reservar. Intentá de nuevo.',
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <>
@@ -74,15 +108,26 @@ export function CartDrawer() {
               </div>
             </div>
 
+            {error != null && (
+              <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+                {error}
+              </p>
+            )}
+
             <div className="mt-4 flex gap-3">
               <button
                 onClick={() => { clear(); setOpen(false) }}
-                className="flex-1 rounded-xl border border-gray-300 py-3 text-sm text-gray-600"
+                disabled={loading}
+                className="flex-1 rounded-xl border border-gray-300 py-3 text-sm text-gray-600 disabled:opacity-40"
               >
                 Vaciar
               </button>
-              <button className="flex-[2] rounded-xl bg-teal-700 py-3 text-sm font-semibold text-white">
-                Confirmar pedido
+              <button
+                onClick={() => void handleCheckout()}
+                disabled={loading}
+                className="flex-[2] rounded-xl bg-teal-700 py-3 text-sm font-semibold text-white disabled:opacity-50"
+              >
+                {loading ? 'Reservando…' : 'Confirmar pedido'}
               </button>
             </div>
           </>
