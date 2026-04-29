@@ -137,9 +137,70 @@ export async function ownerPickupWindowRoutes(app: FastifyInstance) {
     await app.prisma.pickupWindow.delete({ where: { id: req.params.windowId } })
     return reply.send({ ok: true })
   })
+
+  // ── POST /generate-tomorrow — copiar ventanas de hoy para mañana ─────────
+  app.post('/generate-tomorrow', {
+    onRequest: [app.authenticate],
+    schema: {
+      tags:     ['owner-windows'],
+      summary:  'Generar ventanas para mañana copiando las de hoy',
+      security: [{ bearerAuth: [] }],
+    },
+  }, async (req, reply) => {
+    const { businessId } = req.user
+    if (!businessId) return reply.status(403).send({ error: 'forbidden' })
+
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+    const todayEnd = new Date()
+    todayEnd.setHours(23, 59, 59, 999)
+
+    const todayWindows = await app.prisma.pickupWindow.findMany({
+      where: {
+        businessId,
+        date: { gte: todayStart, lte: todayEnd },
+      },
+    })
+
+    if (todayWindows.length === 0) {
+      return reply.status(404).send({ error: 'no_windows_today' })
+    }
+
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    tomorrow.setHours(0, 0, 0, 0)
+
+    // Delete existing tomorrow windows to avoid duplicates
+    await app.prisma.pickupWindow.deleteMany({
+      where: {
+        businessId,
+        date: tomorrow,
+      },
+    })
+
+    const created = await Promise.all(
+      todayWindows.map((w) =>
+        app.prisma.pickupWindow.create({
+          data: {
+            businessId,
+            date:      tomorrow,
+            startTime: w.startTime,
+            endTime:   w.endTime,
+            capacity:  w.capacity,
+            isOpen:    true,
+          },
+        }),
+      ),
+    )
+
+    return reply.status(201).send({
+      date:    tomorrow.toISOString().slice(0, 10),
+      created: created.map(serialize),
+    })
+  })
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function serialize(w: {
   id:          string

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  getWindows, createWindow, patchWindow, deleteWindow,
+  getWindows, createWindow, patchWindow, deleteWindow, generateTomorrow,
   type PickupWindow, type CreateWindowInput,
 } from '../../lib/api'
 
@@ -41,12 +41,14 @@ export default function WindowsPage() {
   const router   = useRouter()
   const tokenRef = useRef<string | null>(null)
 
-  const [windows,    setWindows]    = useState<PickupWindow[]>([])
-  const [loading,    setLoading]    = useState(true)
-  const [saving,     setSaving]     = useState(false)
-  const [error,      setError]      = useState<string | null>(null)
-  const [showForm,   setShowForm]   = useState(false)
-  const [form,       setForm]       = useState<CreateWindowInput>(EMPTY_FORM)
+  const [windows,      setWindows]      = useState<PickupWindow[]>([])
+  const [loading,      setLoading]      = useState(true)
+  const [saving,       setSaving]       = useState(false)
+  const [generating,   setGenerating]   = useState(false)
+  const [error,        setError]        = useState<string | null>(null)
+  const [success,      setSuccess]      = useState<string | null>(null)
+  const [showForm,     setShowForm]     = useState(false)
+  const [form,         setForm]         = useState<CreateWindowInput>(EMPTY_FORM)
 
   // ── Auth + load ─────────────────────────────────────────────────────────────
   const fetchWindows = useCallback(async () => {
@@ -102,6 +104,26 @@ export default function WindowsPage() {
     }
   }
 
+  // ── Generate tomorrow ────────────────────────────────────────────────────────
+  async function handleGenerate() {
+    const token = tokenRef.current
+    if (!token) return
+    setGenerating(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      const result = await generateTomorrow(token)
+      setWindows((prev) => [...prev, ...result.created].sort((a, b) =>
+        a.date === b.date ? a.startTime.localeCompare(b.startTime) : a.date.localeCompare(b.date)
+      ))
+      setSuccess(`✅ ${result.created.length} ventana${result.created.length > 1 ? 's' : ''} creada${result.created.length > 1 ? 's' : ''} para mañana (${result.date})`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al generar ventanas')
+    } finally {
+      setGenerating(false)
+    }
+  }
+
   // ── Delete ───────────────────────────────────────────────────────────────────
   async function handleDelete(w: PickupWindow) {
     if (!confirm(`¿Eliminar ventana ${w.startTime}–${w.endTime}?`)) return
@@ -143,6 +165,13 @@ export default function WindowsPage() {
               ← Pedidos
             </button>
             <button
+              onClick={() => void handleGenerate()}
+              disabled={generating}
+              className="rounded-lg bg-teal-500 px-3 py-1.5 text-xs font-semibold hover:bg-teal-400 disabled:opacity-50"
+            >
+              {generating ? '…' : '📅 Mañana'}
+            </button>
+            <button
               onClick={() => setShowForm((v) => !v)}
               className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-teal-700 hover:bg-teal-50"
             >
@@ -156,6 +185,9 @@ export default function WindowsPage() {
 
         {error != null && (
           <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
+        )}
+        {success != null && (
+          <div className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700">{success}</div>
         )}
 
         {/* Create form */}
