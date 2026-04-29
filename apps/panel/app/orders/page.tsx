@@ -116,19 +116,27 @@ export default function OrdersPage() {
               </p>
             )}
           </div>
-          <div className="text-right">
+          <div className="flex flex-col items-end gap-1">
             {lastUpdated && (
               <p className="text-xs text-teal-300">
                 Actualizado{' '}
                 {lastUpdated.toLocaleTimeString('es-CU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </p>
             )}
-            <button
-              onClick={() => void fetchOrders(true)}
-              className="mt-1 rounded-lg bg-teal-600 px-3 py-1 text-xs font-semibold text-white hover:bg-teal-500"
-            >
-              Actualizar
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => void fetchOrders(true)}
+                className="rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-500"
+              >
+                Actualizar
+              </button>
+              <button
+                onClick={() => router.push('/windows')}
+                className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-teal-700 hover:bg-teal-50"
+              >
+                🕐 Ventanas
+              </button>
+            </div>
           </div>
         </div>
       </header>
