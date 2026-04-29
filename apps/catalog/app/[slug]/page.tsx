@@ -6,7 +6,7 @@ import { AddToCartButton } from '../../components/add-to-cart-button'
 export const revalidate = 60 // ISR — revalida cada 60s
 
 interface Props {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 function StockLabel({ inventory }: { inventory: CatalogProduct['inventory'] }) {
@@ -85,7 +85,8 @@ function ProductRow({ product }: { product: CatalogProduct }) {
 }
 
 export default async function CatalogPage({ params }: Props) {
-  const data = await getCatalog(params.slug)
+  const { slug } = await params
+  const data = await getCatalog(slug)
   if (data == null) notFound()
 
   return (
