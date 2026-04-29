@@ -1,5 +1,6 @@
 import fp from 'fastify-plugin'
 import { Queue } from 'bullmq'
+import { Redis } from 'ioredis'
 import type { FastifyInstance } from 'fastify'
 import { env } from '@colacero/env'
 import { createTelegramProvider } from '../services/telegram.service.js'
@@ -12,8 +13,13 @@ declare module 'fastify' {
 }
 
 export const bullmqPlugin = fp(async (app: FastifyInstance) => {
-  // Reuse the existing Redis connection
-  const connection = app.redis
+  // BullMQ requires its own Redis connection with maxRetriesPerRequest: null
+  // because it uses blocking commands (BRPOP) that need unlimited wait time.
+  const connection = new Redis(env.REDIS_URL, {
+    maxRetriesPerRequest: null,
+    lazyConnect:          true,
+  })
+  await connection.connect()
 
   const queue = new Queue(ANNOUNCEMENT_QUEUE, { connection })
 
@@ -30,5 +36,6 @@ export const bullmqPlugin = fp(async (app: FastifyInstance) => {
   app.addHook('onClose', async () => {
     await worker.close()
     await queue.close()
+    await connection.quit()
   })
 })
