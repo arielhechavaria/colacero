@@ -162,6 +162,20 @@ export async function deleteWindow(token: string, windowId: string): Promise<voi
   }
 }
 
+export async function generateTomorrow(
+  token: string,
+): Promise<{ date: string; created: PickupWindow[] }> {
+  const res = await fetch(`${API_BASE}/api/owner/pickup-windows/generate-tomorrow`, {
+    method:  'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'generate_tomorrow_failed')
+  }
+  return res.json() as Promise<{ date: string; created: PickupWindow[] }>
+}
+
 export async function patchOrderStatus(
   token: string,
   orderId: string,
