@@ -21,8 +21,18 @@ export function buildServer() {
   })
 
   // ── Plugins ──────────────────────────────────────────────────────────────
+  // Support comma-separated origins: CORS_ORIGIN=http://localhost:3001,http://localhost:3002
+  const rawOrigins = process.env['CORS_ORIGIN'] ?? 'http://localhost:3001,http://localhost:3002'
+  const allowedOrigins = rawOrigins.split(',').map((o) => o.trim())
+
   app.register(cors, {
-    origin:      process.env['CORS_ORIGIN'] ?? 'http://localhost:3001',
+    origin: (origin, cb) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        cb(null, true)
+      } else {
+        cb(new Error('Not allowed by CORS'), false)
+      }
+    },
     credentials: true,
   })
   app.register(sensible)
