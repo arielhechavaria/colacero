@@ -13,28 +13,42 @@ declare module 'fastify' {
 }
 
 export const bullmqPlugin = fp(async (app: FastifyInstance) => {
-  // BullMQ requires its own Redis connection with maxRetriesPerRequest: null
-  // because it uses blocking commands (BRPOP) that need unlimited wait time.
+  // BullMQ requires maxRetriesPerRequest: null for blocking commands (BRPOP).
   const connection = new Redis(env.REDIS_URL, {
     maxRetriesPerRequest: null,
     lazyConnect:          true,
   })
+
+  // Silence connection errors in test — the worker teardown fires close events
+  // that aren't relevant to test assertions.
+  connection.on('error', (err: Error) => {
+    if (env.NODE_ENV !== 'test') {
+      app.log.error({ err }, '[BullMQ Redis] connection error')
+    }
+  })
+
   await connection.connect()
 
   const queue = new Queue(ANNOUNCEMENT_QUEUE, { connection })
-
-  const telegram = createTelegramProvider(
-    env.TELEGRAM_PROVIDER,
-    env.TELEGRAM_BOT_TOKEN,
-    env.TELEGRAM_CHANNEL_ID,
-  )
-
-  const worker = createAnnouncementWorker(connection, telegram)
-
   app.decorate('queue', queue)
 
+  // Don't start the worker in test mode — avoids teardown race conditions
+  // where the connection close event fires after the test has ended.
+  if (env.NODE_ENV !== 'test') {
+    const telegram = createTelegramProvider(
+      env.TELEGRAM_PROVIDER,
+      env.TELEGRAM_BOT_TOKEN,
+      env.TELEGRAM_CHANNEL_ID,
+    )
+
+    const worker = createAnnouncementWorker(connection, telegram)
+
+    app.addHook('onClose', async () => {
+      await worker.close()
+    })
+  }
+
   app.addHook('onClose', async () => {
-    await worker.close()
     await queue.close()
     await connection.quit()
   })
