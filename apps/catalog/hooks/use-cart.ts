@@ -14,6 +14,7 @@ type CartAction =
   | { type: 'ADD'; item: Omit<CartItem, 'quantity'> }
   | { type: 'REMOVE'; productId: string }
   | { type: 'CLEAR' }
+  | { type: 'HYDRATE'; state: CartState }
 
 export interface CartState {
   items: CartItem[]
@@ -52,6 +53,8 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     }
     case 'CLEAR':
       return { items: [] }
+    case 'HYDRATE':
+      return action.state
   }
 }
 
@@ -67,9 +70,15 @@ function loadFromStorage(): CartState {
 }
 
 export function useCart() {
-  const [state, dispatch] = useReducer(cartReducer, undefined, loadFromStorage)
+  // Always start empty — matches SSR output, avoids hydration mismatch
+  const [state, dispatch] = useReducer(cartReducer, { items: [] })
 
-  // Sync to localStorage on every change
+  // After mount: hydrate from storage, then keep it in sync
+  useEffect(() => {
+    const saved = loadFromStorage()
+    if (saved.items.length > 0) dispatch({ type: 'HYDRATE', state: saved })
+  }, [])
+
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   }, [state])
