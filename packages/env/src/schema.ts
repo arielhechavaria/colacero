@@ -27,6 +27,11 @@ export const envSchema = z.object({
   WHATSAPP_API_TOKEN:       z.string().optional(),
   WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
 
+  // ── Telegram ───────────────────────────────────────────────────────
+  TELEGRAM_PROVIDER:   z.enum(['bot-api', 'mock']).default('mock'),
+  TELEGRAM_BOT_TOKEN:  z.string().optional(),
+  TELEGRAM_CHANNEL_ID: z.string().optional(),
+
   // ── Upload de archivos ────────────────────────────────────────────
   UPLOAD_DIR:      z.string().default('./uploads'),
   API_PUBLIC_URL:  z.string().url().default('http://localhost:3000'),

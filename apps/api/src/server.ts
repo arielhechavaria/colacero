@@ -9,10 +9,12 @@ import { authRoutes } from './routes/auth/index.js'
 import { customerAuthRoutes } from './routes/auth/customer/index.js'
 import { productRoutes } from './routes/owner/products/index.js'
 import { ownerOrderRoutes }        from './routes/owner/orders/index.js'
-import { ownerPickupWindowRoutes } from './routes/owner/pickup-windows/index.js'
+import { ownerPickupWindowRoutes }  from './routes/owner/pickup-windows/index.js'
+import { ownerAnnouncementRoutes }  from './routes/owner/announcements/index.js'
 import { catalogRoutes } from './routes/catalog/index.js'
 import { cartRoutes } from './routes/cart/index.js'
 import { uploadPlugin } from './plugins/upload.js'
+import { bullmqPlugin } from './plugins/bullmq.js'
 
 export function buildServer() {
   const app = Fastify({
@@ -42,6 +44,7 @@ export function buildServer() {
   app.register(redisPlugin)
   app.register(authPlugin)
   app.register(uploadPlugin)
+  app.register(bullmqPlugin)
 
   // ── Routes ───────────────────────────────────────────────────────────────
   app.register(authRoutes, { prefix: '/api/auth/owner' })
@@ -49,6 +52,7 @@ export function buildServer() {
   app.register(productRoutes,    { prefix: '/api/owner/products' })
   app.register(ownerOrderRoutes,        { prefix: '/api/owner/orders' })
   app.register(ownerPickupWindowRoutes, { prefix: '/api/owner/pickup-windows' })
+  app.register(ownerAnnouncementRoutes, { prefix: '/api/owner/announcements' })
   app.register(catalogRoutes, { prefix: '/api/catalog' })
   app.register(cartRoutes,    { prefix: '/api/cart' })
 

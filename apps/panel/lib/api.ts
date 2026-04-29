@@ -176,6 +176,24 @@ export async function generateTomorrow(
   return res.json() as Promise<{ date: string; created: PickupWindow[] }>
 }
 
+// ── Announcements ─────────────────────────────────────────────────────────────
+
+export async function publishAnnouncement(
+  token: string,
+  text:  string,
+): Promise<{ jobId: string; queue: string }> {
+  const res = await fetch(`${API_BASE}/api/owner/announcements`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body:    JSON.stringify({ text }),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'publish_failed')
+  }
+  return res.json() as Promise<{ jobId: string; queue: string }>
+}
+
 export async function patchOrderStatus(
   token: string,
   orderId: string,

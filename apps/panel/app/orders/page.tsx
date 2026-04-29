@@ -131,6 +131,12 @@ export default function OrdersPage() {
                 Actualizar
               </button>
               <button
+                onClick={() => router.push('/announcements')}
+                className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500"
+              >
+                📣 Anunciar
+              </button>
+              <button
                 onClick={() => router.push('/queue')}
                 className="rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-400"
               >
