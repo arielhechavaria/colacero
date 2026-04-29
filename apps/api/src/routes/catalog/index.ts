@@ -1,10 +1,13 @@
 import type { FastifyInstance } from 'fastify'
+import { pickupWindowsRoute } from './pickup-windows.js'
 
 interface CatalogParams {
   slug: string
 }
 
 export async function catalogRoutes(app: FastifyInstance) {
+  app.register(pickupWindowsRoute)
+
   /**
    * GET /api/catalog/:slug
    * Endpoint público (sin auth) — devuelve productos activos de un negocio
