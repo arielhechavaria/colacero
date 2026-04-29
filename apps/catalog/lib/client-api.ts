@@ -106,3 +106,38 @@ export async function checkout(input: CheckoutInput, token: string): Promise<Che
   }
   return res.json() as Promise<CheckoutResult>
 }
+
+// ── Order ─────────────────────────────────────────────────────────────────────
+
+export interface OrderItem {
+  id:                string
+  productId:         string
+  name:              string
+  unitLabel:         string
+  quantity:          number
+  unitPriceSnapshot: number
+  subtotal:          number
+}
+
+export interface OrderDetail {
+  id:          string
+  pickupCode:  string | null
+  status:      string
+  subtotal:    number
+  confirmedAt: string | null
+  business:    { id: string; name: string; slug: string }
+  pickupWindow: { id: string; date: string; startTime: string; endTime: string } | null
+  items:        OrderItem[]
+}
+
+export async function getOrder(orderId: string, token: string): Promise<OrderDetail> {
+  const res = await fetch(`${API_BASE}/api/cart/order/${orderId}`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+    cache:   'no-store',
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error: string }
+    throw new Error(body.error ?? 'order_not_found')
+  }
+  return res.json() as Promise<OrderDetail>
+}
