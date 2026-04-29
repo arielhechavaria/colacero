@@ -1,5 +1,6 @@
 import Fastify from 'fastify'
 import sensible from '@fastify/sensible'
+import cors from '@fastify/cors'
 import { prismaPlugin } from './plugins/prisma.js'
 import { authPlugin } from './plugins/auth.js'
 import { redisPlugin } from './plugins/redis.js'
@@ -19,6 +20,10 @@ export function buildServer() {
   })
 
   // ── Plugins ──────────────────────────────────────────────────────────────
+  app.register(cors, {
+    origin:      process.env['CORS_ORIGIN'] ?? 'http://localhost:3001',
+    credentials: true,
+  })
   app.register(sensible)
   app.register(swaggerPlugin)
   app.register(prismaPlugin)
