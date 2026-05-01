@@ -38,4 +38,4 @@ COPY --from=builder /app/apps/catalog/public            ./public
 
 EXPOSE 3001
 
-CMD ["node", "server.js"]
+CMD ["node", "apps/catalog/server.js"]

@@ -36,4 +36,4 @@ COPY --from=builder /app/apps/panel/public            ./public
 
 EXPOSE 3002
 
-CMD ["node", "server.js"]
+CMD ["node", "apps/panel/server.js"]
