@@ -29,16 +29,11 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Solo lo necesario para correr
-COPY --from=builder /app/apps/api/dist                   ./dist
-COPY --from=builder /app/node_modules                    ./node_modules
-COPY --from=builder /app/packages/db/dist                ./packages/db/dist
-COPY --from=builder /app/packages/db/package.json        ./packages/db/package.json
-COPY --from=builder /app/packages/env/dist               ./packages/env/dist
-COPY --from=builder /app/packages/env/package.json       ./packages/env/package.json
-COPY --from=builder /app/packages/shared                 ./packages/shared
-# Prisma: schema + migrations (para prisma migrate deploy al arrancar)
-COPY --from=builder /app/packages/db/prisma              ./packages/db/prisma
+COPY --from=builder /app/apps/api/dist   ./dist
+COPY --from=builder /app/node_modules    ./node_modules
+# Copiamos packages/ completo — pnpm resuelve los workspace packages
+# como symlinks dentro de node_modules que apuntan aquí
+COPY --from=builder /app/packages        ./packages
 
 EXPOSE 3000
 
