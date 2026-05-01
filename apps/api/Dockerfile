@@ -1,6 +1,9 @@
 FROM node:20-slim
 WORKDIR /app
 
+# OpenSSL requerido por Prisma para detectar la plataforma correcta (debian-openssl-3.0.x)
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
 RUN npm install -g pnpm@10.33.0
 
 # Copiar manifiestos del workspace primero (layer cache)
