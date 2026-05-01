@@ -12,10 +12,15 @@
     "db:seed": "pnpm --filter @colacero/db run seed",
     "db:studio": "pnpm --filter @colacero/db run studio",
     "infra:up": "docker compose -f infra/docker-compose.yml up -d",
-    "infra:down": "docker compose -f infra/docker-compose.yml down"
+    "infra:down": "docker compose -f infra/docker-compose.yml down",
+    "test:e2e": "playwright test",
+    "test:load": "k6 run loadtests/reserve-concurrency.js",
+    "lhci": "lhci autorun"
   },
   "packageManager": "pnpm@10.33.0",
   "devDependencies": {
+    "@lhci/cli": "^0.14.0",
+    "@playwright/test": "^1.59.1",
     "turbo": "^2.0.0",
     "typescript": "^5.4.0"
   }
