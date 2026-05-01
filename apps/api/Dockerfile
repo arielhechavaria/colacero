@@ -25,8 +25,8 @@ RUN pnpm --filter @colacero/api run build
 
 # Deployment aislado: workspace deps copiados como paquetes reales, sin symlinks
 RUN pnpm --filter @colacero/api deploy --prod --legacy /deploy
-# prisma generate no corre en pnpm deploy → copiar cliente generado manualmente
-RUN cp -r /app/node_modules/.prisma /deploy/node_modules/.prisma
+# Regenerar Prisma client en el contexto del deploy (pnpm deploy no lo incluye)
+RUN cd /deploy && /app/node_modules/.bin/prisma generate --schema /app/packages/db/prisma/schema.prisma
 
 # ── Stage 2: runtime ─────────────────────────────────────────────────────────
 FROM node:20-alpine AS runtime
