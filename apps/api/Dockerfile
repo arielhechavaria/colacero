@@ -5,7 +5,7 @@ WORKDIR /app
 RUN npm install -g pnpm@10.33.0
 
 # Copiar manifiestos del workspace primero (layer cache)
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.base.json ./
 COPY packages/db/package.json        packages/db/
 COPY packages/env/package.json       packages/env/
 COPY packages/shared/package.json    packages/shared/
