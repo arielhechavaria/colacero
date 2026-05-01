@@ -32,9 +32,9 @@ ENV NODE_ENV=production
 ENV PORT=3001
 
 # Next.js standalone incluye todo lo necesario
-COPY --from=builder /app/apps/catalog/.next/standalone  ./
-COPY --from=builder /app/apps/catalog/.next/static      ./.next/static
-COPY --from=builder /app/apps/catalog/public            ./public
+COPY --from=builder /app/apps/catalog/.next/standalone        ./
+COPY --from=builder /app/apps/catalog/.next/static      ./apps/catalog/.next/static
+COPY --from=builder /app/apps/catalog/public            ./apps/catalog/public
 
 EXPOSE 3001
 

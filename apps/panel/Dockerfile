@@ -30,9 +30,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3002
 
-COPY --from=builder /app/apps/panel/.next/standalone  ./
-COPY --from=builder /app/apps/panel/.next/static      ./.next/static
-COPY --from=builder /app/apps/panel/public            ./public
+COPY --from=builder /app/apps/panel/.next/standalone        ./
+COPY --from=builder /app/apps/panel/.next/static      ./apps/panel/.next/static
+COPY --from=builder /app/apps/panel/public            ./apps/panel/public
 
 EXPOSE 3002
 
