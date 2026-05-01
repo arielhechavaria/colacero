@@ -24,7 +24,7 @@ RUN pnpm --filter @colacero/db run build
 RUN pnpm --filter @colacero/api run build
 
 # Deployment aislado: workspace deps copiados como paquetes reales, sin symlinks
-RUN pnpm --filter @colacero/api deploy --prod /deploy
+RUN pnpm --filter @colacero/api deploy --prod --legacy /deploy
 # prisma generate no corre en pnpm deploy → copiar cliente generado manualmente
 RUN cp -r /app/node_modules/.prisma /deploy/node_modules/.prisma
 
