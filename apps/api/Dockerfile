@@ -23,17 +23,20 @@ RUN pnpm --filter @colacero/env run build
 RUN pnpm --filter @colacero/db run build
 RUN pnpm --filter @colacero/api run build
 
+# Deployment aislado: workspace deps copiados como paquetes reales, sin symlinks
+RUN pnpm --filter @colacero/api deploy --prod /deploy
+# prisma generate no corre en pnpm deploy → copiar cliente generado manualmente
+RUN cp -r /app/node_modules/.prisma /deploy/node_modules/.prisma
+
 # ── Stage 2: runtime ─────────────────────────────────────────────────────────
 FROM node:20-alpine AS runtime
 WORKDIR /app
 
 ENV NODE_ENV=production
 
+# node_modules viene del deployment aislado: @colacero/* resueltos sin symlinks
+COPY --from=builder /deploy/node_modules ./node_modules
 COPY --from=builder /app/apps/api/dist   ./dist
-COPY --from=builder /app/node_modules    ./node_modules
-# Copiamos packages/ completo — pnpm resuelve los workspace packages
-# como symlinks dentro de node_modules que apuntan aquí
-COPY --from=builder /app/packages        ./packages
 
 EXPOSE 3000
 
