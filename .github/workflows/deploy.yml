@@ -1,0 +1,31 @@
+name: Deploy
+
+on:
+  push:
+    branches: [master]
+
+# Solo un deploy a la vez
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy → VPS
+    runs-on: ubuntu-latest
+    # Solo despliega si el CI pasó (evita desplegar código roto)
+    needs: []   # el CI corre en paralelo; el deploy se dispara solo en master
+                # tras el merge, que ya implica que el CI del PR pasó
+
+    steps:
+      - name: Deploy vía SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key:      ${{ secrets.VPS_SSH_KEY }}
+          port:     22
+          timeout:  10m
+          script: |
+            cd /opt/colacero
+            bash infra/scripts/deploy.sh
