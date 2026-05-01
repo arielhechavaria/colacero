@@ -92,6 +92,31 @@ jobs:
     # No bloquea el merge si falla — budgets en warn hasta baseline establecida
     continue-on-error: true
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: colacero
+          POSTGRES_PASSWORD: colacero_dev
+          POSTGRES_DB: colacero_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -111,9 +136,9 @@ jobs:
         run: |
           cat > .env << 'ENVEOF'
           NODE_ENV=production
-          DATABASE_URL=postgresql://localhost/dummy
+          DATABASE_URL=postgresql://colacero:colacero_dev@localhost:5432/colacero_dev
           REDIS_URL=redis://localhost:6379
-          JWT_SECRET=lhci-dummy-secret-minimum-32-chars!!
+          JWT_SECRET=lhci-jwt-secret-minimum-32-characters!!
           JWT_EXPIRES_IN=7d
           OTP_TTL_SECONDS=600
           WHATSAPP_PROVIDER=mock
@@ -123,16 +148,34 @@ jobs:
           UPLOAD_DIR=/tmp/colacero-uploads
           API_PUBLIC_URL=http://localhost:3000
           CATALOG_API_URL=http://localhost:3000
-          NEXT_PUBLIC_API_URL=http://localhost:3000
           ENVEOF
+
+      - name: Generate Prisma client
+        run: pnpm --filter @colacero/db run generate
+
+      - name: Run database migrations
+        run: pnpm --filter @colacero/db run migrate:deploy
+
+      - name: Seed database
+        run: pnpm db:seed
+
+      - name: Build API
+        run: pnpm --filter @colacero/api run build
+
+      - name: Start API (background)
+        run: pnpm --filter @colacero/api run start &
+
+      - name: Wait for API to be ready
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3000/health && break || sleep 2
+          done
 
       - name: Build catalog
         run: pnpm --filter @colacero/catalog run build
 
       - name: Start catalog (background)
         run: pnpm --filter @colacero/catalog run start &
-        env:
-          PORT: 3001
 
       - name: Wait for catalog to be ready
         run: |
