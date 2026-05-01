@@ -15,6 +15,9 @@ RUN pnpm install --frozen-lockfile
 COPY packages/ packages/
 COPY apps/catalog/ apps/catalog/
 
+# Asegurar que el directorio public exista (Next.js lo requiere al copiar)
+RUN mkdir -p /app/apps/catalog/public
+
 # Build paquetes internos que catalog usa (env principalmente)
 RUN pnpm --filter @colacero/env run build
 

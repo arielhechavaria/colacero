@@ -15,6 +15,9 @@ RUN pnpm install --frozen-lockfile
 COPY packages/ packages/
 COPY apps/panel/ apps/panel/
 
+# Asegurar que el directorio public exista (Next.js lo requiere al copiar)
+RUN mkdir -p /app/apps/panel/public
+
 RUN pnpm --filter @colacero/env run build
 
 # Build Next.js en modo standalone
@@ -29,7 +32,7 @@ ENV PORT=3002
 
 COPY --from=builder /app/apps/panel/.next/standalone  ./
 COPY --from=builder /app/apps/panel/.next/static      ./.next/static
-COPY --from=builder /app/apps/panel/public            ./public 2>/dev/null || true
+COPY --from=builder /app/apps/panel/public            ./public
 
 EXPOSE 3002
 

@@ -37,9 +37,8 @@ COPY --from=builder /app/packages/db/package.json        ./packages/db/package.j
 COPY --from=builder /app/packages/env/dist               ./packages/env/dist
 COPY --from=builder /app/packages/env/package.json       ./packages/env/package.json
 COPY --from=builder /app/packages/shared                 ./packages/shared
-# Prisma client generado
-COPY --from=builder /app/node_modules/.prisma            ./node_modules/.prisma
-COPY --from=builder /app/packages/db/prisma/schema.prisma ./packages/db/prisma/schema.prisma
+# Prisma: schema + migrations (para prisma migrate deploy al arrancar)
+COPY --from=builder /app/packages/db/prisma              ./packages/db/prisma
 
 EXPOSE 3000
 
