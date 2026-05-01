@@ -159,6 +159,11 @@ jobs:
       - name: Seed database
         run: pnpm db:seed
 
+      - name: Build internal packages
+        run: |
+          pnpm --filter @colacero/env run build
+          pnpm --filter @colacero/db run build
+
       - name: Build API
         run: pnpm --filter @colacero/api run build
 
