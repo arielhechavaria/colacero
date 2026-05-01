@@ -85,3 +85,115 @@ jobs:
 
       - name: Test catalog
         run: pnpm --filter @colacero/catalog run test
+
+  lighthouse:
+    name: Lighthouse CI — Catálogo
+    runs-on: ubuntu-latest
+    # No bloquea el merge si falla — budgets en warn hasta baseline establecida
+    continue-on-error: true
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: colacero
+          POSTGRES_PASSWORD: colacero_dev
+          POSTGRES_DB: colacero_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Create .env for Lighthouse
+        run: |
+          cat > .env << 'ENVEOF'
+          NODE_ENV=production
+          DATABASE_URL=postgresql://colacero:colacero_dev@localhost:5432/colacero_dev
+          REDIS_URL=redis://localhost:6379
+          JWT_SECRET=lhci-jwt-secret-minimum-32-characters!!
+          JWT_EXPIRES_IN=7d
+          OTP_TTL_SECONDS=600
+          WHATSAPP_PROVIDER=mock
+          TELEGRAM_PROVIDER=mock
+          API_PORT=3000
+          API_HOST=0.0.0.0
+          UPLOAD_DIR=/tmp/colacero-uploads
+          API_PUBLIC_URL=http://localhost:3000
+          CATALOG_API_URL=http://localhost:3000
+          ENVEOF
+
+      - name: Generate Prisma client
+        run: pnpm --filter @colacero/db run generate
+
+      - name: Run database migrations
+        run: pnpm --filter @colacero/db run migrate:deploy
+
+      - name: Seed database
+        run: pnpm db:seed
+
+      - name: Build internal packages
+        run: |
+          pnpm --filter @colacero/env run build
+          pnpm --filter @colacero/db run build
+
+      - name: Build API
+        run: pnpm --filter @colacero/api run build
+
+      - name: Start API (background)
+        run: pnpm --filter @colacero/api run start &
+
+      - name: Wait for API to be ready
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3000/health && break || sleep 2
+          done
+
+      - name: Build catalog
+        run: pnpm --filter @colacero/catalog run build
+
+      - name: Start catalog (background)
+        run: pnpm --filter @colacero/catalog run start &
+
+      - name: Wait for catalog to be ready
+        run: |
+          for i in $(seq 1 20); do
+            curl -sf http://localhost:3001 && break || sleep 2
+          done
+
+      - name: Run Lighthouse CI
+        run: pnpm lhci
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
