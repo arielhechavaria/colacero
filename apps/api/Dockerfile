@@ -1,5 +1,4 @@
-# ── Stage 1: builder ─────────────────────────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:20-alpine
 WORKDIR /app
 
 RUN npm install -g pnpm@10.33.0
@@ -23,21 +22,8 @@ RUN pnpm --filter @colacero/env run build
 RUN pnpm --filter @colacero/db run build
 RUN pnpm --filter @colacero/api run build
 
-# Deployment aislado: workspace deps copiados como paquetes reales, sin symlinks
-RUN pnpm --filter @colacero/api deploy --prod --legacy /deploy
-# Regenerar Prisma client en el contexto del deploy (pnpm deploy no lo incluye)
-RUN cd /deploy && /app/node_modules/.bin/prisma generate --schema /app/packages/db/prisma/schema.prisma
-
-# ── Stage 2: runtime ─────────────────────────────────────────────────────────
-FROM node:20-alpine AS runtime
-WORKDIR /app
-
 ENV NODE_ENV=production
-
-# node_modules viene del deployment aislado: @colacero/* resueltos sin symlinks
-COPY --from=builder /deploy/node_modules ./node_modules
-COPY --from=builder /app/apps/api/dist   ./dist
 
 EXPOSE 3000
 
-CMD ["node", "dist/index.js"]
+CMD ["node", "apps/api/dist/index.js"]
