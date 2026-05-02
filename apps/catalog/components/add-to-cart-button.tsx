@@ -19,13 +19,14 @@ export function AddToCartButton({ product, disabled = false }: Props) {
         onClick={() =>
           add({
             productId: product.id,
-            name:       product.name,
-            unitPrice:  product.unitPrice,
-            unitLabel:  product.unitLabel,
+            name:      product.name,
+            unitPrice: product.unitPrice,
+            unitLabel: product.unitLabel,
           })
         }
         disabled={disabled}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-teal-700 text-xl font-bold text-white shadow disabled:opacity-40"
+        className="flex h-9 w-9 items-center justify-center rounded-full text-xl font-bold shadow disabled:opacity-40"
+        style={{ backgroundColor: 'var(--primary)', color: 'white' }}
         aria-label={`Agregar ${product.name} al carrito`}
       >
         +
@@ -34,26 +35,39 @@ export function AddToCartButton({ product, disabled = false }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div
+      className="flex items-center gap-2 rounded-full border px-2 py-1"
+      style={{
+        backgroundColor: 'var(--primary-dim)',
+        borderColor: 'var(--border-glow)',
+      }}
+    >
       <button
         onClick={() => remove(product.id)}
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-lg font-bold text-gray-700"
+        className="flex h-7 w-7 items-center justify-center rounded-full text-lg font-bold"
+        style={{ color: 'var(--primary)' }}
         aria-label="Quitar uno"
       >
         −
       </button>
-      <span className="w-4 text-center text-sm font-semibold">{quantity}</span>
+      <span
+        className="w-4 text-center text-sm font-semibold"
+        style={{ color: 'var(--primary)' }}
+      >
+        {quantity}
+      </span>
       <button
         onClick={() =>
           add({
             productId: product.id,
-            name:       product.name,
-            unitPrice:  product.unitPrice,
-            unitLabel:  product.unitLabel,
+            name:      product.name,
+            unitPrice: product.unitPrice,
+            unitLabel: product.unitLabel,
           })
         }
         disabled={disabled}
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-700 text-lg font-bold text-white disabled:opacity-40"
+        className="flex h-7 w-7 items-center justify-center rounded-full text-lg font-bold disabled:opacity-40"
+        style={{ color: 'var(--primary)' }}
         aria-label="Agregar uno más"
       >
         +

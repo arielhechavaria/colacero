@@ -1,3 +1,72 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Design Tokens — V1 Light (default) ─────────────────────────────────── */
+:root {
+  --primary:       #0D6B63;
+  --primary-dark:  #0A5550;
+  --primary-light: #CCEDE9;
+  --primary-dim:   rgba(13, 107, 99, 0.08);
+  --accent:        #CA8A04;
+  --bg:            #FAFAF9;
+  --surface:       #F5F4F0;
+  --card:          #FFFFFF;
+  --border:        #E7E5E4;
+  --border-glow:   rgba(13, 107, 99, 0.2);
+  --text:          #1C1917;
+  --muted:         #78716C;
+  --sidebar:       #1C1917;
+  --success:       #16A34A;
+  --warning:       #D97706;
+  --error:         #DC2626;
+  --font-display:  'Manrope', sans-serif;
+  --font-body:     'Inter', sans-serif;
+  --font-mono:     'Manrope', sans-serif;
+}
+
+/* ── Design Tokens — V2 Dark ─────────────────────────────────────────────── */
+.dark {
+  --primary:       #00D4BE;
+  --primary-dark:  #00B5A3;
+  --primary-light: rgba(0, 212, 190, 0.15);
+  --primary-dim:   rgba(0, 212, 190, 0.07);
+  --accent:        #FFB020;
+  --bg:            #07080A;
+  --surface:       #0D1014;
+  --card:          #111519;
+  --border:        #1A2028;
+  --border-glow:   rgba(0, 212, 190, 0.22);
+  --text:          #DDE3EA;
+  --muted:         #4A5568;
+  --sidebar:       #050608;
+  --success:       #00D68F;
+  --warning:       #FFB020;
+  --error:         #FF3D55;
+  --font-display:  'Syne', sans-serif;
+  --font-mono:     'JetBrains Mono', monospace;
+}
+
+/* ── Base styles ─────────────────────────────────────────────────────────── */
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+/* Dark mode dot-grid texture */
+.dark body {
+  background-image: radial-gradient(circle, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Smooth transitions for theme switching */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+/* But NOT for transforms/opacity (breaks animations) */
+[class*="transition-"], [class*="animate-"] {
+  transition-property: revert;
+}

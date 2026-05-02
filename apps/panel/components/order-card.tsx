@@ -5,21 +5,11 @@ import type { Order, OrderStatus } from '../lib/api'
 const STATUS_LABEL: Record<OrderStatus, string> = {
   DRAFT:     'Borrador',
   CONFIRMED: 'Confirmado',
-  PREPARING: 'En preparación',
-  READY:     'Listo',
+  PREPARING: 'Preparando',
+  READY:     'Listo ✓',
   PICKED_UP: 'Retirado',
   CANCELLED: 'Cancelado',
   EXPIRED:   'Expirado',
-}
-
-const STATUS_COLOR: Record<OrderStatus, string> = {
-  DRAFT:     'bg-gray-100 text-gray-500',
-  CONFIRMED: 'bg-blue-100 text-blue-700',
-  PREPARING: 'bg-orange-100 text-orange-700',
-  READY:     'bg-green-100 text-green-700',
-  PICKED_UP: 'bg-gray-100 text-gray-400',
-  CANCELLED: 'bg-gray-100 text-gray-400',
-  EXPIRED:   'bg-gray-100 text-gray-400',
 }
 
 interface Props {
@@ -29,81 +19,92 @@ interface Props {
 }
 
 export function OrderCard({ order, onAction, loading }: Props) {
-  const isDone = order.status === 'PICKED_UP' || order.status === 'CANCELLED' || order.status === 'EXPIRED'
+  const isDone =
+    order.status === 'PICKED_UP' ||
+    order.status === 'CANCELLED' ||
+    order.status === 'EXPIRED'
 
   return (
     <div
-      className={`rounded-xl border bg-white p-4 shadow-sm transition-opacity ${
-        isDone ? 'opacity-50' : ''
-      }`}
+      className={`rounded-xl border p-3 transition-all ${isDone ? 'opacity-40' : ''}`}
+      style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
     >
-      {/* Header */}
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <span className="font-mono text-xl font-bold tracking-widest text-gray-800">
+      {/* Code + customer + status dot */}
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="min-w-0">
+          <span
+            className="text-sm font-bold block"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              color: 'var(--primary)',
+              letterSpacing: '0.08em',
+            }}
+          >
             {order.pickupCode ?? '—'}
           </span>
-          <p className="mt-0.5 text-sm text-gray-500">
+          <p className="text-[11px] truncate mt-0.5" style={{ color: 'var(--muted)' }}>
             {order.customer.displayName ?? order.customer.phone}
           </p>
         </div>
-        <span
-          className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_COLOR[order.status]}`}
-        >
-          {STATUS_LABEL[order.status]}
-        </span>
+        <StatusDot status={order.status} />
       </div>
 
       {/* Items */}
-      <ul className="mt-3 flex flex-col gap-1">
+      <ul
+        className="flex flex-col gap-0.5 mb-2 pt-2 border-t"
+        style={{ borderColor: 'var(--border)' }}
+      >
         {order.items.map((item) => (
-          <li key={item.id} className="flex items-center justify-between text-sm">
-            <span className="text-gray-700">
-              {item.name}{' '}
-              <span className="text-gray-400">× {item.quantity} {item.unitLabel}</span>
-            </span>
-            <span className="text-gray-500">${item.subtotal.toFixed(2)}</span>
+          <li key={item.id} className="flex items-center text-[11px]">
+            <span style={{ color: 'var(--text)' }}>{item.name}</span>
+            <span className="ml-1" style={{ color: 'var(--muted)' }}>× {item.quantity}</span>
           </li>
         ))}
       </ul>
 
-      <div className="mt-2 flex items-center justify-between border-t pt-2">
-        <span className="text-sm font-semibold text-gray-900">
-          Total: ${order.subtotal.toFixed(2)}
-        </span>
-      </div>
+      {/* Total */}
+      <p
+        className="text-xs font-semibold mb-2"
+        style={{ fontFamily: 'var(--font-mono)', color: 'var(--text)' }}
+      >
+        ${order.subtotal.toFixed(2)}
+      </p>
 
-      {/* Action buttons */}
+      {/* Actions */}
       {!isDone && (
-        <div className="mt-3 flex gap-2">
+        <div className="flex gap-1.5">
           {order.status === 'CONFIRMED' && (
-            <ActionButton
+            <ActionBtn
               label="Preparar"
-              color="bg-orange-500 hover:bg-orange-600"
+              bgColor="rgba(255,176,32,0.15)"
+              textColor="var(--warning)"
               onClick={() => void onAction(order.id, 'PREPARING')}
               disabled={loading}
             />
           )}
           {order.status === 'PREPARING' && (
-            <ActionButton
-              label="Listo"
-              color="bg-green-600 hover:bg-green-700"
+            <ActionBtn
+              label="Listo ✓"
+              bgColor="rgba(0,214,143,0.15)"
+              textColor="var(--success)"
               onClick={() => void onAction(order.id, 'READY')}
               disabled={loading}
             />
           )}
           {order.status === 'READY' && (
-            <ActionButton
+            <ActionBtn
               label="Entregado"
-              color="bg-teal-700 hover:bg-teal-800"
+              bgColor="var(--primary-dim)"
+              textColor="var(--primary)"
               onClick={() => void onAction(order.id, 'PICKED_UP')}
               disabled={loading}
             />
           )}
-          {order.status !== 'READY' && (
-            <ActionButton
-              label="Cancelar"
-              color="bg-red-500 hover:bg-red-600"
+          {order.status !== 'PICKED_UP' && (
+            <ActionBtn
+              label="×"
+              bgColor="rgba(255,61,85,0.1)"
+              textColor="var(--error)"
               onClick={() => void onAction(order.id, 'CANCELLED')}
               disabled={loading}
             />
@@ -114,19 +115,40 @@ export function OrderCard({ order, onAction, loading }: Props) {
   )
 }
 
-function ActionButton({
-  label, color, onClick, disabled,
+function StatusDot({ status }: { status: OrderStatus }) {
+  const colorMap: Partial<Record<OrderStatus, string>> = {
+    CONFIRMED: 'var(--warning)',
+    PREPARING: 'var(--primary)',
+    READY:     'var(--success)',
+  }
+  const color = colorMap[status] ?? 'var(--muted)'
+  return (
+    <span
+      className="inline-block h-2 w-2 rounded-full flex-shrink-0 mt-1"
+      style={{ backgroundColor: color }}
+    />
+  )
+}
+
+function ActionBtn({
+  label,
+  bgColor,
+  textColor = 'var(--text)',
+  onClick,
+  disabled,
 }: {
-  label:    string
-  color:    string
-  onClick:  () => void
-  disabled: boolean
+  label:      string
+  bgColor:    string
+  textColor?: string
+  onClick:    () => void
+  disabled:   boolean
 }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`flex-1 rounded-lg py-2 text-sm font-semibold text-white transition-colors disabled:opacity-50 ${color}`}
+      className="flex-1 rounded-lg py-1.5 text-xs font-semibold disabled:opacity-40 transition-opacity"
+      style={{ backgroundColor: bgColor, color: textColor }}
     >
       {label}
     </button>

@@ -7,7 +7,6 @@ import {
   type PickupWindow, type CreateWindowInput,
 } from '../../lib/api'
 
-// Group windows by date
 function groupByDate(windows: PickupWindow[]): Record<string, PickupWindow[]> {
   return windows.reduce<Record<string, PickupWindow[]>>((acc, w) => {
     if (!acc[w.date]) acc[w.date] = []
@@ -24,9 +23,8 @@ function formatDate(iso: string): string {
   })
 }
 
-// Today in YYYY-MM-DD
 function todayStr(): string {
-  return new Date().toLocaleDateString('en-CA') // returns YYYY-MM-DD
+  return new Date().toLocaleDateString('en-CA')
 }
 
 const EMPTY_FORM: CreateWindowInput = {
@@ -37,20 +35,25 @@ const EMPTY_FORM: CreateWindowInput = {
   isOpen:    true,
 }
 
+const inputStyle = {
+  backgroundColor: 'var(--surface)',
+  borderColor:     'var(--border)',
+  color:           'var(--text)',
+} as const
+
 export default function WindowsPage() {
   const router   = useRouter()
   const tokenRef = useRef<string | null>(null)
 
-  const [windows,      setWindows]      = useState<PickupWindow[]>([])
-  const [loading,      setLoading]      = useState(true)
-  const [saving,       setSaving]       = useState(false)
-  const [generating,   setGenerating]   = useState(false)
-  const [error,        setError]        = useState<string | null>(null)
-  const [success,      setSuccess]      = useState<string | null>(null)
-  const [showForm,     setShowForm]     = useState(false)
-  const [form,         setForm]         = useState<CreateWindowInput>(EMPTY_FORM)
+  const [windows,    setWindows]    = useState<PickupWindow[]>([])
+  const [loading,    setLoading]    = useState(true)
+  const [saving,     setSaving]     = useState(false)
+  const [generating, setGenerating] = useState(false)
+  const [error,      setError]      = useState<string | null>(null)
+  const [success,    setSuccess]    = useState<string | null>(null)
+  const [showForm,   setShowForm]   = useState(false)
+  const [form,       setForm]       = useState<CreateWindowInput>(EMPTY_FORM)
 
-  // ── Auth + load ─────────────────────────────────────────────────────────────
   const fetchWindows = useCallback(async () => {
     const token = tokenRef.current
     if (!token) return
@@ -71,7 +74,6 @@ export default function WindowsPage() {
     void fetchWindows()
   }, [fetchWindows, router])
 
-  // ── Create ──────────────────────────────────────────────────────────────────
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     const token = tokenRef.current
@@ -92,7 +94,6 @@ export default function WindowsPage() {
     }
   }
 
-  // ── Toggle open/closed ───────────────────────────────────────────────────────
   async function handleToggle(w: PickupWindow) {
     const token = tokenRef.current
     if (!token) return
@@ -104,7 +105,6 @@ export default function WindowsPage() {
     }
   }
 
-  // ── Generate tomorrow ────────────────────────────────────────────────────────
   async function handleGenerate() {
     const token = tokenRef.current
     if (!token) return
@@ -124,7 +124,6 @@ export default function WindowsPage() {
     }
   }
 
-  // ── Delete ───────────────────────────────────────────────────────────────────
   async function handleDelete(w: PickupWindow) {
     if (!confirm(`¿Eliminar ventana ${w.startTime}–${w.endTime}?`)) return
     const token = tokenRef.current
@@ -137,11 +136,10 @@ export default function WindowsPage() {
     }
   }
 
-  // ── Render ───────────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-400">Cargando ventanas…</p>
+        <p style={{ color: 'var(--muted)' }}>Cargando ventanas…</p>
       </main>
     )
   }
@@ -149,31 +147,37 @@ export default function WindowsPage() {
   const grouped = groupByDate(windows)
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-teal-700 px-4 py-4 text-white shadow-md">
-        <div className="mx-auto flex max-w-2xl items-center justify-between">
+      <header
+        className="sticky top-0 z-10 border-b px-6 py-4"
+        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+      >
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-bold">🕐 Ventanas de recogida</h1>
-            <p className="text-sm text-teal-200">Configurá los horarios de entrega</p>
+            <h1
+              className="text-lg font-bold"
+              style={{ fontFamily: 'var(--font-display)', color: 'var(--text)' }}
+            >
+              Ventanas de recogida
+            </h1>
+            <p className="text-sm" style={{ color: 'var(--muted)' }}>
+              Configurá los horarios de entrega
+            </p>
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => router.push('/orders')}
-              className="rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold hover:bg-teal-500"
-            >
-              ← Pedidos
-            </button>
-            <button
               onClick={() => void handleGenerate()}
               disabled={generating}
-              className="rounded-lg bg-teal-500 px-3 py-1.5 text-xs font-semibold hover:bg-teal-400 disabled:opacity-50"
+              className="rounded-xl px-4 py-2 text-sm font-semibold disabled:opacity-50"
+              style={{ backgroundColor: 'var(--primary-dim)', color: 'var(--primary)', border: '1px solid var(--border-glow)' }}
             >
-              {generating ? '…' : '📅 Mañana'}
+              {generating ? '…' : '📅 Generar mañana'}
             </button>
             <button
               onClick={() => setShowForm((v) => !v)}
-              className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-teal-700 hover:bg-teal-50"
+              className="rounded-xl px-4 py-2 text-sm font-semibold"
+              style={{ backgroundColor: 'var(--primary)', color: '#07080A' }}
             >
               {showForm ? 'Cancelar' : '+ Nueva'}
             </button>
@@ -181,63 +185,90 @@ export default function WindowsPage() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-2xl px-4 py-6 flex flex-col gap-4">
-
+      <div className="px-6 py-5 flex flex-col gap-4">
         {error != null && (
-          <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
+          <div
+            className="rounded-xl px-4 py-3 text-sm"
+            style={{ backgroundColor: 'rgba(255,61,85,0.08)', color: 'var(--error)', border: '1px solid rgba(255,61,85,0.2)' }}
+          >
+            {error}
+          </div>
         )}
         {success != null && (
-          <div className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700">{success}</div>
+          <div
+            className="rounded-xl px-4 py-3 text-sm"
+            style={{ backgroundColor: 'rgba(0,214,143,0.1)', color: 'var(--success)', border: '1px solid rgba(0,214,143,0.25)' }}
+          >
+            {success}
+          </div>
         )}
 
         {/* Create form */}
         {showForm && (
           <form
             onSubmit={(e) => void handleCreate(e)}
-            className="rounded-2xl bg-white p-5 shadow-sm flex flex-col gap-3"
+            className="rounded-2xl border p-5 flex flex-col gap-3"
+            style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
           >
-            <p className="font-semibold text-gray-900">Nueva ventana</p>
+            <p
+              className="font-semibold"
+              style={{ fontFamily: 'var(--font-display)', color: 'var(--text)' }}
+            >
+              Nueva ventana
+            </p>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
-                <label className="mb-1 block text-xs font-medium text-gray-600">Fecha</label>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
+                  Fecha
+                </label>
                 <input
                   type="date"
                   required
                   value={form.date}
                   onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-                  className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
+                  className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none"
+                  style={inputStyle}
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">Desde</label>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
+                  Desde
+                </label>
                 <input
                   type="time"
                   required
                   value={form.startTime}
                   onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
-                  className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
+                  className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none"
+                  style={inputStyle}
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">Hasta</label>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
+                  Hasta
+                </label>
                 <input
                   type="time"
                   required
                   value={form.endTime}
                   onChange={(e) => setForm((f) => ({ ...f, endTime: e.target.value }))}
-                  className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
+                  className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none"
+                  style={inputStyle}
                 />
               </div>
               <div className="col-span-2">
-                <label className="mb-1 block text-xs font-medium text-gray-600">Capacidad (pedidos)</label>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
+                  Capacidad (pedidos)
+                </label>
                 <input
                   type="number"
                   required
                   min={1}
                   value={form.capacity}
                   onChange={(e) => setForm((f) => ({ ...f, capacity: parseInt(e.target.value, 10) }))}
-                  className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
+                  className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none"
+                  style={inputStyle}
                 />
               </div>
             </div>
@@ -245,64 +276,82 @@ export default function WindowsPage() {
             <button
               type="submit"
               disabled={saving}
-              className="w-full rounded-xl bg-teal-700 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+              className="w-full rounded-xl py-2.5 text-sm font-semibold disabled:opacity-50"
+              style={{ backgroundColor: 'var(--primary)', color: '#07080A' }}
             >
               {saving ? 'Creando…' : 'Crear ventana'}
             </button>
           </form>
         )}
 
-        {/* Windows list grouped by date */}
+        {/* Windows grouped by date */}
         {Object.keys(grouped).length === 0 ? (
-          <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-            <p className="text-gray-400">No hay ventanas configuradas</p>
+          <div
+            className="rounded-2xl border p-10 text-center"
+            style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+          >
+            <p style={{ color: 'var(--muted)' }}>No hay ventanas configuradas</p>
             <button
               onClick={() => setShowForm(true)}
-              className="mt-3 text-sm text-teal-700 underline"
+              className="mt-3 text-sm underline"
+              style={{ color: 'var(--primary)' }}
             >
               Crear la primera
             </button>
           </div>
         ) : (
           Object.entries(grouped).map(([date, wins]) => (
-            <section key={date} className="rounded-2xl bg-white p-4 shadow-sm">
-              <p className="mb-3 text-sm font-semibold capitalize text-gray-500">
+            <section
+              key={date}
+              className="rounded-2xl border p-4"
+              style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+            >
+              <p
+                className="mb-3 text-sm font-semibold capitalize"
+                style={{ color: 'var(--muted)' }}
+              >
                 {formatDate(date)}
               </p>
               <div className="flex flex-col gap-2">
                 {wins.map((w) => (
                   <div
                     key={w.id}
-                    className={`flex items-center justify-between rounded-xl border px-4 py-3 ${
-                      w.isOpen ? 'border-gray-200 bg-gray-50' : 'border-gray-100 bg-gray-50 opacity-60'
-                    }`}
+                    className="flex items-center justify-between rounded-xl border px-4 py-3"
+                    style={{
+                      backgroundColor: 'var(--surface)',
+                      borderColor:     'var(--border)',
+                      opacity:         w.isOpen ? 1 : 0.55,
+                    }}
                   >
                     <div>
-                      <p className="font-medium text-gray-900">
+                      <p
+                        className="font-medium"
+                        style={{ fontFamily: 'var(--font-mono)', color: 'var(--text)' }}
+                      >
                         {w.startTime} – {w.endTime}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
                         {w.ordersCount}/{w.capacity} pedidos
-                        {!w.isOpen && <span className="ml-2 text-gray-400">· cerrada</span>}
+                        {!w.isOpen && <span className="ml-2">· cerrada</span>}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      {/* Toggle open/closed */}
                       <button
                         onClick={() => void handleToggle(w)}
-                        className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                        className="rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors"
+                        style={
                           w.isOpen
-                            ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                            : 'bg-green-100 text-green-700 hover:bg-green-200'
-                        }`}
+                            ? { backgroundColor: 'rgba(255,176,32,0.12)', color: 'var(--warning)' }
+                            : { backgroundColor: 'rgba(0,214,143,0.12)', color: 'var(--success)' }
+                        }
                       >
                         {w.isOpen ? 'Cerrar' : 'Abrir'}
                       </button>
-                      {/* Delete (solo si no hay órdenes) */}
                       {w.ordersCount === 0 && (
                         <button
                           onClick={() => void handleDelete(w)}
-                          className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-500 hover:bg-red-100"
+                          className="rounded-xl px-3 py-1.5 text-xs font-semibold"
+                          style={{ backgroundColor: 'rgba(255,61,85,0.1)', color: 'var(--error)' }}
                         >
                           Eliminar
                         </button>
@@ -314,15 +363,6 @@ export default function WindowsPage() {
             </section>
           ))
         )}
-
-        {/* Logout */}
-        <button
-          onClick={() => { sessionStorage.removeItem('panel_token'); router.push('/login') }}
-          className="mt-2 w-full rounded-xl border border-gray-300 py-2 text-sm text-gray-500 hover:bg-gray-50"
-        >
-          Cerrar sesión
-        </button>
-
       </div>
     </main>
   )

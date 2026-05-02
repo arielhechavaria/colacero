@@ -7,12 +7,10 @@ import type { Order, OrderStatus } from '../../lib/api'
 
 const POLL_INTERVAL_MS = 15_000
 
-// Flatten all PREPARING + CONFIRMED orders across windows, sorted by confirmedAt
 function buildQueue(orders: Order[]): Order[] {
   return orders
     .filter((o) => o.status === 'PREPARING' || o.status === 'CONFIRMED')
     .sort((a, b) => {
-      // PREPARING before CONFIRMED, then by confirmedAt asc (oldest first)
       if (a.status !== b.status) return a.status === 'PREPARING' ? -1 : 1
       const ta = a.confirmedAt ?? ''
       const tb = b.confirmedAt ?? ''
@@ -35,7 +33,6 @@ export default function QueuePage() {
   const [error,         setError]         = useState<string | null>(null)
   const [lastUpdated,   setLastUpdated]   = useState<Date | null>(null)
 
-  // ── Fetch ──────────────────────────────────────────────────────────────────
   const fetchQueue = useCallback(async (showLoader = false) => {
     const token = tokenRef.current
     if (!token) return
@@ -65,19 +62,13 @@ export default function QueuePage() {
     return () => clearInterval(id)
   }, [fetchQueue])
 
-  // ── Action ────────────────────────────────────────────────────────────────
   const handleAction = useCallback(async (orderId: string, newStatus: OrderStatus) => {
     const token = tokenRef.current
     if (!token) return
     setActionLoading(true)
     try {
       await patchOrderStatus(token, orderId, newStatus)
-      setQueue((prev) => {
-        const updated = prev.map((o) =>
-          o.id === orderId ? { ...o, status: newStatus } : o
-        )
-        return buildQueue(updated)
-      })
+      setQueue((prev) => buildQueue(prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o)))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al actualizar')
       void fetchQueue(false)
@@ -89,97 +80,129 @@ export default function QueuePage() {
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-400">Cargando cola…</p>
+        <p style={{ color: 'var(--muted)' }}>Cargando cola…</p>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-orange-600 px-4 py-4 text-white shadow-md">
-        <div className="mx-auto flex max-w-2xl items-center justify-between">
+      <header
+        className="sticky top-0 z-10 border-b px-6 py-4"
+        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+      >
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-bold">🍳 Cola de preparación</h1>
-            <p className="text-sm text-orange-200">
-              {queue.length === 0 ? 'Todo al día' : `${queue.length} pedido${queue.length > 1 ? 's' : ''} pendiente${queue.length > 1 ? 's' : ''}`}
+            <h1
+              className="text-lg font-bold"
+              style={{ fontFamily: 'var(--font-display)', color: 'var(--text)' }}
+            >
+              Cola de preparación
+            </h1>
+            <p className="text-sm" style={{ color: 'var(--muted)' }}>
+              {queue.length === 0
+                ? 'Todo al día ✓'
+                : `${queue.length} pedido${queue.length > 1 ? 's' : ''} pendiente${queue.length > 1 ? 's' : ''}`}
             </p>
           </div>
-          <div className="flex flex-col items-end gap-1">
+          <div className="flex items-center gap-3">
             {lastUpdated && (
-              <p className="text-xs text-orange-300">
+              <span className="text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'var(--muted)' }}>
                 {lastUpdated.toLocaleTimeString('es-CU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-              </p>
+              </span>
             )}
-            <div className="flex gap-2">
-              <button
-                onClick={() => void fetchQueue(true)}
-                className="rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold hover:bg-orange-400"
-              >
-                Actualizar
-              </button>
-              <button
-                onClick={() => router.push('/orders')}
-                className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-orange-700 hover:bg-orange-50"
-              >
-                ← Pedidos
-              </button>
-            </div>
+            <button
+              onClick={() => void fetchQueue(true)}
+              className="rounded-xl px-4 py-2 text-sm font-semibold"
+              style={{
+                backgroundColor: 'var(--primary-dim)',
+                color:           'var(--primary)',
+                border:          '1px solid var(--border-glow)',
+              }}
+            >
+              Actualizar
+            </button>
           </div>
         </div>
       </header>
 
-      <div className="mx-auto max-w-2xl px-4 py-6 flex flex-col gap-3">
-
+      <div className="px-6 py-5 flex flex-col gap-3">
         {error != null && (
-          <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
+          <div
+            className="rounded-xl px-4 py-3 text-sm"
+            style={{ backgroundColor: 'rgba(255,61,85,0.08)', color: 'var(--error)', border: '1px solid rgba(255,61,85,0.2)' }}
+          >
+            {error}
+          </div>
         )}
 
         {queue.length === 0 ? (
-          <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
-            <p className="text-4xl mb-3">✅</p>
-            <p className="font-semibold text-gray-700">No hay pedidos pendientes</p>
-            <p className="text-sm text-gray-400 mt-1">Todos los pedidos están listos o entregados</p>
+          <div
+            className="rounded-2xl p-10 text-center border"
+            style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+          >
+            <p className="text-3xl mb-2">✅</p>
+            <p className="font-semibold" style={{ color: 'var(--text)' }}>No hay pedidos pendientes</p>
+            <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
+              Todos los pedidos están listos o entregados
+            </p>
           </div>
         ) : (
           queue.map((order, idx) => {
-            const mins = waitingMinutes(order.confirmedAt)
+            const mins   = waitingMinutes(order.confirmedAt)
             const urgent = mins >= 20
+
+            const borderColor = order.status === 'PREPARING'
+              ? urgent ? 'var(--error)' : 'var(--warning)'
+              : 'var(--border)'
 
             return (
               <div
                 key={order.id}
-                className={`rounded-2xl border-2 bg-white p-4 shadow-sm ${
-                  order.status === 'PREPARING'
-                    ? urgent ? 'border-red-400' : 'border-orange-400'
-                    : 'border-gray-200'
-                }`}
+                className="rounded-2xl p-4 border-2"
+                style={{ backgroundColor: 'var(--card)', borderColor }}
               >
                 {/* Position + code */}
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div className="flex items-center gap-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-sm font-bold text-gray-600">
+                    <span
+                      className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold flex-shrink-0"
+                      style={{ backgroundColor: 'var(--surface)', color: 'var(--muted)' }}
+                    >
                       {idx + 1}
                     </span>
                     <div>
-                      <p className="font-mono text-xl font-bold tracking-widest text-gray-800">
+                      <p
+                        className="text-xl font-bold tracking-widest"
+                        style={{ fontFamily: 'var(--font-mono)', color: 'var(--primary)' }}
+                      >
                         {order.pickupCode ?? '—'}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm" style={{ color: 'var(--muted)' }}>
                         {order.customer.displayName ?? order.customer.phone}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                      order.status === 'PREPARING'
-                        ? urgent ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
-                        : 'bg-blue-100 text-blue-700'
-                    }`}>
+                    <span
+                      className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                      style={{
+                        backgroundColor: order.status === 'PREPARING'
+                          ? urgent ? 'rgba(255,61,85,0.12)' : 'rgba(255,176,32,0.12)'
+                          : 'rgba(0,212,190,0.1)',
+                        color: order.status === 'PREPARING'
+                          ? urgent ? 'var(--error)' : 'var(--warning)'
+                          : 'var(--primary)',
+                      }}
+                    >
                       {order.status === 'PREPARING' ? 'Preparando' : 'Confirmado'}
                     </span>
                     {order.confirmedAt && (
-                      <p className={`mt-1 text-xs ${urgent ? 'font-bold text-red-600' : 'text-gray-400'}`}>
+                      <p
+                        className="mt-1 text-xs"
+                        style={{ color: urgent ? 'var(--error)' : 'var(--muted)', fontWeight: urgent ? 700 : 400 }}
+                      >
                         {mins} min esperando
                       </p>
                     )}
@@ -187,12 +210,15 @@ export default function QueuePage() {
                 </div>
 
                 {/* Items */}
-                <ul className="mb-3 flex flex-col gap-1 border-t pt-3">
+                <ul
+                  className="mb-3 flex flex-col gap-1 border-t pt-3"
+                  style={{ borderColor: 'var(--border)' }}
+                >
                   {order.items.map((item) => (
                     <li key={item.id} className="flex justify-between text-sm">
-                      <span className="text-gray-700">
+                      <span style={{ color: 'var(--text)' }}>
                         {item.name}
-                        <span className="ml-1 text-gray-400">× {item.quantity} {item.unitLabel}</span>
+                        <span className="ml-1" style={{ color: 'var(--muted)' }}>× {item.quantity} {item.unitLabel}</span>
                       </span>
                     </li>
                   ))}
@@ -204,7 +230,8 @@ export default function QueuePage() {
                     <button
                       disabled={actionLoading}
                       onClick={() => void handleAction(order.id, 'PREPARING')}
-                      className="flex-1 rounded-xl bg-orange-500 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
+                      className="flex-1 rounded-xl py-2 text-sm font-semibold disabled:opacity-50"
+                      style={{ backgroundColor: 'rgba(255,176,32,0.15)', color: 'var(--warning)' }}
                     >
                       Empezar preparación
                     </button>
@@ -213,7 +240,8 @@ export default function QueuePage() {
                     <button
                       disabled={actionLoading}
                       onClick={() => void handleAction(order.id, 'READY')}
-                      className="flex-1 rounded-xl bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+                      className="flex-1 rounded-xl py-2 text-sm font-semibold disabled:opacity-50"
+                      style={{ backgroundColor: 'rgba(0,214,143,0.15)', color: 'var(--success)' }}
                     >
                       Marcar listo ✓
                     </button>
@@ -221,7 +249,8 @@ export default function QueuePage() {
                   <button
                     disabled={actionLoading}
                     onClick={() => void handleAction(order.id, 'CANCELLED')}
-                    className="rounded-xl bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-500 hover:bg-gray-200 disabled:opacity-50"
+                    className="rounded-xl px-4 py-2 text-sm font-semibold disabled:opacity-50"
+                    style={{ backgroundColor: 'rgba(255,61,85,0.1)', color: 'var(--error)' }}
                   >
                     Cancelar
                   </button>

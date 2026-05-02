@@ -23,7 +23,7 @@ function formatDate(iso: string): string {
 export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, loading, error }: Props) {
   if (windows.length === 0) {
     return (
-      <p className="py-8 text-center text-gray-400">
+      <p className="py-8 text-center" style={{ color: 'var(--muted)' }}>
         No hay ventanas de recogida disponibles por el momento.
       </p>
     )
@@ -31,7 +31,7 @@ export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, l
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm" style={{ color: 'var(--muted)' }}>
         Elegí cuándo querés recoger tu pedido:
       </p>
 
@@ -39,11 +39,12 @@ export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, l
         {windows.map((w) => (
           <label
             key={w.id}
-            className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-colors ${
+            className="flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-colors"
+            style={
               selected === w.id
-                ? 'border-teal-600 bg-teal-50'
-                : 'border-gray-200 bg-white'
-            }`}
+                ? { backgroundColor: 'var(--primary-dim)', borderColor: 'var(--primary)' }
+                : { backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }
+            }
           >
             <input
               type="radio"
@@ -51,20 +52,19 @@ export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, l
               value={w.id}
               checked={selected === w.id}
               onChange={() => onSelect(w.id)}
-              className="accent-teal-600"
+              className="accent-[var(--primary)]"
             />
             <div className="flex-1">
-              <p className="font-medium capitalize text-gray-900">
+              <p className="font-medium capitalize" style={{ color: 'var(--text)' }}>
                 {formatDate(w.date)}
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm" style={{ color: 'var(--muted)' }}>
                 {w.startTime} – {w.endTime}
               </p>
             </div>
             <span
-              className={`text-xs font-medium ${
-                w.spotsLeft <= 2 ? 'text-amber-500' : 'text-emerald-600'
-              }`}
+              className="text-xs font-medium"
+              style={{ color: w.spotsLeft <= 2 ? 'var(--warning)' : 'var(--success)' }}
             >
               {w.spotsLeft === 1 ? 'Último lugar' : `${w.spotsLeft} lugares`}
             </span>
@@ -73,13 +73,19 @@ export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, l
       </div>
 
       {error != null && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+        <p
+          className="rounded-lg px-3 py-2 text-sm"
+          style={{ backgroundColor: 'rgba(255,61,85,0.1)', color: 'var(--error)' }}
+        >
+          {error}
+        </p>
       )}
 
       <button
         onClick={() => void onConfirm()}
         disabled={loading || selected === null}
-        className="w-full rounded-xl bg-teal-700 py-3 text-sm font-semibold text-white disabled:opacity-50"
+        className="w-full rounded-xl py-3 text-sm font-semibold disabled:opacity-50"
+        style={{ backgroundColor: 'var(--primary)', color: 'var(--sidebar)' }}
       >
         {loading ? 'Confirmando pedido…' : 'Confirmar pedido'}
       </button>

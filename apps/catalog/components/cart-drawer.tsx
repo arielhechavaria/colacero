@@ -46,12 +46,26 @@ export function CartDrawer() {
       {/* FAB — botón flotante del carrito */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-4 flex items-center gap-2 rounded-full bg-teal-700 px-4 py-3 text-white shadow-lg"
+        className="fixed bottom-6 right-4 flex items-center gap-2 rounded-full px-4 py-3 shadow-lg"
+        style={{ backgroundColor: 'var(--sidebar)', color: 'white' }}
         aria-label="Ver carrito"
       >
         <span className="text-xl">🛒</span>
         {itemCount > 0 && (
-          <span className="text-sm font-semibold">{itemCount}</span>
+          <span
+            className="text-sm font-semibold rounded-full px-1.5"
+            style={{ backgroundColor: 'var(--accent)', color: 'var(--sidebar)' }}
+          >
+            {itemCount}
+          </span>
+        )}
+        {total > 0 && (
+          <span
+            className="text-sm font-mono font-bold"
+            style={{ color: 'var(--accent)' }}
+          >
+            ${total.toFixed(2)}
+          </span>
         )}
       </button>
 
@@ -65,16 +79,20 @@ export function CartDrawer() {
 
       {/* Drawer */}
       <aside
-        className={`fixed bottom-0 left-0 right-0 z-50 max-h-[80vh] overflow-y-auto rounded-t-3xl bg-white p-6 shadow-xl transition-transform duration-300 ${
+        className={`fixed bottom-0 left-0 right-0 z-50 max-h-[80vh] overflow-y-auto rounded-t-3xl p-6 shadow-xl transition-transform duration-300 ${
           open ? 'translate-y-0' : 'translate-y-full'
         }`}
+        style={{ backgroundColor: 'var(--card)', borderTop: '1px solid var(--border)' }}
         aria-label="Carrito de compras"
       >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold">Tu pedido</h2>
+          <h2 className="text-lg font-bold" style={{ color: 'var(--text)' }}>
+            Tu pedido
+          </h2>
           <button
             onClick={() => setOpen(false)}
-            className="text-gray-400 text-2xl leading-none"
+            className="text-2xl leading-none"
+            style={{ color: 'var(--muted)' }}
             aria-label="Cerrar carrito"
           >
             ×
@@ -82,34 +100,47 @@ export function CartDrawer() {
         </div>
 
         {items.length === 0 ? (
-          <p className="py-8 text-center text-gray-400">El carrito está vacío</p>
+          <p className="py-8 text-center" style={{ color: 'var(--muted)' }}>
+            El carrito está vacío
+          </p>
         ) : (
           <>
             <ul className="flex flex-col gap-3">
               {items.map((item) => (
-                <li key={item.productId} className="flex items-center justify-between">
+                <li
+                  key={item.productId}
+                  className="flex items-center justify-between border-b pb-3"
+                  style={{ borderColor: 'var(--border)' }}
+                >
                   <div>
-                    <p className="font-medium leading-snug">{item.name}</p>
-                    <p className="text-sm text-gray-400">
+                    <p className="font-medium leading-snug" style={{ color: 'var(--text)' }}>
+                      {item.name}
+                    </p>
+                    <p className="text-sm" style={{ color: 'var(--muted)' }}>
                       {item.quantity} × ${Number(item.unitPrice).toFixed(2)}
                     </p>
                   </div>
-                  <p className="font-semibold text-teal-700">
+                  <p className="font-semibold font-mono" style={{ color: 'var(--primary)' }}>
                     ${(Number(item.unitPrice) * item.quantity).toFixed(2)}
                   </p>
                 </li>
               ))}
             </ul>
 
-            <div className="mt-4 border-t pt-4">
+            <div className="mt-4 pt-4">
               <div className="flex items-center justify-between text-lg font-bold">
-                <span>Total</span>
-                <span className="text-teal-700">${total.toFixed(2)}</span>
+                <span style={{ color: 'var(--text)' }}>Total</span>
+                <span className="font-mono" style={{ color: 'var(--primary)' }}>
+                  ${total.toFixed(2)}
+                </span>
               </div>
             </div>
 
             {error != null && (
-              <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+              <p
+                className="mt-3 rounded-lg px-3 py-2 text-sm"
+                style={{ backgroundColor: 'rgba(255,61,85,0.1)', color: 'var(--error)' }}
+              >
                 {error}
               </p>
             )}
@@ -118,14 +149,16 @@ export function CartDrawer() {
               <button
                 onClick={() => { clear(); setOpen(false) }}
                 disabled={loading}
-                className="flex-1 rounded-xl border border-gray-300 py-3 text-sm text-gray-600 disabled:opacity-40"
+                className="flex-1 rounded-xl border py-3 text-sm disabled:opacity-40"
+                style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}
               >
                 Vaciar
               </button>
               <button
                 onClick={() => void handleCheckout()}
                 disabled={loading}
-                className="flex-[2] rounded-xl bg-teal-700 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                className="flex-[2] rounded-xl py-3 text-sm font-semibold disabled:opacity-50"
+                style={{ backgroundColor: 'var(--primary)', color: 'var(--sidebar)' }}
               >
                 {loading ? 'Reservando…' : 'Confirmar pedido'}
               </button>

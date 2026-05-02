@@ -27,11 +27,9 @@ export default function OrdersPage() {
 
   const tokenRef = useRef<string | null>(null)
 
-  // ── Fetch orders ────────────────────────────────────────────────────────────
   const fetchOrders = useCallback(async (showLoader = false) => {
     const token = tokenRef.current
     if (!token) return
-
     if (showLoader) setLoading(true)
     try {
       const result = await getOrders(token)
@@ -45,34 +43,24 @@ export default function OrdersPage() {
     }
   }, [])
 
-  // ── Auth check + initial load ────────────────────────────────────────────────
   useEffect(() => {
     const token = sessionStorage.getItem('panel_token')
-    if (!token) {
-      router.replace('/login')
-      return
-    }
+    if (!token) { router.replace('/login'); return }
     tokenRef.current = token
     void fetchOrders(true)
   }, [fetchOrders, router])
 
-  // ── Polling ─────────────────────────────────────────────────────────────────
   useEffect(() => {
-    const id = setInterval(() => {
-      void fetchOrders(false)
-    }, POLL_INTERVAL_MS)
+    const id = setInterval(() => void fetchOrders(false), POLL_INTERVAL_MS)
     return () => clearInterval(id)
   }, [fetchOrders])
 
-  // ── Status action ────────────────────────────────────────────────────────────
   const handleAction = useCallback(async (orderId: string, newStatus: OrderStatus) => {
     const token = tokenRef.current
     if (!token) return
-
     setActionLoading(true)
     try {
       await patchOrderStatus(token, orderId, newStatus)
-      // Optimistic update — replace status in local state
       setData((prev) => {
         if (!prev) return prev
         return {
@@ -87,106 +75,97 @@ export default function OrdersPage() {
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al actualizar estado')
-      // Re-fetch to ensure consistency
       void fetchOrders(false)
     } finally {
       setActionLoading(false)
     }
   }, [fetchOrders])
 
-  // ── Render ───────────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-400">Cargando pedidos…</p>
+        <p style={{ color: 'var(--muted)' }}>Cargando pedidos…</p>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-teal-700 px-4 py-4 text-white shadow-md">
-        <div className="mx-auto flex max-w-2xl items-center justify-between">
+      <header
+        className="sticky top-0 z-10 border-b px-6 py-4"
+        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+      >
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-bold">📋 Pedidos del día</h1>
+            <h1
+              className="text-lg font-bold"
+              style={{ fontFamily: 'var(--font-display)', color: 'var(--text)' }}
+            >
+              Pedidos del día
+            </h1>
             {data && (
-              <p className="text-sm capitalize text-teal-200">
+              <p className="text-sm capitalize" style={{ color: 'var(--muted)' }}>
                 {formatDate(data.date)}
               </p>
             )}
           </div>
-          <div className="flex flex-col items-end gap-1">
+          <div className="flex items-center gap-3">
             {lastUpdated && (
-              <p className="text-xs text-teal-300">
-                Actualizado{' '}
-                {lastUpdated.toLocaleTimeString('es-CU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-              </p>
+              <span className="text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'var(--muted)' }}>
+                {lastUpdated.toLocaleTimeString('es-CU', {
+                  hour:   '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                })}
+              </span>
             )}
-            <div className="flex gap-2">
-              <button
-                onClick={() => void fetchOrders(true)}
-                className="rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-500"
-              >
-                Actualizar
-              </button>
-              <button
-                onClick={() => router.push('/announcements')}
-                className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500"
-              >
-                📣 Anunciar
-              </button>
-              <button
-                onClick={() => router.push('/queue')}
-                className="rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-400"
-              >
-                🍳 Cola
-              </button>
-              <button
-                onClick={() => router.push('/windows')}
-                className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-teal-700 hover:bg-teal-50"
-              >
-                🕐 Ventanas
-              </button>
-            </div>
+            <button
+              onClick={() => void fetchOrders(true)}
+              className="rounded-xl px-4 py-2 text-sm font-semibold transition-all"
+              style={{
+                backgroundColor: 'var(--primary-dim)',
+                color:           'var(--primary)',
+                border:          '1px solid var(--border-glow)',
+              }}
+            >
+              Actualizar
+            </button>
           </div>
         </div>
       </header>
 
-      <div className="mx-auto max-w-2xl px-4 py-6">
+      <div className="px-6 py-5 flex flex-col gap-4">
         {error != null && (
-          <div className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+          <div
+            className="rounded-xl px-4 py-3 text-sm"
+            style={{
+              backgroundColor: 'rgba(255,61,85,0.08)',
+              color:           'var(--error)',
+              border:          '1px solid rgba(255,61,85,0.2)',
+            }}
+          >
             {error}
           </div>
         )}
 
         {data == null || data.windows.length === 0 ? (
-          <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-            <p className="text-gray-400">No hay ventanas de recogida para hoy</p>
+          <div
+            className="rounded-2xl p-10 text-center border"
+            style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+          >
+            <p style={{ color: 'var(--muted)' }}>No hay ventanas de recogida para hoy</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
-            {data.windows.map((w) => (
-              <WindowGroup
-                key={w.id}
-                window={w}
-                onAction={handleAction}
-                loading={actionLoading}
-              />
-            ))}
-          </div>
+          data.windows.map((w) => (
+            <WindowGroup
+              key={w.id}
+              window={w}
+              onAction={handleAction}
+              loading={actionLoading}
+            />
+          ))
         )}
-
-        {/* Logout */}
-        <button
-          onClick={() => {
-            sessionStorage.removeItem('panel_token')
-            router.push('/login')
-          }}
-          className="mt-6 w-full rounded-xl border border-gray-300 py-2 text-sm text-gray-500 hover:bg-gray-50"
-        >
-          Cerrar sesión
-        </button>
       </div>
     </main>
   )
