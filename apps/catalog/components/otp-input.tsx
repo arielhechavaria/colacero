@@ -49,8 +49,9 @@ export function OtpInput({ phone, onSubmit, onResend, loading, error }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <p className="text-sm text-gray-600">
-        Ingresá el código de 6 dígitos enviado a <strong>{phone}</strong>
+      <p className="text-sm" style={{ color: 'var(--muted)' }}>
+        Ingresá el código de 6 dígitos enviado a{' '}
+        <strong style={{ color: 'var(--text)' }}>{phone}</strong>
       </p>
 
       <div className="flex justify-center gap-2" onPaste={handlePaste}>
@@ -64,19 +65,31 @@ export function OtpInput({ phone, onSubmit, onResend, loading, error }: Props) {
             value={d}
             onChange={(e) => handleChange(i, e.target.value)}
             onKeyDown={(e) => handleKeyDown(i, e)}
-            className="h-12 w-10 rounded-xl border border-gray-300 text-center text-lg font-bold outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
+            className="h-12 w-10 rounded-xl border text-center text-lg font-bold outline-none transition-colors"
+            style={{
+              fontFamily:      'var(--font-mono)',
+              backgroundColor: 'var(--surface)',
+              borderColor:     d ? 'var(--primary)' : 'var(--border)',
+              color:           'var(--text)',
+            }}
           />
         ))}
       </div>
 
       {error != null && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 text-center">{error}</p>
+        <p
+          className="rounded-xl px-3 py-2 text-sm text-center"
+          style={{ backgroundColor: 'rgba(255,61,85,0.1)', color: 'var(--error)' }}
+        >
+          {error}
+        </p>
       )}
 
       <button
         type="submit"
         disabled={loading || otp.length < 6}
-        className="w-full rounded-xl bg-teal-700 py-3 text-sm font-semibold text-white disabled:opacity-50"
+        className="w-full rounded-xl py-3 text-sm font-semibold disabled:opacity-50"
+        style={{ backgroundColor: 'var(--primary)', color: 'var(--sidebar)' }}
       >
         {loading ? 'Verificando…' : 'Verificar código'}
       </button>
@@ -84,7 +97,8 @@ export function OtpInput({ phone, onSubmit, onResend, loading, error }: Props) {
       <button
         type="button"
         onClick={() => void onResend()}
-        className="text-center text-sm text-teal-700 underline"
+        className="text-center text-sm underline"
+        style={{ color: 'var(--primary)' }}
       >
         Reenviar código
       </button>

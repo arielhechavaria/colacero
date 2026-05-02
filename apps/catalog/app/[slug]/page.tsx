@@ -124,42 +124,35 @@ export default async function CatalogPage({ params }: Props) {
     <main className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
       {/* Header */}
       <header
-        className="sticky top-0 z-10 px-4 pb-4 pt-5 border-b"
+        className="sticky top-0 z-10 px-4 py-3 border-b"
         style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
       >
-        <div className="mx-auto max-w-lg">
-          <div className="flex items-center justify-between mb-3">
-            <Logo size="sm" />
-            <div className="flex items-center gap-2">
-              <span
-                className="rounded-full px-2.5 py-1 text-[11px] font-semibold"
-                style={{
-                  backgroundColor: 'var(--primary-dim)',
-                  color: 'var(--primary)',
-                  border: '1px solid var(--border-glow)',
-                }}
-              >
-                recogé sin cola
-              </span>
-              <ThemeToggle />
-            </div>
+        <div className="mx-auto max-w-lg flex items-center gap-3">
+          <Logo size="sm" className="flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <h1
+              className="text-sm font-bold leading-tight truncate"
+              style={{ fontFamily: 'var(--font-display)', color: 'var(--text)' }}
+            >
+              {data.business.name}
+            </h1>
+            <span
+              className="inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold mt-0.5"
+              style={{
+                backgroundColor: 'var(--primary-dim)',
+                color:           'var(--primary)',
+                border:          '1px solid var(--border-glow)',
+              }}
+            >
+              recogé sin cola
+            </span>
           </div>
-          <h1
-            className="text-xl font-display font-bold"
-            style={{ color: 'var(--text)' }}
-          >
-            {data.business.name}
-          </h1>
-          {data.business.description != null && (
-            <p className="mt-0.5 text-sm" style={{ color: 'var(--muted)' }}>
-              {data.business.description}
-            </p>
-          )}
+          <ThemeToggle className="flex-shrink-0" />
         </div>
       </header>
 
-      {/* Lista de productos */}
-      <div className="mx-auto max-w-lg px-4 py-4 pb-32">
+      {/* Lista de productos — pb extra para el FAB */}
+      <div className="mx-auto max-w-lg px-4 py-4" style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}>
         {data.products.length === 0 ? (
           <p className="py-16 text-center" style={{ color: 'var(--muted)' }}>
             Este negocio aún no tiene productos publicados.

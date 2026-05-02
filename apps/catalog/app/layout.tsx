@@ -39,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         {/* Prevent FOUC: apply saved theme before paint */}
         <script
           dangerouslySetInnerHTML={{
@@ -55,7 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className={`
           ${manrope.variable} ${inter.variable} ${syne.variable} ${jetbrainsMono.variable}
-          min-h-screen antialiased
+          min-h-screen antialiased overflow-x-hidden
           [--font-display:var(--font-manrope)] [--font-body:var(--font-inter)] [--font-mono:var(--font-manrope)]
           dark:[--font-display:var(--font-syne)] dark:[--font-mono:var(--font-jetbrains)]
         `}

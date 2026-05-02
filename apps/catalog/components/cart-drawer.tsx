@@ -41,33 +41,44 @@ export function CartDrawer() {
     }
   }
 
+  // No mostrar FAB si el carrito está vacío
+  if (itemCount === 0 && !open) {
+    return null
+  }
+
   return (
     <>
       {/* FAB — botón flotante del carrito */}
-      <button
-        onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-4 flex items-center gap-2 rounded-full px-4 py-3 shadow-lg"
-        style={{ backgroundColor: 'var(--sidebar)', color: 'white' }}
-        aria-label="Ver carrito"
-      >
-        <span className="text-xl">🛒</span>
-        {itemCount > 0 && (
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          className="fixed z-30 flex items-center gap-2.5 rounded-2xl px-4 py-3.5 shadow-lg"
+          style={{
+            bottom:          'calc(1.5rem + env(safe-area-inset-bottom))',
+            left:            '50%',
+            transform:       'translateX(-50%)',
+            backgroundColor: 'var(--sidebar)',
+            color:           'white',
+            maxWidth:        'calc(100vw - 32px)',
+            whiteSpace:      'nowrap',
+          }}
+          aria-label="Ver carrito"
+        >
+          <span className="text-lg">🛒</span>
           <span
-            className="text-sm font-semibold rounded-full px-1.5"
-            style={{ backgroundColor: 'var(--accent)', color: 'var(--sidebar)' }}
+            className="text-sm font-semibold rounded-full px-2 py-0.5"
+            style={{ backgroundColor: 'var(--accent)', color: 'var(--sidebar)', fontFamily: 'var(--font-mono)' }}
           >
-            {itemCount}
+            {itemCount} {itemCount === 1 ? 'producto' : 'productos'}
           </span>
-        )}
-        {total > 0 && (
           <span
-            className="text-sm font-mono font-bold"
-            style={{ color: 'var(--accent)' }}
+            className="text-sm font-bold"
+            style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)' }}
           >
             ${total.toFixed(2)}
           </span>
-        )}
-      </button>
+        </button>
+      )}
 
       {/* Overlay */}
       {open && (
@@ -79,12 +90,17 @@ export function CartDrawer() {
 
       {/* Drawer */}
       <aside
-        className={`fixed bottom-0 left-0 right-0 z-50 max-h-[80vh] overflow-y-auto rounded-t-3xl p-6 shadow-xl transition-transform duration-300 ${
+        className={`fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-3xl shadow-xl transition-transform duration-300 ${
           open ? 'translate-y-0' : 'translate-y-full'
         }`}
-        style={{ backgroundColor: 'var(--card)', borderTop: '1px solid var(--border)' }}
+        style={{
+          backgroundColor: 'var(--card)',
+          borderTop:       '1px solid var(--border)',
+          paddingBottom:   'env(safe-area-inset-bottom)',
+        }}
         aria-label="Carrito de compras"
       >
+      <div className="p-5">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold" style={{ color: 'var(--text)' }}>
             Tu pedido
@@ -165,6 +181,7 @@ export function CartDrawer() {
             </div>
           </>
         )}
+      </div>
       </aside>
     </>
   )

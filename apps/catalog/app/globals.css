@@ -48,10 +48,23 @@
 }
 
 /* ── Base styles ─────────────────────────────────────────────────────────── */
+html {
+  /* Respect iPhone notch / home indicator */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  padding: 0; /* reset — individual elements handle it */
+}
+
 body {
   background-color: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
+  /* Prevent bounce scroll on iOS from showing white gaps */
+  overscroll-behavior: none;
+}
+
+/* Prevent tap highlight on mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Dark mode dot-grid texture */

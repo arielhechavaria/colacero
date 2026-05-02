@@ -141,46 +141,95 @@ export default function CheckoutPage() {
     window: '3. Fecha de recogida',
   }
 
+  const STEPS: Step[] = ['form', 'otp', 'window']
+  const stepIdx = STEPS.indexOf(step)
+
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
       {/* Header */}
-      <header className="bg-teal-700 px-4 pb-6 pt-8 text-white">
-        <button
-          onClick={() => router.back()}
-          className="mb-2 text-sm text-teal-200"
-        >
-          ← Volver
-        </button>
-        <h1 className="text-2xl font-bold">Confirmar pedido</h1>
-        <p className="mt-1 text-sm text-teal-100">{stepLabels[step]}</p>
+      <header
+        className="sticky top-0 z-10 border-b px-4 py-3"
+        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+      >
+        <div className="mx-auto max-w-lg flex items-center gap-3">
+          <button
+            onClick={() => router.back()}
+            className="text-sm font-medium"
+            style={{ color: 'var(--primary)' }}
+          >
+            ←
+          </button>
+          <div className="flex-1">
+            <p className="text-xs" style={{ color: 'var(--muted)' }}>
+              Confirmar pedido
+            </p>
+            <p
+              className="text-sm font-semibold"
+              style={{ fontFamily: 'var(--font-display)', color: 'var(--text)' }}
+            >
+              {stepLabels[step]}
+            </p>
+          </div>
+          {/* Step dots */}
+          <div className="flex gap-1.5">
+            {STEPS.map((s, i) => (
+              <span
+                key={s}
+                className="h-1.5 w-4 rounded-full transition-all"
+                style={{ backgroundColor: i <= stepIdx ? 'var(--primary)' : 'var(--border)' }}
+              />
+            ))}
+          </div>
+        </div>
       </header>
 
-      <div className="mx-auto max-w-lg px-4 py-6">
+      <div
+        className="mx-auto max-w-lg px-4 py-4 flex flex-col gap-4"
+        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+      >
         {/* Resumen del carrito */}
-        <div className="mb-6 rounded-2xl bg-white p-4 shadow-sm">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-400">
+        <div
+          className="rounded-2xl border p-4"
+          style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+        >
+          <h2
+            className="mb-2 text-xs font-semibold uppercase tracking-wide"
+            style={{ color: 'var(--muted)' }}
+          >
             Tu pedido
           </h2>
-          <ul className="flex flex-col gap-2">
+          <ul className="flex flex-col gap-1.5">
             {items.map((item) => (
               <li key={item.productId} className="flex justify-between text-sm">
-                <span className="text-gray-700">
-                  {item.name} × {item.quantity}
+                <span style={{ color: 'var(--text)' }}>
+                  {item.name}
+                  <span style={{ color: 'var(--muted)' }}> × {item.quantity}</span>
                 </span>
-                <span className="font-medium text-teal-700">
+                <span
+                  className="font-mono font-semibold"
+                  style={{ color: 'var(--primary)' }}
+                >
                   ${(Number(item.unitPrice) * item.quantity).toFixed(2)}
                 </span>
               </li>
             ))}
           </ul>
-          <div className="mt-3 border-t pt-3 flex justify-between font-bold">
-            <span>Total</span>
-            <span className="text-teal-700">${total.toFixed(2)}</span>
+          <div
+            className="mt-2 border-t pt-2 flex justify-between font-bold"
+            style={{ borderColor: 'var(--border)' }}
+          >
+            <span style={{ color: 'var(--text)' }}>Total</span>
+            <span className="font-mono" style={{ color: 'var(--primary)' }}>
+              ${total.toFixed(2)}
+            </span>
           </div>
         </div>
 
-        {/* Steps */}
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        {/* Step content */}
+        <div
+          className="rounded-2xl border p-5"
+          style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+        >
           {step === 'form' && (
             <CheckoutForm
               onSubmit={handleFormSubmit}

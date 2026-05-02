@@ -128,7 +128,10 @@ export default function ConfirmationPage() {
         </p>
       </header>
 
-      <div className="mx-auto max-w-lg px-4 py-6 flex flex-col gap-4">
+      <div
+        className="mx-auto max-w-lg px-4 py-6 flex flex-col gap-4"
+        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+      >
 
         {/* Pickup code */}
         <section

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Manrope, Inter, Syne, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
-import { Sidebar } from '../components/sidebar'
+import { AppShell } from '../components/app-shell'
 
 const manrope = Manrope({
   subsets: ['latin'],
@@ -60,10 +60,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dark:[--font-display:var(--font-syne)] dark:[--font-mono:var(--font-jetbrains)]
         `}
       >
-        <Sidebar />
-        <main className="ml-[220px] min-h-screen">
+        <AppShell>
           {children}
-        </main>
+        </AppShell>
       </body>
     </html>
   )
