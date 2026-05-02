@@ -177,6 +177,26 @@ export async function generateTomorrow(
   return res.json() as Promise<{ date: string; created: PickupWindow[] }>
 }
 
+// ── Products ──────────────────────────────────────────────────────────────────
+
+export interface Product {
+  id:        string
+  name:      string
+  unitPrice: number
+  unitLabel: string
+  isActive:  boolean
+  inventory?: { quantityAvailable: number }
+}
+
+export async function getProducts(token: string): Promise<Product[]> {
+  const res = await fetch(`${API_BASE}/api/owner/products`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+    cache:   'no-store',
+  })
+  if (!res.ok) throw new Error('fetch_products_failed')
+  return res.json() as Promise<Product[]>
+}
+
 // ── Announcements ─────────────────────────────────────────────────────────────
 
 export async function publishAnnouncement(
