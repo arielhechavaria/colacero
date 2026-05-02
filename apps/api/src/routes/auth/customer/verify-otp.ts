@@ -53,19 +53,19 @@ export async function verifyOtpRoute(app: FastifyInstance) {
     }
 
     const customer = await app.prisma.customer.upsert({
-      where:  { whatsappPhone: phone },
+      where:  { phone },
       update: { lastLoginAt: new Date() },
-      create: { whatsappPhone: phone, lastLoginAt: new Date() },
+      create: { phone, lastLoginAt: new Date() },
     })
 
     const token = app.jwt.sign({
       sub:   customer.id,
-      phone: customer.whatsappPhone,
+      phone: customer.phone,
     })
 
     return reply.send({
       token,
-      customer: { id: customer.id, phone: customer.whatsappPhone },
+      customer: { id: customer.id, phone: customer.phone },
     })
   })
 }

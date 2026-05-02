@@ -39,6 +39,26 @@ export default function CheckoutPage() {
     }
   }, [])
 
+  // Si ya hay token (Telegram Mini App auth automático), saltar form + OTP
+  useEffect(() => {
+    const savedToken = sessionStorage.getItem('colacero_token')
+    const savedName  = sessionStorage.getItem('colacero_display_name')
+    if (!savedToken) return
+
+    setToken(savedToken)
+    if (savedName) setName(savedName)
+
+    void (async () => {
+      try {
+        const ws = await getPickupWindows(slug)
+        setWindows(ws)
+        setStep('window')
+      } catch {
+        // Si falla cargar ventanas, dejamos el flujo normal
+      }
+    })()
+  }, [slug])
+
   // Redirigir si el carrito está vacío (sin reservas)
   useEffect(() => {
     if (items.length === 0) {

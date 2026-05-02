@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Manrope, Inter, Syne, JetBrains_Mono } from 'next/font/google'
+import { TelegramAuthProvider } from '../components/telegram-auth-provider'
 import './globals.css'
 
 const manrope = Manrope({
@@ -61,6 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dark:[--font-display:var(--font-syne)] dark:[--font-mono:var(--font-jetbrains)]
         `}
       >
+        <TelegramAuthProvider />
         {children}
       </body>
     </html>

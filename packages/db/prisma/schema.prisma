@@ -42,14 +42,15 @@ model User {
   @@index([businessId])
 }
 
-// ─── Customer (auth via WhatsApp OTP) ────────────────────────────────────────
+// ─── Customer (auth via Telegram Mini App) ───────────────────────────────────
 
 model Customer {
-  id            String    @id @default(cuid())
-  whatsappPhone String    @unique
-  displayName   String?
-  lastLoginAt   DateTime?
-  createdAt     DateTime  @default(now())
+  id          String    @id @default(cuid())
+  telegramId  String?   @unique   // Telegram user.id — auth principal
+  phone       String?   @unique   // fallback OTP (opcional)
+  displayName String?
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
 
   orders Order[]
 }

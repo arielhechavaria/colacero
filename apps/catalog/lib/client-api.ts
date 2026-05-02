@@ -2,6 +2,24 @@ const API_BASE = ''
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
+export interface TelegramAuthResult {
+  token:    string
+  customer: { id: string; telegramId: string | null; displayName: string | null }
+}
+
+export async function telegramAuth(initData: string): Promise<TelegramAuthResult> {
+  const res = await fetch(`${API_BASE}/api/auth/customer/telegram`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ initData }),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error: string }
+    throw new Error(body.error ?? 'telegram_auth_failed')
+  }
+  return res.json() as Promise<TelegramAuthResult>
+}
+
 export async function requestOtp(phone: string): Promise<{ ok: boolean }> {
   const res = await fetch(`${API_BASE}/api/auth/customer/request-otp`, {
     method:  'POST',
