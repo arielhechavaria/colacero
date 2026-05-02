@@ -11,27 +11,37 @@ async function handler(
   req: NextRequest,
   { params }: { params: Promise<{ path: string[] }> },
 ) {
-  const { path } = await params
-  const upstream = `${API_URL}/api/${path.join('/')}${req.nextUrl.search}`
+  try {
+    const { path } = await params
+    const upstream = `${API_URL}/api/${path.join('/')}${req.nextUrl.search}`
 
-  const headers = new Headers(req.headers)
-  headers.delete('host')
+    const headers = new Headers()
+    const ct = req.headers.get('content-type')
+    if (ct) headers.set('content-type', ct)
+    const auth = req.headers.get('authorization')
+    if (auth) headers.set('authorization', auth)
 
-  const body =
-    req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined
+    const body =
+      req.method !== 'GET' && req.method !== 'HEAD'
+        ? await req.text()
+        : undefined
 
-  const res = await fetch(upstream, {
-    method:  req.method,
-    headers,
-    body,
-    // @ts-expect-error — duplex requerido por Node cuando body es stream
-    duplex: 'half',
-  })
+    const res = await fetch(upstream, {
+      method: req.method,
+      headers,
+      body,
+    })
 
-  return new NextResponse(res.body, {
-    status:  res.status,
-    headers: res.headers,
-  })
+    const resBody = await res.text()
+
+    return new NextResponse(resBody, {
+      status: res.status,
+      headers: { 'content-type': res.headers.get('content-type') ?? 'application/json' },
+    })
+  } catch (err) {
+    console.error('[proxy] error:', err)
+    return NextResponse.json({ error: 'proxy_error', detail: String(err) }, { status: 502 })
+  }
 }
 
 export const GET    = handler
