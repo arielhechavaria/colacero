@@ -21,9 +21,10 @@ export interface User {
 }
 
 export interface Customer {
-  id:            string
-  whatsappPhone: string   // e164: +5355123456
-  displayName?:  string
-  lastLoginAt?:  Date
-  createdAt:     Date
+  id:          string
+  telegramId?: string | null
+  phone?:      string | null   // e164: +5355123456 — fallback OTP
+  displayName?: string | null
+  lastLoginAt?: Date | null
+  createdAt:   Date
 }

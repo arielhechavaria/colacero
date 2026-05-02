@@ -17,12 +17,12 @@ const TEST_PHONE = '+5355500099'
 beforeAll(async () => {
   await app.ready()
   await redis.del(`otp:${TEST_PHONE}`)
-  await prisma.customer.deleteMany({ where: { whatsappPhone: TEST_PHONE } })
+  await prisma.customer.deleteMany({ where: { phone: TEST_PHONE } })
 })
 
 afterAll(async () => {
   await redis.del(`otp:${TEST_PHONE}`)
-  await prisma.customer.deleteMany({ where: { whatsappPhone: TEST_PHONE } })
+  await prisma.customer.deleteMany({ where: { phone: TEST_PHONE } })
   await prisma.$disconnect()
   await redis.quit()
   await app.close()
@@ -81,9 +81,9 @@ describe('POST /api/auth/customer/verify-otp', () => {
   })
 
   it('verify-otp-creates-customer: primer login crea Customer en DB', async () => {
-    const customer = await prisma.customer.findUnique({ where: { whatsappPhone: TEST_PHONE } })
+    const customer = await prisma.customer.findUnique({ where: { phone: TEST_PHONE } })
     expect(customer).not.toBeNull()
-    expect(customer?.whatsappPhone).toBe(TEST_PHONE)
+    expect(customer?.phone).toBe(TEST_PHONE)
   })
 
   it('verify-otp-wrong: OTP incorrecto → 401 invalid_otp', async () => {
@@ -128,7 +128,7 @@ describe('POST /api/auth/customer/verify-otp', () => {
   })
 
   it('verify-otp-updates-lastLoginAt: segundo login actualiza lastLoginAt', async () => {
-    const before = await prisma.customer.findUnique({ where: { whatsappPhone: TEST_PHONE } })
+    const before = await prisma.customer.findUnique({ where: { phone: TEST_PHONE } })
 
     await app.inject({
       method:  'POST',
@@ -142,7 +142,7 @@ describe('POST /api/auth/customer/verify-otp', () => {
       payload: { phone: TEST_PHONE, otp },
     })
 
-    const after = await prisma.customer.findUnique({ where: { whatsappPhone: TEST_PHONE } })
+    const after = await prisma.customer.findUnique({ where: { phone: TEST_PHONE } })
     expect(after?.lastLoginAt).not.toBeNull()
     if (before?.lastLoginAt && after?.lastLoginAt) {
       expect(after.lastLoginAt.getTime()).toBeGreaterThanOrEqual(before.lastLoginAt.getTime())

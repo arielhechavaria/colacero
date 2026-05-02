@@ -55,12 +55,12 @@ beforeAll(async () => {
 
   // Cliente + token JWT (simular verify-otp)
   const customer = await prisma.customer.upsert({
-    where:  { whatsappPhone: '+5355599999' },
+    where:  { phone: '+5355599999' },
     update: {},
-    create: { whatsappPhone: '+5355599999' },
+    create: { phone: '+5355599999' },
   })
   customerId = customer.id
-  customerToken = app.jwt.sign({ sub: customer.id, phone: customer.whatsappPhone })
+  customerToken = app.jwt.sign({ sub: customer.id, phone: customer.phone })
 })
 
 afterAll(async () => {
@@ -71,7 +71,7 @@ afterAll(async () => {
   await prisma.order.deleteMany({ where: { businessId } })
   await prisma.pickupWindow.deleteMany({ where: { businessId } })
   await prisma.product.deleteMany({ where: { businessId } })
-  await prisma.customer.deleteMany({ where: { whatsappPhone: '+5355599999' } })
+  await prisma.customer.deleteMany({ where: { phone: '+5355599999' } })
   await prisma.business.deleteMany({ where: { slug: TEST_SLUG } })
   await prisma.$disconnect()
   await app.close()
