@@ -30,9 +30,7 @@ services:
   # ── Aplicaciones ────────────────────────────────────────────────────────────
 
   api:
-    build:
-      context: ..
-      dockerfile: apps/api/Dockerfile
+    image: ghcr.io/arielhechavaria/colacero-api:latest
     restart: unless-stopped
     env_file: ../.env
     depends_on:
@@ -45,9 +43,7 @@ services:
       - "3000:3000"
 
   catalog:
-    build:
-      context: ..
-      dockerfile: apps/catalog/Dockerfile
+    image: ghcr.io/arielhechavaria/colacero-catalog:latest
     restart: unless-stopped
     env_file: ../.env
     environment:
@@ -58,9 +54,7 @@ services:
       - "3001:3001"
 
   panel:
-    build:
-      context: ..
-      dockerfile: apps/panel/Dockerfile
+    image: ghcr.io/arielhechavaria/colacero-panel:latest
     restart: unless-stopped
     env_file: ../.env
     environment:
