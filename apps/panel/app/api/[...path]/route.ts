@@ -21,10 +21,10 @@ async function handler(
     const auth = req.headers.get('authorization')
     if (auth) headers.set('authorization', auth)
 
-    const body =
+    const body: string | null =
       req.method !== 'GET' && req.method !== 'HEAD'
         ? await req.text()
-        : undefined
+        : null
 
     const res = await fetch(upstream, {
       method: req.method,
