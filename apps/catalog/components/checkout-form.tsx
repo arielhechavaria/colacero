@@ -56,7 +56,7 @@ export function CheckoutForm({ onSubmit, loading, error }: Props) {
           className="mb-1 block text-sm font-medium"
           style={{ color: 'var(--text)' }}
         >
-          Número de WhatsApp{' '}
+          Tu número de Telegram{' '}
           <span style={{ color: 'var(--error)' }}>*</span>
         </label>
         <input
@@ -73,7 +73,7 @@ export function CheckoutForm({ onSubmit, loading, error }: Props) {
           }}
         />
         <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>
-          Recibirás un código de verificación por WhatsApp
+          Recibirás un código de verificación por Telegram
         </p>
       </div>
 
@@ -92,7 +92,7 @@ export function CheckoutForm({ onSubmit, loading, error }: Props) {
         className="w-full rounded-xl py-3 text-sm font-semibold disabled:opacity-50"
         style={{ backgroundColor: 'var(--primary)', color: 'var(--sidebar)' }}
       >
-        {loading ? 'Enviando código…' : 'Recibir código por WhatsApp'}
+        {loading ? 'Enviando código…' : 'Recibir código por Telegram'}
       </button>
     </form>
   )
