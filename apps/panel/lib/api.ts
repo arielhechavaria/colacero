@@ -194,7 +194,8 @@ export async function getProducts(token: string): Promise<Product[]> {
     cache:   'no-store',
   })
   if (!res.ok) throw new Error('fetch_products_failed')
-  return res.json() as Promise<Product[]>
+  const data = await res.json() as { products: Product[] } | Product[]
+  return Array.isArray(data) ? data : data.products
 }
 
 // ── Announcements ─────────────────────────────────────────────────────────────
