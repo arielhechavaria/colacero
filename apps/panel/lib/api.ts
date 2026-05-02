@@ -1,6 +1,7 @@
 'use client'
 
-const API_BASE = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3000'
+// URLs relativas — Next.js reescribe /api/* hacia el servicio API via rewrites()
+const API_BASE = ''
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
