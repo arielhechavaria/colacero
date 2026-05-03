@@ -249,8 +249,7 @@ export default function AnnouncementsPage() {
             <button
               type="submit"
               disabled={sending || !text.trim()}
-              className="rounded-xl px-6 py-2 text-sm font-semibold disabled:opacity-50"
-              className="bg-gradient-teal-violet shadow-glow text-white"
+              className="rounded-xl px-6 py-2 text-sm font-semibold disabled:opacity-50 bg-gradient-teal-violet shadow-glow text-white"
             >
               {sending ? 'Publicando…' : '📤 Publicar en canal'}
             </button>
