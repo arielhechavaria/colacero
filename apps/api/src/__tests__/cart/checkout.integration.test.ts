@@ -60,7 +60,7 @@ beforeAll(async () => {
     create: { phone: '+5355599999' },
   })
   customerId = customer.id
-  customerToken = app.jwt.sign({ sub: customer.id, phone: customer.phone })
+  customerToken = app.jwt.sign({ sub: customer.id, phone: customer.phone ?? undefined })
 })
 
 afterAll(async () => {

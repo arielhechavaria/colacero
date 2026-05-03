@@ -60,7 +60,7 @@ export async function verifyOtpRoute(app: FastifyInstance) {
 
     const token = app.jwt.sign({
       sub:   customer.id,
-      phone: customer.phone,
+      phone: customer.phone ?? undefined,
     })
 
     return reply.send({
