@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { loginOwner } from '../../lib/api'
-import { Logo } from '../../components/logo'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -28,15 +27,30 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center px-4" style={{ backgroundColor: 'var(--bg)' }}>
-      <div className="w-full max-w-sm">
-        {/* Logo centered */}
+    <div className="fixed inset-0 flex items-center justify-center px-4">
+      {/* Background orbs */}
+      <div
+        className="pointer-events-none absolute top-1/4 left-1/4 h-72 w-72 rounded-full opacity-20 blur-3xl animate-float"
+        style={{ background: 'radial-gradient(circle, #14B8A6, transparent)' }}
+      />
+      <div
+        className="pointer-events-none absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full opacity-20 blur-3xl animate-float"
+        style={{ background: 'radial-gradient(circle, #A855F7, transparent)', animationDelay: '3s' }}
+      />
+
+      <div className="relative w-full max-w-sm">
+        {/* Logo mark */}
         <div className="flex justify-center mb-8">
-          <Logo size="md" variant="page" />
+          <div className="animate-float">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-teal-violet text-white text-2xl font-black shadow-glow animate-glow">
+              C
+            </div>
+          </div>
         </div>
 
-        <div className="rounded-2xl border p-8" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
-          <h1 className="mb-1 text-xl font-bold font-display" style={{ color: 'var(--text)' }}>
+        {/* Glass card */}
+        <div className="glass rounded-2xl p-8">
+          <h1 className="mb-1 text-xl font-bold" style={{ color: 'var(--text)', fontFamily: 'Inter, sans-serif' }}>
             Acceso al panel
           </h1>
           <p className="mb-6 text-sm" style={{ color: 'var(--muted)' }}>
@@ -53,8 +67,12 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-1 transition-colors"
-                style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--text)' }}
+                className="w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2 transition-colors"
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.5)',
+                  borderColor:     'var(--glass-border)',
+                  color:           'var(--text)',
+                }}
                 placeholder="owner@negocio.com"
               />
             </div>
@@ -68,14 +86,18 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-1 transition-colors"
-                style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--text)' }}
+                className="w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2 transition-colors"
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.5)',
+                  borderColor:     'var(--glass-border)',
+                  color:           'var(--text)',
+                }}
                 placeholder="••••••••"
               />
             </div>
 
             {error != null && (
-              <p className="rounded-xl px-4 py-2.5 text-sm" style={{ backgroundColor: 'rgba(255,61,85,0.1)', color: 'var(--error)', border: '1px solid rgba(255,61,85,0.2)' }}>
+              <p className="rounded-xl px-4 py-2.5 text-sm" style={{ backgroundColor: 'rgba(220,38,38,0.1)', color: 'var(--error)', border: '1px solid rgba(220,38,38,0.2)' }}>
                 {error}
               </p>
             )}
@@ -83,8 +105,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl py-3 text-sm font-semibold disabled:opacity-50 mt-1"
-              style={{ backgroundColor: 'var(--primary)', color: '#07080A' }}
+              className="w-full rounded-xl py-3 text-sm font-semibold text-white disabled:opacity-50 mt-1 bg-gradient-teal-violet shadow-glow transition-all hover:shadow-glow-violet"
             >
               {loading ? 'Ingresando…' : 'Ingresar →'}
             </button>

@@ -48,33 +48,25 @@ export function CartDrawer() {
 
   return (
     <>
-      {/* FAB — botón flotante del carrito */}
+      {/* FAB — botón flotante gradiente */}
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed z-30 flex items-center gap-2.5 rounded-2xl px-4 py-3.5 shadow-lg"
+          className="fixed z-30 flex items-center gap-2.5 rounded-2xl px-4 py-3.5 bg-gradient-teal-violet shadow-glow text-white"
           style={{
-            bottom:          'calc(1.5rem + env(safe-area-inset-bottom))',
-            left:            '50%',
-            transform:       'translateX(-50%)',
-            backgroundColor: 'var(--sidebar)',
-            color:           'white',
-            maxWidth:        'calc(100vw - 32px)',
-            whiteSpace:      'nowrap',
+            bottom:    'calc(1.5rem + env(safe-area-inset-bottom))',
+            left:      '50%',
+            transform: 'translateX(-50%)',
+            maxWidth:  'calc(100vw - 32px)',
+            whiteSpace:'nowrap',
           }}
           aria-label="Ver carrito"
         >
           <span className="text-lg">🛒</span>
-          <span
-            className="text-sm font-semibold rounded-full px-2 py-0.5"
-            style={{ backgroundColor: 'var(--accent)', color: 'var(--sidebar)', fontFamily: 'var(--font-mono)' }}
-          >
+          <span className="text-sm font-semibold rounded-full px-2 py-0.5 bg-white/20">
             {itemCount} {itemCount === 1 ? 'producto' : 'productos'}
           </span>
-          <span
-            className="text-sm font-bold"
-            style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)' }}
-          >
+          <span className="text-sm font-bold font-mono">
             ${total.toFixed(2)}
           </span>
         </button>
@@ -88,16 +80,12 @@ export function CartDrawer() {
         />
       )}
 
-      {/* Drawer */}
+      {/* Drawer glass */}
       <aside
-        className={`fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-3xl shadow-xl transition-transform duration-300 ${
+        className={`fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-3xl shadow-xl transition-transform duration-300 glass ${
           open ? 'translate-y-0' : 'translate-y-full'
         }`}
-        style={{
-          backgroundColor: 'var(--card)',
-          borderTop:       '1px solid var(--border)',
-          paddingBottom:   'env(safe-area-inset-bottom)',
-        }}
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
         aria-label="Carrito de compras"
       >
       <div className="p-5">
@@ -165,16 +153,15 @@ export function CartDrawer() {
               <button
                 onClick={() => { clear(); setOpen(false) }}
                 disabled={loading}
-                className="flex-1 rounded-xl border py-3 text-sm disabled:opacity-40"
-                style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}
+                className="flex-1 rounded-xl border py-3 text-sm disabled:opacity-40 transition-colors"
+                style={{ borderColor: 'var(--glass-border)', color: 'var(--muted)', backgroundColor: 'transparent' }}
               >
                 Vaciar
               </button>
               <button
                 onClick={() => void handleCheckout()}
                 disabled={loading}
-                className="flex-[2] rounded-xl py-3 text-sm font-semibold disabled:opacity-50"
-                style={{ backgroundColor: 'var(--primary)', color: 'var(--sidebar)' }}
+                className="flex-[2] rounded-xl py-3 text-sm font-semibold text-white disabled:opacity-50 bg-gradient-teal-violet shadow-glow"
               >
                 {loading ? 'Reservando…' : 'Confirmar pedido'}
               </button>

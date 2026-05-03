@@ -90,18 +90,12 @@ export default function OrdersPage() {
   }
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
-      {/* Header */}
-      <header
-        className="sticky top-0 z-10 border-b px-6 py-4"
-        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
-      >
+    <main className="min-h-screen">
+      {/* Header glass */}
+      <header className="sticky top-0 z-10 glass px-6 py-4" style={{ borderBottom: '1px solid var(--glass-border)' }}>
         <div className="flex items-center justify-between">
           <div>
-            <h1
-              className="text-lg font-bold"
-              style={{ fontFamily: 'var(--font-display)', color: 'var(--text)' }}
-            >
+            <h1 className="text-lg font-bold text-gradient">
               Pedidos del día
             </h1>
             {data && (
@@ -112,7 +106,7 @@ export default function OrdersPage() {
           </div>
           <div className="flex items-center gap-3">
             {lastUpdated && (
-              <span className="text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'var(--muted)' }}>
+              <span className="text-xs font-mono" style={{ color: 'var(--muted)' }}>
                 {lastUpdated.toLocaleTimeString('es-CU', {
                   hour:   '2-digit',
                   minute: '2-digit',

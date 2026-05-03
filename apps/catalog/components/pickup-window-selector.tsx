@@ -84,8 +84,7 @@ export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, l
       <button
         onClick={() => void onConfirm()}
         disabled={loading || selected === null}
-        className="w-full rounded-xl py-3 text-sm font-semibold disabled:opacity-50"
-        style={{ backgroundColor: 'var(--primary)', color: 'var(--sidebar)' }}
+        className="w-full rounded-xl py-3 text-sm font-semibold text-white disabled:opacity-50 bg-gradient-teal-violet shadow-glow"
       >
         {loading ? 'Confirmando pedido…' : 'Confirmar pedido'}
       </button>

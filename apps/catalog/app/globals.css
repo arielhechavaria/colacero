@@ -2,75 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Design Tokens — V1 Light (default) ─────────────────────────────────── */
+/* ── Design Tokens — V3 Light ────────────────────────────────────────────── */
 :root {
-  --primary:       #0D6B63;
-  --primary-dark:  #0A5550;
-  --primary-light: #CCEDE9;
-  --primary-dim:   rgba(13, 107, 99, 0.08);
-  --accent:        #CA8A04;
-  --bg:            #FAFAF9;
-  --surface:       #F5F4F0;
+  --primary:       #14B8A6;
+  --primary-dark:  #0D9488;
+  --primary-light: #CCFBF1;
+  --primary-dim:   rgba(20, 184, 166, 0.08);
+  --accent:        #A855F7;
+  --bg:            #F9FAFB;
+  --surface:       #F3F4F6;
   --card:          #FFFFFF;
-  --border:        #E7E5E4;
-  --border-glow:   rgba(13, 107, 99, 0.2);
-  --text:          #1C1917;
-  --muted:         #78716C;
-  --sidebar:       #1C1917;
+  --border:        #E5E7EB;
+  --border-glow:   rgba(20, 184, 166, 0.25);
+  --text:          #111827;
+  --muted:         #6B7280;
+  --sidebar:       rgba(255,255,255,0.7);
   --success:       #16A34A;
   --warning:       #D97706;
   --error:         #DC2626;
-  --font-display:  'Manrope', sans-serif;
-  --font-body:     'Inter', sans-serif;
-  --font-mono:     'Manrope', sans-serif;
+  --gradient-primary: linear-gradient(135deg, #14B8A6 0%, #A855F7 100%);
+  --glass-bg:      rgba(255, 255, 255, 0.7);
+  --glass-border:  rgba(255, 255, 255, 0.3);
 }
 
-/* ── Design Tokens — V2 Dark ─────────────────────────────────────────────── */
+/* ── Design Tokens — V3 Dark ─────────────────────────────────────────────── */
 .dark {
-  --primary:       #00D4BE;
-  --primary-dark:  #00B5A3;
-  --primary-light: rgba(0, 212, 190, 0.15);
-  --primary-dim:   rgba(0, 212, 190, 0.07);
-  --accent:        #FFB020;
-  --bg:            #07080A;
-  --surface:       #0D1014;
-  --card:          #111519;
-  --border:        #1A2028;
-  --border-glow:   rgba(0, 212, 190, 0.22);
-  --text:          #DDE3EA;
-  --muted:         #4A5568;
-  --sidebar:       #050608;
-  --success:       #00D68F;
-  --warning:       #FFB020;
-  --error:         #FF3D55;
-  --font-display:  'Syne', sans-serif;
-  --font-mono:     'JetBrains Mono', monospace;
+  --primary:       #2DD4BF;
+  --primary-dark:  #14B8A6;
+  --primary-light: rgba(45, 212, 191, 0.15);
+  --primary-dim:   rgba(45, 212, 191, 0.07);
+  --accent:        #C084FC;
+  --bg:            #030712;
+  --surface:       #111827;
+  --card:          #1F2937;
+  --border:        #374151;
+  --border-glow:   rgba(45, 212, 191, 0.22);
+  --text:          #F9FAFB;
+  --muted:         #9CA3AF;
+  --sidebar:       rgba(17, 24, 39, 0.7);
+  --success:       #34D399;
+  --warning:       #FBBF24;
+  --error:         #F87171;
+  --gradient-primary: linear-gradient(135deg, #2DD4BF 0%, #C084FC 100%);
+  --glass-bg:      rgba(17, 24, 39, 0.7);
+  --glass-border:  rgba(255, 255, 255, 0.1);
 }
 
 /* ── Base styles ─────────────────────────────────────────────────────────── */
 html {
-  /* Respect iPhone notch / home indicator */
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-  padding: 0; /* reset — individual elements handle it */
+  padding: 0;
 }
 
 body {
-  background-color: var(--bg);
+  background: linear-gradient(to bottom right, #F9FAFB, #F0FDFA, #FAF5FF);
   color: var(--text);
-  font-family: var(--font-body);
-  /* Prevent bounce scroll on iOS from showing white gaps */
+  font-family: var(--font-inter), 'Inter', sans-serif;
   overscroll-behavior: none;
+  min-height: 100vh;
+}
+
+.dark body {
+  background: linear-gradient(to bottom right, #030712, #111827, #1E0A3C);
 }
 
 /* Prevent tap highlight on mobile */
 * {
   -webkit-tap-highlight-color: transparent;
-}
-
-/* Dark mode dot-grid texture */
-.dark body {
-  background-image: radial-gradient(circle, rgba(255,255,255,0.018) 1px, transparent 1px);
-  background-size: 24px 24px;
 }
 
 /* Smooth transitions for theme switching */
@@ -79,7 +77,62 @@ body {
   transition-duration: 150ms;
   transition-timing-function: ease;
 }
-/* But NOT for transforms/opacity (breaks animations) */
 [class*="transition-"], [class*="animate-"] {
   transition-property: revert;
+}
+
+/* ── Glass morphism ──────────────────────────────────────────────────────── */
+@layer components {
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+  }
+
+  .glass-dark {
+    background: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .bg-gradient-teal-violet {
+    background: linear-gradient(135deg, #14B8A6 0%, #A855F7 100%);
+  }
+
+  .dark .bg-gradient-teal-violet {
+    background: linear-gradient(135deg, #2DD4BF 0%, #C084FC 100%);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #14B8A6, #A855F7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .dark .text-gradient {
+    background: linear-gradient(135deg, #2DD4BF, #C084FC);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-20px); }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(20, 184, 166, 0.3); }
+  50%       { box-shadow: 0 0 60px rgba(20, 184, 166, 0.8), 0 0 80px rgba(168, 85, 247, 0.4); }
+}
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
 }

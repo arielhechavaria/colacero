@@ -26,25 +26,16 @@ function PickupCodeBox({ code }: { code: string }) {
     <div className="flex flex-col items-center gap-3">
       <button
         onClick={() => void handleCopy()}
-        className="group flex flex-col items-center gap-1"
+        className="group flex flex-col items-center gap-2"
         aria-label="Copiar código de recogida"
       >
         <span
-          className="rounded-2xl border px-8 py-4 text-4xl font-bold tracking-widest"
-          style={{
-            backgroundColor: 'var(--primary-dim)',
-            border: '1px solid var(--border-glow)',
-            color: 'var(--primary)',
-            fontFamily: 'var(--font-mono)',
-            letterSpacing: '0.1em',
-          }}
+          className="rounded-2xl px-8 py-4 text-6xl font-black tracking-widest font-mono text-gradient animate-glow"
+          style={{ letterSpacing: '0.15em' }}
         >
           {code}
         </span>
-        <span
-          className="text-xs"
-          style={{ color: 'var(--muted)' }}
-        >
+        <span className="text-xs" style={{ color: 'var(--muted)' }}>
           {copied ? '✓ Copiado' : 'Toca para copiar'}
         </span>
       </button>
@@ -110,17 +101,14 @@ export default function ConfirmationPage() {
   }
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
-      {/* Header */}
+    <main className="min-h-screen">
+      {/* Header glass */}
       <header
-        className="px-4 pb-8 pt-8 text-center border-b"
-        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+        className="glass px-4 pb-8 pt-8 text-center"
+        style={{ borderBottom: '1px solid var(--glass-border)' }}
       >
         <div className="mb-2 text-4xl">✅</div>
-        <h1
-          className="text-2xl font-bold font-display"
-          style={{ color: 'var(--text)' }}
-        >
+        <h1 className="text-2xl font-black text-gradient">
           ¡Pedido confirmado!
         </h1>
         <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>
@@ -133,11 +121,8 @@ export default function ConfirmationPage() {
         style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
       >
 
-        {/* Pickup code */}
-        <section
-          className="rounded-2xl p-6 text-center border"
-          style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
-        >
+        {/* Pickup code — glass card destacada */}
+        <section className="glass rounded-2xl p-6 text-center">
           <p
             className="mb-4 text-sm font-semibold uppercase tracking-wide"
             style={{ color: 'var(--muted)' }}
@@ -156,10 +141,7 @@ export default function ConfirmationPage() {
 
         {/* Pickup window */}
         {order.pickupWindow != null && (
-          <section
-            className="rounded-2xl p-4 border"
-            style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
-          >
+          <section className="glass rounded-2xl p-4">
             <p
               className="mb-2 text-sm font-semibold uppercase tracking-wide"
               style={{ color: 'var(--muted)' }}
@@ -176,10 +158,7 @@ export default function ConfirmationPage() {
         )}
 
         {/* Items */}
-        <section
-          className="rounded-2xl p-4 border"
-          style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
-        >
+        <section className="glass rounded-2xl p-4">
           <p
             className="mb-3 text-sm font-semibold uppercase tracking-wide"
             style={{ color: 'var(--muted)' }}
@@ -191,7 +170,7 @@ export default function ConfirmationPage() {
               <li
                 key={item.id}
                 className="flex items-center justify-between text-sm border-b pb-2 last:border-0 last:pb-0"
-                style={{ borderColor: 'var(--border)' }}
+                style={{ borderColor: 'var(--glass-border)' }}
               >
                 <span style={{ color: 'var(--text)' }}>
                   {item.name}{' '}
@@ -207,23 +186,19 @@ export default function ConfirmationPage() {
           </ul>
           <div
             className="mt-3 border-t pt-3 flex justify-between font-bold text-base"
-            style={{ borderColor: 'var(--border)' }}
+            style={{ borderColor: 'var(--glass-border)' }}
           >
             <span style={{ color: 'var(--text)' }}>Total</span>
-            <span
-              className="font-mono"
-              style={{ color: 'var(--primary)' }}
-            >
+            <span className="font-mono text-gradient">
               ${order.subtotal.toFixed(2)}
             </span>
           </div>
         </section>
 
-        {/* CTA */}
+        {/* CTA gradiente */}
         <button
           onClick={() => router.push(`/${slug}`)}
-          className="w-full rounded-xl py-3 text-sm font-semibold"
-          style={{ backgroundColor: 'var(--primary)', color: 'var(--sidebar)' }}
+          className="w-full rounded-xl py-3 text-sm font-semibold text-white bg-gradient-teal-violet shadow-glow"
         >
           Volver al catálogo
         </button>

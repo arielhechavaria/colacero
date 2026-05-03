@@ -1,34 +1,20 @@
 import type { Metadata } from 'next'
-import { Manrope, Inter, Syne, JetBrains_Mono } from 'next/font/google'
+import { Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { AppShell } from '../components/app-shell'
 
-const manrope = Manrope({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-manrope',
-  display: 'swap',
-})
-
 const inter = Inter({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  subsets:  ['latin'],
+  weight:   ['300', '400', '500', '600', '700', '800', '900'],
   variable: '--font-inter',
-  display: 'swap',
-})
-
-const syne = Syne({
-  subsets: ['latin'],
-  weight: ['400', '600', '700', '800'],
-  variable: '--font-syne',
-  display: 'swap',
+  display:  'swap',
 })
 
 const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-jetbrains',
-  display: 'swap',
+  subsets:  ['latin'],
+  weight:   ['400', '500', '600'],
+  variable: '--font-mono',
+  display:  'swap',
 })
 
 export const metadata: Metadata = {
@@ -52,14 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body
-        className={`
-          ${manrope.variable} ${inter.variable} ${syne.variable} ${jetbrainsMono.variable}
-          min-h-screen antialiased
-          [--font-display:var(--font-manrope)] [--font-body:var(--font-inter)] [--font-mono:var(--font-manrope)]
-          dark:[--font-display:var(--font-syne)] dark:[--font-mono:var(--font-jetbrains)]
-        `}
-      >
+      <body className={`${inter.variable} ${jetbrainsMono.variable} min-h-screen antialiased`}>
         <AppShell>
           {children}
         </AppShell>

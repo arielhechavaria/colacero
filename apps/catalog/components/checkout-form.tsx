@@ -89,8 +89,7 @@ export function CheckoutForm({ onSubmit, loading, error }: Props) {
       <button
         type="submit"
         disabled={loading || phone.trim() === ''}
-        className="w-full rounded-xl py-3 text-sm font-semibold disabled:opacity-50"
-        style={{ backgroundColor: 'var(--primary)', color: 'var(--sidebar)' }}
+        className="w-full rounded-xl py-3 text-sm font-semibold text-white disabled:opacity-50 bg-gradient-teal-violet shadow-glow"
       >
         {loading ? 'Enviando código…' : 'Recibir código por Telegram'}
       </button>

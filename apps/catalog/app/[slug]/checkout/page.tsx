@@ -165,11 +165,11 @@ export default function CheckoutPage() {
   const stepIdx = STEPS.indexOf(step)
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
-      {/* Header */}
+    <main className="min-h-screen">
+      {/* Header glass */}
       <header
-        className="sticky top-0 z-10 border-b px-4 py-3"
-        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+        className="sticky top-0 z-10 glass px-4 py-3"
+        style={{ borderBottom: '1px solid var(--glass-border)' }}
       >
         <div className="mx-auto max-w-lg flex items-center gap-3">
           <button
@@ -183,10 +183,7 @@ export default function CheckoutPage() {
             <p className="text-xs" style={{ color: 'var(--muted)' }}>
               Confirmar pedido
             </p>
-            <p
-              className="text-sm font-semibold"
-              style={{ fontFamily: 'var(--font-display)', color: 'var(--text)' }}
-            >
+            <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
               {stepLabels[step]}
             </p>
           </div>
@@ -196,7 +193,11 @@ export default function CheckoutPage() {
               <span
                 key={s}
                 className="h-1.5 w-4 rounded-full transition-all"
-                style={{ backgroundColor: i <= stepIdx ? 'var(--primary)' : 'var(--border)' }}
+                style={{
+                  background: i <= stepIdx
+                    ? 'linear-gradient(135deg, #14B8A6, #A855F7)'
+                    : 'var(--border)',
+                }}
               />
             ))}
           </div>
@@ -207,11 +208,8 @@ export default function CheckoutPage() {
         className="mx-auto max-w-lg px-4 py-4 flex flex-col gap-4"
         style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
       >
-        {/* Resumen del carrito */}
-        <div
-          className="rounded-2xl border p-4"
-          style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
-        >
+        {/* Resumen del carrito — glass */}
+        <div className="glass rounded-2xl p-4">
           <h2
             className="mb-2 text-xs font-semibold uppercase tracking-wide"
             style={{ color: 'var(--muted)' }}
@@ -225,10 +223,7 @@ export default function CheckoutPage() {
                   {item.name}
                   <span style={{ color: 'var(--muted)' }}> × {item.quantity}</span>
                 </span>
-                <span
-                  className="font-mono font-semibold"
-                  style={{ color: 'var(--primary)' }}
-                >
+                <span className="font-mono font-semibold text-gradient">
                   ${(Number(item.unitPrice) * item.quantity).toFixed(2)}
                 </span>
               </li>
@@ -236,20 +231,15 @@ export default function CheckoutPage() {
           </ul>
           <div
             className="mt-2 border-t pt-2 flex justify-between font-bold"
-            style={{ borderColor: 'var(--border)' }}
+            style={{ borderColor: 'var(--glass-border)' }}
           >
             <span style={{ color: 'var(--text)' }}>Total</span>
-            <span className="font-mono" style={{ color: 'var(--primary)' }}>
-              ${total.toFixed(2)}
-            </span>
+            <span className="font-mono text-gradient">${total.toFixed(2)}</span>
           </div>
         </div>
 
-        {/* Step content */}
-        <div
-          className="rounded-2xl border p-5"
-          style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
-        >
+        {/* Step content — glass */}
+        <div className="glass rounded-2xl p-5">
           {step === 'form' && (
             <CheckoutForm
               onSubmit={handleFormSubmit}

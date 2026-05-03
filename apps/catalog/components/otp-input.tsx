@@ -65,12 +65,10 @@ export function OtpInput({ phone, onSubmit, onResend, loading, error }: Props) {
             value={d}
             onChange={(e) => handleChange(i, e.target.value)}
             onKeyDown={(e) => handleKeyDown(i, e)}
-            className="h-12 w-10 rounded-xl border text-center text-lg font-bold outline-none transition-colors"
+            className="h-12 w-10 rounded-xl border text-center text-lg font-bold outline-none transition-colors font-mono glass"
             style={{
-              fontFamily:      'var(--font-mono)',
-              backgroundColor: 'var(--surface)',
-              borderColor:     d ? 'var(--primary)' : 'var(--border)',
-              color:           'var(--text)',
+              borderColor: d ? 'var(--primary)' : 'var(--glass-border)',
+              color:       'var(--text)',
             }}
           />
         ))}
@@ -88,8 +86,7 @@ export function OtpInput({ phone, onSubmit, onResend, loading, error }: Props) {
       <button
         type="submit"
         disabled={loading || otp.length < 6}
-        className="w-full rounded-xl py-3 text-sm font-semibold disabled:opacity-50"
-        style={{ backgroundColor: 'var(--primary)', color: 'var(--sidebar)' }}
+        className="w-full rounded-xl py-3 text-sm font-semibold text-white disabled:opacity-50 bg-gradient-teal-violet shadow-glow"
       >
         {loading ? 'Verificando…' : 'Verificar código'}
       </button>

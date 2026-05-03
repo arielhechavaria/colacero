@@ -51,8 +51,7 @@ function ProductRow({ product }: { product: CatalogProduct }) {
 
   return (
     <article
-      className={`flex gap-3 rounded-2xl border p-3 transition-all ${outOfStock ? 'opacity-50' : ''}`}
-      style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+      className={`glass flex gap-3 rounded-2xl p-3 transition-all ${outOfStock ? 'opacity-50' : ''}`}
     >
       {/* Imagen */}
       <div
@@ -78,7 +77,7 @@ function ProductRow({ product }: { product: CatalogProduct }) {
       <div className="flex flex-1 flex-col justify-between py-0.5">
         <div>
           <h2
-            className="font-display font-semibold text-sm leading-snug"
+            className="font-semibold text-sm leading-snug"
             style={{ color: 'var(--text)' }}
           >
             {product.name}
@@ -95,10 +94,7 @@ function ProductRow({ product }: { product: CatalogProduct }) {
 
         <div className="flex items-end justify-between">
           <div>
-            <p
-              className="text-base font-mono font-bold"
-              style={{ color: 'var(--primary)' }}
-            >
+            <p className="text-base font-mono font-bold text-gradient">
               ${Number(product.unitPrice).toFixed(2)}
             </p>
             <p className="text-[11px]" style={{ color: 'var(--muted)' }}>
@@ -121,18 +117,18 @@ export default async function CatalogPage({ params }: Props) {
   if (data == null) notFound()
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
-      {/* Header */}
+    <main className="min-h-screen">
+      {/* Header glass */}
       <header
-        className="sticky top-0 z-10 px-4 py-3 border-b"
-        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+        className="sticky top-0 z-10 glass px-4 py-3"
+        style={{ borderBottom: '1px solid var(--glass-border)' }}
       >
         <div className="mx-auto max-w-lg flex items-center gap-3">
           <Logo size="sm" className="flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <h1
               className="text-sm font-bold leading-tight truncate"
-              style={{ fontFamily: 'var(--font-display)', color: 'var(--text)' }}
+              style={{ color: 'var(--text)' }}
             >
               {data.business.name}
             </h1>

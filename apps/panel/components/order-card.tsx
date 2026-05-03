@@ -25,20 +25,13 @@ export function OrderCard({ order, onAction, loading }: Props) {
     order.status === 'EXPIRED'
 
   return (
-    <div
-      className={`rounded-xl border p-3 transition-all ${isDone ? 'opacity-40' : ''}`}
-      style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
-    >
+    <div className={`glass rounded-xl p-3 transition-all ${isDone ? 'opacity-40' : ''}`}>
       {/* Code + customer + status dot */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0">
           <span
-            className="text-sm font-bold block"
-            style={{
-              fontFamily: 'var(--font-mono)',
-              color: 'var(--primary)',
-              letterSpacing: '0.08em',
-            }}
+            className="text-sm font-bold font-mono block text-gradient"
+            style={{ letterSpacing: '0.08em' }}
           >
             {order.pickupCode ?? '—'}
           </span>
@@ -52,7 +45,7 @@ export function OrderCard({ order, onAction, loading }: Props) {
       {/* Items */}
       <ul
         className="flex flex-col gap-0.5 mb-2 pt-2 border-t"
-        style={{ borderColor: 'var(--border)' }}
+        style={{ borderColor: 'var(--glass-border)' }}
       >
         {order.items.map((item) => (
           <li key={item.id} className="flex items-center text-[11px]">
@@ -63,10 +56,7 @@ export function OrderCard({ order, onAction, loading }: Props) {
       </ul>
 
       {/* Total */}
-      <p
-        className="text-xs font-semibold mb-2"
-        style={{ fontFamily: 'var(--font-mono)', color: 'var(--text)' }}
-      >
+      <p className="text-xs font-semibold font-mono mb-2" style={{ color: 'var(--text)' }}>
         ${order.subtotal.toFixed(2)}
       </p>
 
@@ -94,8 +84,7 @@ export function OrderCard({ order, onAction, loading }: Props) {
           {order.status === 'READY' && (
             <ActionBtn
               label="Entregado"
-              bgColor="var(--primary-dim)"
-              textColor="var(--primary)"
+              gradient
               onClick={() => void onAction(order.id, 'PICKED_UP')}
               disabled={loading}
             />
@@ -134,12 +123,14 @@ function ActionBtn({
   label,
   bgColor,
   textColor = 'var(--text)',
+  gradient = false,
   onClick,
   disabled,
 }: {
   label:      string
-  bgColor:    string
+  bgColor?:   string
   textColor?: string
+  gradient?:  boolean
   onClick:    () => void
   disabled:   boolean
 }) {
@@ -147,8 +138,10 @@ function ActionBtn({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="flex-1 rounded-lg py-1.5 text-xs font-semibold disabled:opacity-40 transition-opacity"
-      style={{ backgroundColor: bgColor, color: textColor }}
+      className={`flex-1 rounded-lg py-1.5 text-xs font-semibold disabled:opacity-40 transition-opacity ${
+        gradient ? 'bg-gradient-teal-violet text-white shadow-glow' : ''
+      }`}
+      style={gradient ? undefined : { backgroundColor: bgColor, color: textColor }}
     >
       {label}
     </button>
