@@ -120,8 +120,8 @@ export async function telegramAuthRoute(app: FastifyInstance) {
     })
 
     const token = app.jwt.sign({
-      sub:        customer.id,
-      telegramId: customer.telegramId,
+      sub: customer.id,
+      ...(customer.telegramId ? { telegramId: customer.telegramId } : {}),
     })
 
     return reply.send({

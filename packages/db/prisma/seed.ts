@@ -67,9 +67,14 @@ async function main() {
     console.log(`  ✓ Producto: ${p.name} (stock: ${p.qty})`)
   }
 
-  // 4. Ventanas de recogida para hoy
+  // 4. Ventanas de recogida para hoy (upsert por businessId+date+startTime)
   const today = new Date()
   today.setHours(0, 0, 0, 0)
+
+  // Eliminar ventanas viejas del negocio para evitar acumulación
+  await prisma.pickupWindow.deleteMany({
+    where: { businessId: business.id },
+  })
 
   const ventanas = [
     { startTime: '10:00', endTime: '12:00', capacity: 10 },
@@ -86,7 +91,7 @@ async function main() {
         capacity:   v.capacity,
         isOpen:     true,
       },
-    }).catch(() => {}) // ignorar duplicados si ya existen
+    })
     console.log(`  ✓ Ventana: ${v.startTime}–${v.endTime} (cap: ${v.capacity})`)
   }
 
