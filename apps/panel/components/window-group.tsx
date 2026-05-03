@@ -74,7 +74,8 @@ export function WindowGroup({ window: w, onAction, loading }: Props) {
       </div>
 
       {/* Kanban 3 columns */}
-      <div className="grid grid-cols-3">
+      <div className="overflow-x-auto">
+      <div className="grid grid-cols-3 min-w-[480px]">
         {COLUMNS.map((col, i) => {
           const colOrders = activeOrders.filter((o) => col.statuses.includes(o.status))
           return (
@@ -129,6 +130,7 @@ export function WindowGroup({ window: w, onAction, loading }: Props) {
           )
         })}
       </div>
+      </div>{/* overflow-x-auto */}
     </section>
   )
 }

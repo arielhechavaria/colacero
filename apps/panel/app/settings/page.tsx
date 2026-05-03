@@ -121,9 +121,57 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
     return <p className="text-sm py-8 text-center" style={{ color: 'var(--muted)' }}>Cargando…</p>
   }
 
+  // Catalog URL — same host, port 3001 (or NEXT_PUBLIC_CATALOG_URL if set)
+  const catalogUrl = typeof window !== 'undefined'
+    ? (process.env['NEXT_PUBLIC_CATALOG_URL'] ?? window.location.origin.replace(':3002', ':3001')) + `/${profile.slug}`
+    : `/${profile.slug}`
+
+  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(catalogUrl)}&color=00D4BE&bgcolor=0B0F1A&qzone=1`
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {feedback && <Toast {...feedback} />}
+
+      {/* ── QR del catálogo ── */}
+      <div className="glass rounded-2xl p-5">
+        <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text)' }}>
+          Código QR del catálogo
+        </p>
+        <p className="text-xs mb-4" style={{ color: 'var(--muted)' }}>
+          Compartilo con tus clientes o imprimilo en el local
+        </p>
+        <div className="flex items-start gap-5 flex-wrap">
+          {/* QR image */}
+          <div
+            className="rounded-xl overflow-hidden flex-shrink-0"
+            style={{ background: '#0B0F1A', padding: '8px' }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={qrSrc} alt="QR catálogo" width={180} height={180} />
+          </div>
+          {/* URL + copy */}
+          <div className="flex flex-col gap-3 flex-1 min-w-0 justify-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--muted)' }}>
+                Link del catálogo
+              </p>
+              <p
+                className="text-sm font-mono break-all rounded-lg px-3 py-2"
+                style={{ background: 'var(--surface)', color: 'var(--primary)', border: '1px solid var(--border-glow)' }}
+              >
+                {catalogUrl}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => void navigator.clipboard.writeText(catalogUrl)}
+              className="rounded-xl px-4 py-2 text-sm font-semibold text-white bg-gradient-teal-violet shadow-glow w-fit"
+            >
+              Copiar link
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div className="glass rounded-2xl p-5 flex flex-col gap-4">
         <div>

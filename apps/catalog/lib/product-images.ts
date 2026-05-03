@@ -28,7 +28,7 @@ const KEYWORDS: [string, string][] = [
   ['atun',        'photo-1534482421-64566f976cfa'],
 
   // ── Granos y cereales ────────────────────────────────────────────────────
-  ['arroz',       'photo-1536304993881-ff86e0c9ef30'],
+  ['arroz',       'photo-1586201375761-83865001e31c'],
   ['frijol',      'photo-1551462147-ff29053bfc14'],
   ['lenteja',     'photo-1515543904379-3d757afe72e4'],
   ['garbanzo',    'photo-1515543904379-3d757afe72e4'],
@@ -50,13 +50,13 @@ const KEYWORDS: [string, string][] = [
   ['bizcocho',    'photo-1499636136210-6f4ee915583e'],
 
   // ── Vegetales ────────────────────────────────────────────────────────────
-  ['tomate',      'photo-1546470427-e26264be0b0d'],
+  ['tomate',      'photo-1548247416-ec66f4900b2e'],
   ['cebolla',     'photo-1508747703725-719777637510'],
   ['ajo',         'photo-1540420828642-fca2c5c18abe'],
   ['pimiento',    'photo-1518977822534-7049a61ee0c2'],
   ['zanahoria',   'photo-1447175008436-054170c2e979'],
-  ['papa',        'photo-1518977676405-d7f6aa5e30e2'],
-  ['patata',      'photo-1518977676405-d7f6aa5e30e2'],
+  ['papa',        'photo-1590165482129-1b8b27698780'],
+  ['patata',      'photo-1590165482129-1b8b27698780'],
   ['lechuga',     'photo-1622206151226-18ca2c9ab4a1'],
   ['pepino',      'photo-1604977042946-1eecc30f269e'],
   ['berenjena',   'photo-1615484477778-ca3b77940c25'],
@@ -66,7 +66,7 @@ const KEYWORDS: [string, string][] = [
   ['mango',       'photo-1591073113125-e46713c829ed'],
   ['naranja',     'photo-1580052614034-c55d20bfee3b'],
   ['mandarina',   'photo-1580052614034-c55d20bfee3b'],
-  ['limon',       'photo-1575113533813-fb82562a1614'],
+  ['limon',       'photo-1559181567-c3190ca9959b'],
   ['aguacate',    'photo-1601039641847-7857b994d704'],
   ['guayaba',     'photo-1491553895911-0055eca6402d'],
   ['papaya',      'photo-1617112848923-cc2234396a8d'],
@@ -80,8 +80,8 @@ const KEYWORDS: [string, string][] = [
   ['vinagre',     'photo-1474979266404-7eaacbcd87c5'],
   ['cafe',        'photo-1495474472287-4d71bcdd2085'],
   ['te',          'photo-1544787219-7f47ccb76574'],
-  ['detergente',  'photo-1558618047-3c8c76ca7d13'],
-  ['jabon',       'photo-1558618047-3c8c76ca7d13'],
+  ['detergente',  'photo-1584568694244-14fbdf83bd30'],
+  ['jabon',       'photo-1581833971358-2c8b550f87b3'],
 ]
 
 /** Remove diacritics and lowercase — handles Spanish accents and ñ. */

@@ -25,9 +25,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
-      {/* ── Sidebar 80px glass ───────────────────────────────────────── */}
+      {/* ── Sidebar 80px glass (desktop only) ───────────────────────── */}
       <aside
-        className="fixed left-0 top-0 z-20 flex h-full w-20 flex-col glass border-r-0"
+        className="fixed left-0 top-0 z-20 hidden md:flex h-full w-20 flex-col glass border-r-0"
         style={{ borderRight: '1px solid var(--glass-border)' }}
       >
         {/* Logo mark */}
@@ -65,9 +65,38 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* ── Main content ────────────────────────────────────────────── */}
-      <main className="flex-1 min-h-screen" style={{ marginLeft: '80px' }}>
+      <main className="flex-1 min-h-screen md:ml-20 pb-16 md:pb-0">
         {children}
       </main>
+
+      {/* ── Bottom nav (mobile only) ─────────────────────────────────── */}
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-20 md:hidden glass"
+        style={{ borderTop: '1px solid var(--glass-border)' }}
+      >
+        <div className="flex items-center justify-around px-1 py-1.5">
+          {NAV_ITEMS.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                title={item.label}
+                className="flex flex-col items-center gap-0.5 rounded-xl px-1.5 py-1.5 transition-all min-w-0"
+                style={{
+                  backgroundColor: isActive ? 'var(--primary-dim)' : 'transparent',
+                  color:           isActive ? 'var(--primary)' : 'var(--muted)',
+                }}
+              >
+                <span className="text-base leading-none">{item.icon}</span>
+                <span className="text-[8px] font-semibold leading-none truncate w-full text-center">
+                  {item.label}
+                </span>
+              </Link>
+            )
+          })}
+        </div>
+      </nav>
     </div>
   )
 }
