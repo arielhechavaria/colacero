@@ -50,8 +50,8 @@ export async function cartCheckoutRoutes(app: FastifyInstance) {
     const result = await createOrder(app.prisma, app.redis, customerId, {
       pickupWindowId: req.body.pickupWindowId,
       reservationIds: req.body.reservationIds,
-      customerName:   req.body.customerName,
-      notes:          req.body.notes,
+      ...(req.body.customerName ? { customerName: req.body.customerName } : {}),
+      ...(req.body.notes        ? { notes: req.body.notes }               : {}),
     })
 
     if (!result.ok) {
@@ -62,7 +62,7 @@ export async function cartCheckoutRoutes(app: FastifyInstance) {
     // A1 — Notificar al negocio sobre el nuevo pedido
     if (env.TELEGRAM_NOTIFY_CHAT_ID) {
       const itemsText = result.items
-        .map((i: { name: string; quantity: number; unitLabel: string }) => `  • ${i.name} × ${i.quantity} ${i.unitLabel}`)
+        .map(i => `  • ${i.name} × ${i.quantity}`)
         .join('\n')
       void app.notifQueue.add('business_new_order', {
         type:         'business_new_order',

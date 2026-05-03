@@ -55,7 +55,6 @@ export async function ownerOrderRoutes(app: FastifyInstance) {
           },
           include: {
             customer: { select: { id: true, displayName: true, phone: true, telegramId: true } },
-            notes: true,
             items: {
               include: {
                 product: { select: { id: true, name: true, unitLabel: true } },
