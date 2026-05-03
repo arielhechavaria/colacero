@@ -348,6 +348,134 @@ export async function getTopProducts(
   return res.json() as Promise<TopProduct[]>
 }
 
+// ── Settings ──────────────────────────────────────────────────────────────────
+
+export interface BusinessProfile {
+  id:                 string
+  name:               string
+  slug:               string
+  description:        string | null
+  timezone:           string
+  subscriptionStatus: string
+}
+
+export interface StaffMember {
+  id:        string
+  email:     string
+  role:      'OWNER' | 'STAFF'
+  createdAt: string
+}
+
+export interface CurrentUser {
+  id:         string
+  email:      string
+  role:       string
+  businessId: string
+}
+
+export const TIMEZONES = [
+  { value: 'America/Havana',        label: 'La Habana (Cuba)'      },
+  { value: 'America/New_York',      label: 'Nueva York (ET)'       },
+  { value: 'America/Chicago',       label: 'Chicago (CT)'          },
+  { value: 'America/Mexico_City',   label: 'Ciudad de México'      },
+  { value: 'America/Bogota',        label: 'Bogotá (Colombia)'     },
+  { value: 'America/Lima',          label: 'Lima (Perú)'           },
+  { value: 'America/Caracas',       label: 'Caracas (Venezuela)'   },
+  { value: 'America/La_Paz',        label: 'La Paz (Bolivia)'      },
+  { value: 'America/Guayaquil',     label: 'Guayaquil (Ecuador)'   },
+  { value: 'America/Santiago',      label: 'Santiago (Chile)'      },
+  { value: 'America/Buenos_Aires',  label: 'Buenos Aires'          },
+  { value: 'America/Montevideo',    label: 'Montevideo (Uruguay)'  },
+  { value: 'America/Asuncion',      label: 'Asunción (Paraguay)'   },
+  { value: 'UTC',                   label: 'UTC'                   },
+]
+
+export async function getMe(token: string): Promise<CurrentUser> {
+  const res = await fetch(`${API_BASE}/api/auth/owner/me`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+    cache:   'no-store',
+  })
+  if (!res.ok) throw new Error('fetch_me_failed')
+  return res.json() as Promise<CurrentUser>
+}
+
+export async function getBusinessProfile(token: string): Promise<BusinessProfile> {
+  const res = await fetch(`${API_BASE}/api/owner/settings/business`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+    cache:   'no-store',
+  })
+  if (!res.ok) throw new Error('fetch_business_failed')
+  return res.json() as Promise<BusinessProfile>
+}
+
+export async function updateBusinessProfile(
+  token: string,
+  data:  { name?: string; description?: string | null; timezone?: string },
+): Promise<BusinessProfile> {
+  const res = await fetch(`${API_BASE}/api/owner/settings/business`, {
+    method:  'PATCH',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body:    JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'update_business_failed')
+  }
+  return res.json() as Promise<BusinessProfile>
+}
+
+export async function getStaff(token: string): Promise<StaffMember[]> {
+  const res = await fetch(`${API_BASE}/api/owner/settings/staff`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+    cache:   'no-store',
+  })
+  if (!res.ok) throw new Error('fetch_staff_failed')
+  return res.json() as Promise<StaffMember[]>
+}
+
+export async function createStaff(
+  token: string,
+  data:  { email: string; password: string; role?: 'OWNER' | 'STAFF' },
+): Promise<StaffMember> {
+  const res = await fetch(`${API_BASE}/api/owner/settings/staff`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body:    JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'create_staff_failed')
+  }
+  return res.json() as Promise<StaffMember>
+}
+
+export async function deleteStaff(token: string, userId: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/owner/settings/staff/${userId}`, {
+    method:  'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'delete_staff_failed')
+  }
+}
+
+export async function changePassword(
+  token: string,
+  currentPassword: string,
+  newPassword: string,
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/owner/settings/password`, {
+    method:  'PATCH',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body:    JSON.stringify({ currentPassword, newPassword }),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'change_password_failed')
+  }
+}
+
 // ── Customers / CRM ───────────────────────────────────────────────────────────
 
 export type CustomerSegment = 'all' | 'active' | 'vip'

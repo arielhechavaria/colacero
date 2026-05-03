@@ -13,6 +13,7 @@ import { ownerPickupWindowRoutes }  from './routes/owner/pickup-windows/index.js
 import { ownerAnnouncementRoutes }  from './routes/owner/announcements/index.js'
 import { ownerStatsRoutes }         from './routes/owner/stats/index.js'
 import { ownerCustomerRoutes }      from './routes/owner/customers/index.js'
+import { ownerSettingsRoutes }      from './routes/owner/settings/index.js'
 import { catalogRoutes } from './routes/catalog/index.js'
 import { cartRoutes } from './routes/cart/index.js'
 import { uploadPlugin } from './plugins/upload.js'
@@ -57,6 +58,7 @@ export function buildServer() {
   app.register(ownerAnnouncementRoutes, { prefix: '/api/owner/announcements' })
   app.register(ownerStatsRoutes,        { prefix: '/api/owner/stats' })
   app.register(ownerCustomerRoutes,     { prefix: '/api/owner/customers' })
+  app.register(ownerSettingsRoutes,     { prefix: '/api/owner/settings' })
   app.register(catalogRoutes, { prefix: '/api/catalog' })
   app.register(cartRoutes,    { prefix: '/api/cart' })
 

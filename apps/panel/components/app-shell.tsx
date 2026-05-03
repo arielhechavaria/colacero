@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: '/products',      icon: '📦', label: 'Productos'     },
   { href: '/customers',     icon: '👥', label: 'Clientes'      },
   { href: '/announcements', icon: '📣', label: 'Anuncios'      },
+  { href: '/settings',      icon: '⚙️',  label: 'Configuración' },
 ]
 
 export function AppShell({ children }: { children: React.ReactNode }) {
