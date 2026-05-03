@@ -85,23 +85,10 @@ html {
 
 body {
   background-color: var(--bg);
-  background-image: radial-gradient(
-    ellipse 80% 40% at 50% -5%,
-    rgba(99, 102, 241, 0.07) 0%,
-    transparent 70%
-  );
   color: var(--text);
   font-family: var(--font-inter), 'Inter', sans-serif;
   overscroll-behavior: none;
   min-height: 100vh;
-}
-
-.dark body {
-  background-image: radial-gradient(
-    ellipse 80% 40% at 50% -5%,
-    rgba(45, 212, 191, 0.06) 0%,
-    transparent 70%
-  );
 }
 
 /* Prevent tap highlight on mobile */
@@ -122,54 +109,34 @@ body {
 /* ── Components ──────────────────────────────────────────────────────────── */
 @layer components {
 
-  .glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow);
-  }
-
+  /* Card — reemplaza glass: fondo sólido, sin blur */
+  .glass,
   .card {
     background: var(--card);
     border: 1px solid var(--border);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-sm);
   }
 
+  /* Botón primario — indigo sólido, sin gradiente */
   .bg-gradient-teal-violet {
-    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-  }
-  .dark .bg-gradient-teal-violet {
-    background: linear-gradient(135deg, #818CF8 0%, #A78BFA 100%);
+    background-color: var(--primary);
   }
 
+  /* Texto primario — indigo sólido, sin clip */
   .text-gradient {
-    background: linear-gradient(135deg, #6366F1, #8B5CF6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .dark .text-gradient {
-    background: linear-gradient(135deg, #818CF8, #A78BFA);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--primary);
+    background: none;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: unset;
+    background-clip: unset;
   }
 
+  /* Sombra glow → sombra sutil */
   .shadow-glow {
-    box-shadow: var(--shadow-glow);
+    box-shadow: var(--shadow-sm);
   }
 }
 
-/* ── Animations ──────────────────────────────────────────────────────────── */
-@keyframes float {
-  0%, 100% { transform: translateY(0);    }
-  50%       { transform: translateY(-20px); }
-}
-.animate-float { animation: float 6s ease-in-out infinite; }
-
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
-  50%       { box-shadow: 0 0 50px rgba(99, 102, 241, 0.7), 0 0 70px rgba(139, 92, 246, 0.4); }
-}
-.animate-glow { animation: glow-pulse 2.5s ease-in-out infinite; }
+/* Animaciones eliminadas en V4 (minimalismo) */
+.animate-float { }
+.animate-glow  { }
