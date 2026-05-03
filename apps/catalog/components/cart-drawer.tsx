@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useParams, usePathname } from 'next/navigation'
 import { useCartContext } from '../context/cart-context'
 import { reserveStock } from '../lib/client-api'
 
 export function CartDrawer() {
   const { items, total, itemCount, remove, clear } = useCartContext()
+  const pathname = usePathname()
   const [open, setOpen]       = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState<string | null>(null)
@@ -39,6 +40,11 @@ export function CartDrawer() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // No mostrar en checkout/confirmation
+  if (pathname.includes('/checkout') || pathname.includes('/confirmation')) {
+    return null
   }
 
   // No mostrar FAB si el carrito está vacío
