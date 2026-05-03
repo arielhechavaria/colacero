@@ -11,6 +11,7 @@ import { productRoutes } from './routes/owner/products/index.js'
 import { ownerOrderRoutes }        from './routes/owner/orders/index.js'
 import { ownerPickupWindowRoutes }  from './routes/owner/pickup-windows/index.js'
 import { ownerAnnouncementRoutes }  from './routes/owner/announcements/index.js'
+import { ownerStatsRoutes }         from './routes/owner/stats/index.js'
 import { catalogRoutes } from './routes/catalog/index.js'
 import { cartRoutes } from './routes/cart/index.js'
 import { uploadPlugin } from './plugins/upload.js'
@@ -53,6 +54,7 @@ export function buildServer() {
   app.register(ownerOrderRoutes,        { prefix: '/api/owner/orders' })
   app.register(ownerPickupWindowRoutes, { prefix: '/api/owner/pickup-windows' })
   app.register(ownerAnnouncementRoutes, { prefix: '/api/owner/announcements' })
+  app.register(ownerStatsRoutes,        { prefix: '/api/owner/stats' })
   app.register(catalogRoutes, { prefix: '/api/catalog' })
   app.register(cartRoutes,    { prefix: '/api/cart' })
 

@@ -300,6 +300,54 @@ export async function adjustInventory(
   return res.json() as Promise<Inventory>
 }
 
+// ── Stats / Dashboard ─────────────────────────────────────────────────────────
+
+export type StatsPeriod = 'today' | 'week' | 'month'
+
+export interface StatsSummary {
+  period:          StatsPeriod
+  periodStart:     string
+  revenue:         number
+  ordersCount:     number
+  deliveredCount:  number
+  cancelledCount:  number
+  avgTicket:       number
+  fulfillmentRate: number
+}
+
+export interface TopProduct {
+  productId: string
+  name:      string
+  unitLabel: string
+  totalQty:  number
+  totalRev:  number
+}
+
+export async function getStatsSummary(
+  token: string,
+  period: StatsPeriod = 'today',
+): Promise<StatsSummary> {
+  const res = await fetch(`${API_BASE}/api/owner/stats/summary?period=${period}`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+    cache:   'no-store',
+  })
+  if (!res.ok) throw new Error('fetch_stats_failed')
+  return res.json() as Promise<StatsSummary>
+}
+
+export async function getTopProducts(
+  token: string,
+  period: StatsPeriod = 'today',
+  limit = 5,
+): Promise<TopProduct[]> {
+  const res = await fetch(`${API_BASE}/api/owner/stats/top-products?period=${period}&limit=${limit}`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+    cache:   'no-store',
+  })
+  if (!res.ok) throw new Error('fetch_top_products_failed')
+  return res.json() as Promise<TopProduct[]>
+}
+
 // ── Announcements ─────────────────────────────────────────────────────────────
 
 export async function publishAnnouncement(

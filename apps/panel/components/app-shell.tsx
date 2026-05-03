@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ThemeToggle } from './theme-toggle'
 
 const NAV_ITEMS = [
+  { href: '/dashboard',     icon: '📊', label: 'Dashboard'     },
   { href: '/orders',        icon: '📋', label: 'Pedidos'       },
   { href: '/queue',         icon: '🍳', label: 'Cola de prep.' },
   { href: '/windows',       icon: '🕐', label: 'Ventanas'      },
