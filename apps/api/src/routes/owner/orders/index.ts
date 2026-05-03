@@ -55,6 +55,7 @@ export async function ownerOrderRoutes(app: FastifyInstance) {
           },
           include: {
             customer: { select: { id: true, displayName: true, phone: true, telegramId: true } },
+            notes: true,
             items: {
               include: {
                 product: { select: { id: true, name: true, unitLabel: true } },
@@ -190,6 +191,7 @@ function serializeOrder(order: {
   status:      OrderStatus
   subtotal:    { toNumber: () => number }
   confirmedAt: Date | null
+  notes:       string | null
   customer:    { id: string; displayName: string | null; phone: string | null; telegramId: string | null }
   items: Array<{
     id:                string
@@ -205,6 +207,7 @@ function serializeOrder(order: {
     status:      order.status,
     subtotal:    order.subtotal.toNumber(),
     confirmedAt: order.confirmedAt?.toISOString() ?? null,
+    notes:       order.notes,
     customer: {
       id:           order.customer.id,
       displayName:  order.customer.displayName,

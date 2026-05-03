@@ -30,6 +30,7 @@ export interface Order {
   status:      OrderStatus
   subtotal:    number
   confirmedAt: string | null
+  notes:       string | null
   customer: {
     id:          string
     displayName: string | null

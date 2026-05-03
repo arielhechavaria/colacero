@@ -6,6 +6,7 @@ interface CheckoutBody {
   pickupWindowId: string
   reservationIds: string[]
   customerName?:  string
+  notes?:         string
 }
 
 export async function cartCheckoutRoutes(app: FastifyInstance) {
@@ -26,6 +27,7 @@ export async function cartCheckoutRoutes(app: FastifyInstance) {
           pickupWindowId: { type: 'string' },
           reservationIds: { type: 'array', items: { type: 'string' }, minItems: 1 },
           customerName:   { type: 'string' },
+          notes:          { type: 'string', maxLength: 500 },
         },
       },
       response: {
@@ -45,7 +47,12 @@ export async function cartCheckoutRoutes(app: FastifyInstance) {
     },
   }, async (req, reply) => {
     const customerId = req.user.sub
-    const result = await createOrder(app.prisma, app.redis, customerId, req.body)
+    const result = await createOrder(app.prisma, app.redis, customerId, {
+      pickupWindowId: req.body.pickupWindowId,
+      reservationIds: req.body.reservationIds,
+      customerName:   req.body.customerName,
+      notes:          req.body.notes,
+    })
 
     if (!result.ok) {
       const status = result.reason === 'window_not_found' ? 404 : 409
@@ -62,7 +69,7 @@ export async function cartCheckoutRoutes(app: FastifyInstance) {
         chatId:       env.TELEGRAM_NOTIFY_CHAT_ID,
         pickupCode:   result.pickupCode ?? '—',
         customerName: req.body.customerName ?? 'Cliente',
-        itemsText,
+        itemsText:    req.body.notes ? `${itemsText}\n📝 ${req.body.notes}` : itemsText,
         windowTime:   `${result.pickupWindow.startTime} – ${result.pickupWindow.endTime}`,
         total:        `$${Number(result.subtotal).toFixed(2)}`,
       })

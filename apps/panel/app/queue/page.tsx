@@ -211,6 +211,16 @@ export default function QueuePage() {
                   ))}
                 </ul>
 
+                {/* Notas del cliente */}
+                {order.notes && (
+                  <p
+                    className="mb-3 rounded-lg px-3 py-2 text-sm leading-snug"
+                    style={{ backgroundColor: 'rgba(255,176,32,0.08)', color: 'var(--warning)', borderLeft: '2px solid var(--warning)' }}
+                  >
+                    📝 {order.notes}
+                  </p>
+                )}
+
                 {/* Actions */}
                 <div className="flex gap-2">
                   {order.status === 'CONFIRMED' && (

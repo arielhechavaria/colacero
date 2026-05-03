@@ -3,12 +3,14 @@
 import type { PickupWindow } from '../lib/client-api'
 
 interface Props {
-  windows:    PickupWindow[]
-  selected:   string | null
-  onSelect:   (id: string) => void
-  onConfirm:  () => Promise<void>
-  loading:    boolean
-  error?:     string | null
+  windows:       PickupWindow[]
+  selected:      string | null
+  onSelect:      (id: string) => void
+  onConfirm:     () => Promise<void>
+  loading:       boolean
+  error?:        string | null
+  notes:         string
+  onNotesChange: (v: string) => void
 }
 
 function formatDate(iso: string): string {
@@ -20,7 +22,7 @@ function formatDate(iso: string): string {
   })
 }
 
-export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, loading, error }: Props) {
+export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, loading, error, notes, onNotesChange }: Props) {
   if (windows.length === 0) {
     return (
       <p className="py-8 text-center" style={{ color: 'var(--muted)' }}>
@@ -70,6 +72,26 @@ export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, l
             </span>
           </label>
         ))}
+      </div>
+
+      {/* Notas opcionales */}
+      <div>
+        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
+          ¿Alguna indicación? <span className="normal-case font-normal">(opcional)</span>
+        </label>
+        <textarea
+          value={notes}
+          onChange={(e) => onNotesChange(e.target.value)}
+          placeholder="Sin cebolla, alérgico a…"
+          rows={2}
+          maxLength={500}
+          className="w-full resize-none rounded-xl border px-3 py-2.5 text-sm outline-none"
+          style={{
+            backgroundColor: 'var(--surface)',
+            borderColor:     'var(--border)',
+            color:           'var(--text)',
+          }}
+        />
       </div>
 
       {error != null && (

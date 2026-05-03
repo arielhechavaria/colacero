@@ -60,6 +60,16 @@ export function OrderCard({ order, onAction, loading }: Props) {
         ${order.subtotal.toFixed(2)}
       </p>
 
+      {/* Notas del cliente */}
+      {order.notes && (
+        <p
+          className="mb-2 rounded-lg px-2 py-1.5 text-[11px] leading-snug"
+          style={{ backgroundColor: 'rgba(255,176,32,0.08)', color: 'var(--warning)', borderLeft: '2px solid var(--warning)' }}
+        >
+          📝 {order.notes}
+        </p>
+      )}
+
       {/* Actions */}
       {!isDone && (
         <div className="flex gap-1.5">

@@ -97,6 +97,7 @@ export interface CheckoutInput {
   pickupWindowId: string
   reservationIds: string[]
   customerName?:  string
+  notes?:         string
 }
 
 export interface CheckoutResult {

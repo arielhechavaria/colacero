@@ -10,6 +10,7 @@ export interface CheckoutInput {
   pickupWindowId: string
   reservationIds: string[]
   customerName?:  string
+  notes?:         string
 }
 
 export interface OrderResult {
@@ -65,7 +66,7 @@ export async function createOrder(
   customerId: string,
   input:      CheckoutInput,
 ): Promise<CheckoutResult> {
-  const { pickupWindowId, reservationIds, customerName } = input
+  const { pickupWindowId, reservationIds, customerName, notes } = input
 
   // 1. Cargar todas las reservas desde Redis
   const rawValues = await Promise.all(
@@ -137,6 +138,7 @@ export async function createOrder(
         status:      'CONFIRMED',
         subtotal,
         pickupCode,
+        notes:       notes?.trim() || null,
         confirmedAt: new Date(),
         items: {
           create: [...itemMap.entries()].map(([productId, item]) => ({

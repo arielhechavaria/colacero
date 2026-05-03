@@ -30,6 +30,7 @@ export default function CheckoutPage() {
   const [windows, setWindows]             = useState<PickupWindow[]>([])
   const [selectedWindow, setSelectedWindow] = useState<string | null>(null)
   const [reservationIds, setReservationIds] = useState<string[]>([])
+  const [notes, setNotes]                 = useState('')
 
   // Leer reservationIds guardados por el drawer
   useEffect(() => {
@@ -129,7 +130,8 @@ export default function CheckoutPage() {
         {
           pickupWindowId: selectedWindow,
           reservationIds,
-          ...(name ? { customerName: name } : {}),
+          ...(name        ? { customerName: name }        : {}),
+          ...(notes.trim() ? { notes: notes.trim() }      : {}),
         },
         token,
       )
@@ -264,6 +266,8 @@ export default function CheckoutPage() {
               onConfirm={handleConfirm}
               loading={loading}
               error={error}
+              notes={notes}
+              onNotesChange={setNotes}
             />
           )}
         </div>
