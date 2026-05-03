@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import Link from 'next/link'
 import { getOrder, type OrderDetail } from '../../../../lib/client-api'
 
 function formatDate(iso: string): string {
@@ -137,6 +138,14 @@ export default function ConfirmationPage() {
           <p className="mt-4 text-xs" style={{ color: 'var(--muted)' }}>
             Mostrá este código cuando vayas a recoger tu pedido
           </p>
+          {order.pickupCode != null && (
+            <Link
+              href={`/${slug}/track/${order.pickupCode}`}
+              className="mt-3 inline-block text-xs font-semibold text-gradient underline underline-offset-2"
+            >
+              Ver estado del pedido en tiempo real →
+            </Link>
+          )}
         </section>
 
         {/* Pickup window */}

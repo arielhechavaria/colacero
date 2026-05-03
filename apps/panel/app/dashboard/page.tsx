@@ -5,9 +5,15 @@ import { useRouter } from 'next/navigation'
 import {
   getStatsSummary,
   getTopProducts,
+  getCoPurchases,
+  getWeeklyTrends,
+  getStockAlerts,
   type StatsPeriod,
   type StatsSummary,
   type TopProduct,
+  type CoPurchasePair,
+  type WeeklyDay,
+  type StockAlert,
 } from '../../lib/api'
 
 // ── Period selector ───────────────────────────────────────────────────────────
@@ -135,16 +141,150 @@ function TopProductsList({ items }: { items: TopProduct[] }) {
   )
 }
 
+// ── Co-purchases ─────────────────────────────────────────────────────────────
+
+function CoPurchasesCard({ pairs }: { pairs: CoPurchasePair[] }) {
+  if (pairs.length === 0) return null
+
+  const max = pairs[0]?.count ?? 1
+
+  return (
+    <div className="glass rounded-2xl p-5">
+      <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text)' }}>
+        Combos frecuentes
+      </p>
+      <p className="text-xs mb-4" style={{ color: 'var(--muted)' }}>
+        Productos que se piden juntos — últimos 28 días
+      </p>
+      <ul className="flex flex-col gap-3">
+        {pairs.map((pair, i) => {
+          const pct = max > 0 ? (pair.count / max) * 100 : 0
+          return (
+            <li key={i} className="flex flex-col gap-1">
+              <div className="flex items-center justify-between">
+                <span className="text-sm truncate" style={{ color: 'var(--text)' }}>
+                  {pair.nameA}
+                  <span className="mx-1.5" style={{ color: 'var(--muted)' }}>+</span>
+                  {pair.nameB}
+                </span>
+                <span className="ml-3 flex-shrink-0 text-xs font-mono font-bold text-gradient">
+                  {pair.count}×
+                </span>
+              </div>
+              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--surface)' }}>
+                <div
+                  className="h-full rounded-full bg-gradient-teal-violet transition-all duration-700"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
+}
+
+// ── Weekly chart ──────────────────────────────────────────────────────────────
+
+function WeeklyChart({ days }: { days: WeeklyDay[] }) {
+  const maxOrders = Math.max(...days.map((d) => d.orders), 1)
+
+  return (
+    <div className="glass rounded-2xl p-5">
+      <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text)' }}>
+        Pedidos por día de la semana
+      </p>
+      <p className="text-xs mb-5" style={{ color: 'var(--muted)' }}>
+        Últimas 4 semanas
+      </p>
+      <div className="flex items-end justify-between gap-2 h-28">
+        {days.map((day) => {
+          const pct = (day.orders / maxOrders) * 100
+          return (
+            <div key={day.day} className="flex flex-1 flex-col items-center gap-1">
+              <span
+                className="text-[10px] font-mono font-semibold"
+                style={{ color: day.orders > 0 ? 'var(--primary)' : 'transparent' }}
+              >
+                {day.orders}
+              </span>
+              <div
+                className="w-full rounded-t-lg bg-gradient-teal-violet transition-all duration-700"
+                style={{ height: `${Math.max(pct, day.orders > 0 ? 5 : 0)}%` }}
+              />
+              <span className="text-[10px] font-semibold" style={{ color: 'var(--muted)' }}>
+                {day.label}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ── Stock alerts ──────────────────────────────────────────────────────────────
+
+function StockAlertsList({ alerts }: { alerts: StockAlert[] }) {
+  if (alerts.length === 0) {
+    return (
+      <div className="glass rounded-2xl p-5 flex items-center gap-3">
+        <span className="text-xl">✅</span>
+        <p className="text-sm font-semibold" style={{ color: 'var(--success)' }}>
+          Todo el stock en orden
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="glass rounded-2xl p-5">
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+          Alertas de stock
+        </p>
+        <span
+          className="text-xs font-semibold px-2 py-0.5 rounded-full"
+          style={{ background: 'rgba(255,61,85,0.12)', color: 'var(--error)' }}
+        >
+          {alerts.length} producto{alerts.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+      <ul className="flex flex-col gap-2">
+        {alerts.map((a) => (
+          <li key={a.productId} className="flex items-center justify-between text-sm">
+            <span style={{ color: 'var(--text)' }}>{a.name}</span>
+            <span
+              className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ml-3"
+              style={
+                a.status === 'out'
+                  ? { background: 'rgba(255,61,85,0.12)',   color: 'var(--error)'   }
+                  : { background: 'rgba(255,176,32,0.12)', color: 'var(--warning)' }
+              }
+            >
+              {a.status === 'out' ? 'Sin stock' : `${a.quantityAvailable} restantes`}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
   const router = useRouter()
 
-  const [period,   setPeriod]   = useState<StatsPeriod>('today')
-  const [summary,  setSummary]  = useState<StatsSummary | null>(null)
-  const [topProds, setTopProds] = useState<TopProduct[]>([])
-  const [loading,  setLoading]  = useState(true)
-  const [error,    setError]    = useState<string | null>(null)
+  const [period,     setPeriod]     = useState<StatsPeriod>('today')
+  const [summary,    setSummary]    = useState<StatsSummary | null>(null)
+  const [topProds,   setTopProds]   = useState<TopProduct[]>([])
+  const [coPurchases, setCoPurchases] = useState<CoPurchasePair[]>([])
+  const [weeklyDays,  setWeeklyDays]  = useState<WeeklyDay[]>([])
+  const [stockAlerts, setStockAlerts] = useState<StockAlert[]>([])
+  const [loading,    setLoading]    = useState(true)
+  const [error,      setError]      = useState<string | null>(null)
 
   const tokenRef = useRef<string | null>(null)
 
@@ -152,12 +292,18 @@ export default function DashboardPage() {
     setLoading(true)
     setError(null)
     try {
-      const [s, t] = await Promise.all([
+      const [s, t, co, wk, sa] = await Promise.all([
         getStatsSummary(tok, p),
         getTopProducts(tok, p, 5),
+        getCoPurchases(tok),
+        getWeeklyTrends(tok),
+        getStockAlerts(tok),
       ])
       setSummary(s)
       setTopProds(t)
+      setCoPurchases(co)
+      setWeeklyDays(wk)
+      setStockAlerts(sa)
     } catch {
       setError('Error al cargar estadísticas')
     } finally {
@@ -266,6 +412,21 @@ export default function DashboardPage() {
 
             {/* Top products */}
             <TopProductsList items={topProds} />
+
+            {/* ── Inteligencia — independiente del período ── */}
+            <div className="mt-2">
+              <p
+                className="text-xs font-semibold uppercase tracking-widest mb-3"
+                style={{ color: 'var(--muted)' }}
+              >
+                Inteligencia de negocio
+              </p>
+              <div className="flex flex-col gap-4">
+                <StockAlertsList alerts={stockAlerts} />
+                <WeeklyChart     days={weeklyDays}    />
+                <CoPurchasesCard pairs={coPurchases}  />
+              </div>
+            </div>
           </>
         ) : null}
       </div>

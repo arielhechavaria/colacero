@@ -140,6 +140,164 @@ export async function ownerStatsRoutes(app: FastifyInstance) {
       })),
     )
   })
+
+  // ── GET /api/owner/stats/copurchases ─────────────────────────────────────
+  // Pares de productos que se piden juntos con más frecuencia (últimos 28 días).
+  app.get('/copurchases', {
+    onRequest: [app.authenticate],
+    schema: {
+      tags:     ['owner-stats'],
+      summary:  'Combos de productos pedidos juntos con frecuencia',
+      security: [{ bearerAuth: [] }],
+    },
+  }, async (req, reply) => {
+    const { businessId } = req.user
+    if (!businessId) return reply.status(403).send({ error: 'forbidden' })
+
+    const since = new Date()
+    since.setDate(since.getDate() - 28)
+
+    const billableStatuses: BillableStatus[] = [...BILLABLE]
+
+    const orders = await app.prisma.order.findMany({
+      where: {
+        businessId,
+        status:      { in: billableStatuses },
+        confirmedAt: { gte: since },
+      },
+      select: {
+        items: {
+          select: {
+            productId: true,
+            product:   { select: { name: true } },
+          },
+        },
+      },
+    })
+
+    // Count co-occurrence of every product pair across orders
+    const pairCount = new Map<string, { nameA: string; nameB: string; count: number }>()
+
+    for (const order of orders) {
+      const items = order.items
+      if (items.length < 2) continue
+      for (let i = 0; i < items.length; i++) {
+        for (let j = i + 1; j < items.length; j++) {
+          const itemA = items[i]!
+          const itemB = items[j]!
+          const [a, b] = itemA.productId < itemB.productId
+            ? [itemA, itemB]
+            : [itemB, itemA]
+          const key = `${a.productId}:${b.productId}`
+          const entry = pairCount.get(key)
+          if (entry) {
+            entry.count++
+          } else {
+            pairCount.set(key, { nameA: a.product.name, nameB: b.product.name, count: 1 })
+          }
+        }
+      }
+    }
+
+    const top = Array.from(pairCount.values())
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+
+    return reply.send(top)
+  })
+
+  // ── GET /api/owner/stats/weekly ───────────────────────────────────────────
+  // Pedidos e ingresos por día de la semana (últimas 4 semanas).
+  app.get('/weekly', {
+    onRequest: [app.authenticate],
+    schema: {
+      tags:     ['owner-stats'],
+      summary:  'Distribución de pedidos por día de la semana (últimas 4 semanas)',
+      security: [{ bearerAuth: [] }],
+    },
+  }, async (req, reply) => {
+    const { businessId } = req.user
+    if (!businessId) return reply.status(403).send({ error: 'forbidden' })
+
+    const since = new Date()
+    since.setDate(since.getDate() - 28)
+
+    const billableStatuses: BillableStatus[] = [...BILLABLE]
+
+    const orders = await app.prisma.order.findMany({
+      where: {
+        businessId,
+        status:      { in: billableStatuses },
+        confirmedAt: { gte: since },
+      },
+      select: { confirmedAt: true, subtotal: true },
+    })
+
+    const DAY_LABELS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+    const byDay = Array.from({ length: 7 }, (_, i) => ({
+      day:     i,
+      label:   DAY_LABELS[i]!,
+      orders:  0,
+      revenue: 0,
+    }))
+
+    for (const order of orders) {
+      if (!order.confirmedAt) continue
+      const dow = order.confirmedAt.getDay()
+      byDay[dow]!.orders++
+      byDay[dow]!.revenue += order.subtotal.toNumber()
+    }
+
+    // Round revenue
+    for (const d of byDay) {
+      d.revenue = Math.round(d.revenue * 100) / 100
+    }
+
+    // Reorder Mon-Sun (index 1-6, then 0)
+    return reply.send([...byDay.slice(1), byDay[0]])
+  })
+
+  // ── GET /api/owner/stats/stock-alerts ────────────────────────────────────
+  // Productos activos con stock igual o por debajo del umbral mínimo.
+  app.get('/stock-alerts', {
+    onRequest: [app.authenticate],
+    schema: {
+      tags:     ['owner-stats'],
+      summary:  'Productos con stock bajo o agotado',
+      security: [{ bearerAuth: [] }],
+    },
+  }, async (req, reply) => {
+    const { businessId } = req.user
+    if (!businessId) return reply.status(403).send({ error: 'forbidden' })
+
+    const products = await app.prisma.product.findMany({
+      where: { businessId, isActive: true },
+      select: {
+        id:   true,
+        name: true,
+        inventory: {
+          select: { quantityAvailable: true, lowStockThreshold: true },
+        },
+      },
+    })
+
+    const alerts = products
+      .filter(
+        (p) =>
+          p.inventory != null &&
+          p.inventory.quantityAvailable <= p.inventory.lowStockThreshold,
+      )
+      .map((p) => ({
+        productId:         p.id,
+        name:              p.name,
+        quantityAvailable: p.inventory!.quantityAvailable,
+        lowStockThreshold: p.inventory!.lowStockThreshold,
+        status:            p.inventory!.quantityAvailable === 0 ? 'out' : 'low',
+      }))
+      .sort((a, b) => a.quantityAvailable - b.quantityAvailable)
+
+    return reply.send(alerts)
+  })
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

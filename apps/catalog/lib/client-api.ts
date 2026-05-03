@@ -158,3 +158,36 @@ export async function getOrder(orderId: string, token: string): Promise<OrderDet
   }
   return res.json() as Promise<OrderDetail>
 }
+
+// ── Public order tracking ─────────────────────────────────────────────────────
+
+export interface TrackingItem {
+  id:        string
+  name:      string
+  unitLabel: string
+  quantity:  number
+  subtotal:  number
+}
+
+export interface TrackingOrder {
+  id:          string
+  pickupCode:  string | null
+  status:      string
+  subtotal:    number
+  confirmedAt: string | null
+  notes:       string | null
+  business:    { id: string; name: string; slug: string }
+  pickupWindow: { id: string; date: string; startTime: string; endTime: string } | null
+  items:        TrackingItem[]
+}
+
+export async function getOrderByCode(slug: string, code: string): Promise<TrackingOrder> {
+  const res = await fetch(`${API_BASE}/api/catalog/${slug}/order/${code}`, {
+    cache: 'no-store',
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error: string }
+    throw new Error(body.error ?? 'order_not_found')
+  }
+  return res.json() as Promise<TrackingOrder>
+}

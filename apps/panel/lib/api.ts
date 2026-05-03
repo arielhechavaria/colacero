@@ -349,6 +349,54 @@ export async function getTopProducts(
   return res.json() as Promise<TopProduct[]>
 }
 
+export interface CoPurchasePair {
+  nameA:  string
+  nameB:  string
+  count:  number
+}
+
+export interface WeeklyDay {
+  day:     number
+  label:   string
+  orders:  number
+  revenue: number
+}
+
+export interface StockAlert {
+  productId:         string
+  name:              string
+  quantityAvailable: number
+  lowStockThreshold: number
+  status:            'out' | 'low'
+}
+
+export async function getCoPurchases(token: string): Promise<CoPurchasePair[]> {
+  const res = await fetch(`${API_BASE}/api/owner/stats/copurchases`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+    cache:   'no-store',
+  })
+  if (!res.ok) throw new Error('fetch_copurchases_failed')
+  return res.json() as Promise<CoPurchasePair[]>
+}
+
+export async function getWeeklyTrends(token: string): Promise<WeeklyDay[]> {
+  const res = await fetch(`${API_BASE}/api/owner/stats/weekly`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+    cache:   'no-store',
+  })
+  if (!res.ok) throw new Error('fetch_weekly_failed')
+  return res.json() as Promise<WeeklyDay[]>
+}
+
+export async function getStockAlerts(token: string): Promise<StockAlert[]> {
+  const res = await fetch(`${API_BASE}/api/owner/stats/stock-alerts`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+    cache:   'no-store',
+  })
+  if (!res.ok) throw new Error('fetch_stock_alerts_failed')
+  return res.json() as Promise<StockAlert[]>
+}
+
 // ── Settings ──────────────────────────────────────────────────────────────────
 
 export interface BusinessProfile {
