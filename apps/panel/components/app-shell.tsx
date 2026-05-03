@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: '/orders',        icon: '📋', label: 'Pedidos'       },
   { href: '/queue',         icon: '🍳', label: 'Cola de prep.' },
   { href: '/windows',       icon: '🕐', label: 'Ventanas'      },
+  { href: '/products',      icon: '📦', label: 'Productos'     },
   { href: '/announcements', icon: '📣', label: 'Anuncios'      },
 ]
 

@@ -179,14 +179,40 @@ export async function generateTomorrow(
 
 // ── Products ──────────────────────────────────────────────────────────────────
 
-export interface Product {
-  id:        string
-  name:      string
-  unitPrice: number
-  unitLabel: string
-  isActive:  boolean
-  inventory?: { quantityAvailable: number }
+export interface Inventory {
+  productId:          string
+  quantityAvailable:  number
+  quantityReserved:   number
+  lowStockThreshold:  number
+  version:            number
+  updatedAt:          string
 }
+
+export interface Product {
+  id:          string
+  sku:         string | null
+  name:        string
+  description: string | null
+  unitPrice:   number
+  unitLabel:   string
+  imageUrl:    string | null
+  isActive:    boolean
+  createdAt:   string
+  inventory:   Inventory | null
+}
+
+export interface CreateProductInput {
+  name:               string
+  sku?:               string
+  description?:       string
+  unitPrice:          number
+  unitLabel?:         string
+  imageUrl?:          string
+  initialQuantity?:   number
+  lowStockThreshold?: number
+}
+
+export type UpdateProductInput = Partial<Omit<CreateProductInput, 'initialQuantity'> & { isActive: boolean }>
 
 export async function getProducts(token: string): Promise<Product[]> {
   const res = await fetch(`${API_BASE}/api/owner/products`, {
@@ -196,6 +222,82 @@ export async function getProducts(token: string): Promise<Product[]> {
   if (!res.ok) throw new Error('fetch_products_failed')
   const data = await res.json() as { products: Product[] } | Product[]
   return Array.isArray(data) ? data : data.products
+}
+
+export async function createProduct(
+  token: string,
+  input: CreateProductInput,
+): Promise<Product> {
+  const res = await fetch(`${API_BASE}/api/owner/products`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body:    JSON.stringify(input),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'create_product_failed')
+  }
+  return res.json() as Promise<Product>
+}
+
+export async function updateProduct(
+  token: string,
+  productId: string,
+  input: UpdateProductInput,
+): Promise<Product> {
+  const res = await fetch(`${API_BASE}/api/owner/products/${productId}`, {
+    method:  'PATCH',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body:    JSON.stringify(input),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'update_product_failed')
+  }
+  return res.json() as Promise<Product>
+}
+
+export async function deleteProduct(token: string, productId: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/owner/products/${productId}`, {
+    method:  'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'delete_product_failed')
+  }
+}
+
+export async function getInventory(token: string, productId: string): Promise<Inventory> {
+  const res = await fetch(`${API_BASE}/api/owner/products/${productId}/inventory`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+    cache:   'no-store',
+  })
+  if (!res.ok) throw new Error('fetch_inventory_failed')
+  return res.json() as Promise<Inventory>
+}
+
+export async function adjustInventory(
+  token: string,
+  productId: string,
+  version: number,
+  quantityAvailable: number,
+  lowStockThreshold?: number,
+): Promise<Inventory> {
+  const res = await fetch(`${API_BASE}/api/owner/products/${productId}/inventory`, {
+    method:  'PATCH',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body:    JSON.stringify({
+      version,
+      quantityAvailable,
+      ...(lowStockThreshold !== undefined ? { lowStockThreshold } : {}),
+    }),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'adjust_inventory_failed')
+  }
+  return res.json() as Promise<Inventory>
 }
 
 // ── Announcements ─────────────────────────────────────────────────────────────
