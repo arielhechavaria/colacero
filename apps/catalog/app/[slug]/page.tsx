@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { getCatalog, type CatalogProduct } from '../../lib/api'
+import { getProductFallbackImage } from '../../lib/product-images'
 import { AddToCartButton } from '../../components/add-to-cart-button'
 import { Logo } from '../../components/logo'
 import { ThemeToggle } from '../../components/theme-toggle'
@@ -47,7 +48,8 @@ function StockLabel({ inventory }: { inventory: CatalogProduct['inventory'] }) {
 }
 
 function ProductRow({ product }: { product: CatalogProduct }) {
-  const outOfStock = product.inventory?.quantityAvailable === 0
+  const outOfStock  = product.inventory?.quantityAvailable === 0
+  const imageSrc    = product.imageUrl ?? getProductFallbackImage(product.name)
 
   return (
     <article
@@ -58,9 +60,9 @@ function ProductRow({ product }: { product: CatalogProduct }) {
         className="relative h-[88px] w-[88px] flex-shrink-0 overflow-hidden rounded-xl"
         style={{ backgroundColor: 'var(--surface)' }}
       >
-        {product.imageUrl != null ? (
+        {imageSrc != null ? (
           <Image
-            src={product.imageUrl}
+            src={imageSrc}
             alt={product.name}
             fill
             sizes="88px"

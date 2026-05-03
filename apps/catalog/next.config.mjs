@@ -15,6 +15,11 @@ const nextConfig = {
         hostname: process.env.API_HOSTNAME ?? 'localhost',
         pathname: '/uploads/**',
       },
+      {
+        // Unsplash CDN — used for product image fallbacks
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
     ],
   },
 }
