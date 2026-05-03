@@ -26,7 +26,10 @@ export async function requestOtpRoute(app: FastifyInstance) {
       response: {
         200: {
           type:       'object',
-          properties: { ok: { type: 'boolean' } },
+          properties: {
+            ok:       { type: 'boolean' },
+            _devCode: { type: 'string' },  // solo presente en WHATSAPP_PROVIDER=mock
+          },
         },
         422: {
           type:       'object',
