@@ -29,8 +29,7 @@ export function WindowGroup({ window: w, onAction, loading }: Props) {
 
   return (
     <section
-      className="rounded-2xl overflow-hidden border"
-      style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
+      className="glass rounded-2xl overflow-hidden"
     >
       {/* Window header */}
       <div
