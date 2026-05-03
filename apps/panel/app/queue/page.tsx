@@ -86,20 +86,14 @@ export default function QueuePage() {
   }
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
-      {/* Header */}
+    <main className="min-h-screen">
       <header
-        className="sticky top-0 z-10 border-b px-6 py-4"
-        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+        className="sticky top-0 z-10 glass px-6 py-4"
+        style={{ borderBottom: '1px solid var(--glass-border)' }}
       >
         <div className="flex items-center justify-between">
           <div>
-            <h1
-              className="text-lg font-bold"
-              style={{ fontFamily: 'var(--font-display)', color: 'var(--text)' }}
-            >
-              Cola de preparación
-            </h1>
+            <h1 className="text-lg font-bold text-gradient">Cola de preparación</h1>
             <p className="text-sm" style={{ color: 'var(--muted)' }}>
               {queue.length === 0
                 ? 'Todo al día ✓'
@@ -108,18 +102,14 @@ export default function QueuePage() {
           </div>
           <div className="flex items-center gap-3">
             {lastUpdated && (
-              <span className="text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'var(--muted)' }}>
+              <span className="text-xs font-mono" style={{ color: 'var(--muted)' }}>
                 {lastUpdated.toLocaleTimeString('es-CU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
             )}
             <button
               onClick={() => void fetchQueue(true)}
               className="rounded-xl px-4 py-2 text-sm font-semibold"
-              style={{
-                backgroundColor: 'var(--primary-dim)',
-                color:           'var(--primary)',
-                border:          '1px solid var(--border-glow)',
-              }}
+              style={{ background: 'var(--primary-dim)', color: 'var(--primary)', border: '1px solid var(--border-glow)' }}
             >
               Actualizar
             </button>
@@ -138,10 +128,7 @@ export default function QueuePage() {
         )}
 
         {queue.length === 0 ? (
-          <div
-            className="rounded-2xl p-10 text-center border"
-            style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
-          >
+          <div className="glass rounded-2xl p-10 text-center">
             <p className="text-3xl mb-2">✅</p>
             <p className="font-semibold" style={{ color: 'var(--text)' }}>No hay pedidos pendientes</p>
             <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
@@ -155,20 +142,20 @@ export default function QueuePage() {
 
             const borderColor = order.status === 'PREPARING'
               ? urgent ? 'var(--error)' : 'var(--warning)'
-              : 'var(--border)'
+              : 'var(--glass-border)'
 
             return (
               <div
                 key={order.id}
-                className="rounded-2xl p-4 border-2"
-                style={{ backgroundColor: 'var(--card)', borderColor }}
+                className="glass rounded-2xl p-4"
+                style={{ borderColor, borderWidth: '2px' }}
               >
                 {/* Position + code */}
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div className="flex items-center gap-3">
                     <span
                       className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold flex-shrink-0"
-                      style={{ backgroundColor: 'var(--surface)', color: 'var(--muted)' }}
+                      style={{ background: 'var(--primary-dim)', color: 'var(--primary)' }}
                     >
                       {idx + 1}
                     </span>

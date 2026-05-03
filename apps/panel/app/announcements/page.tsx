@@ -94,20 +94,14 @@ export default function AnnouncementsPage() {
   const activeProducts = products.filter(p => p.isActive)
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
-      {/* Header */}
+    <main className="min-h-screen">
       <header
-        className="sticky top-0 z-10 border-b px-6 py-4"
-        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+        className="sticky top-0 z-10 glass px-6 py-4"
+        style={{ borderBottom: '1px solid var(--glass-border)' }}
       >
         <div className="flex items-center justify-between">
           <div>
-            <h1
-              className="text-lg font-bold"
-              style={{ fontFamily: 'var(--font-display)', color: 'var(--text)' }}
-            >
-              Canal de anuncios
-            </h1>
+            <h1 className="text-lg font-bold text-gradient">Canal de anuncios</h1>
             <p className="text-sm" style={{ color: 'var(--muted)' }}>
               Publicá en tu canal de Telegram
             </p>
@@ -119,8 +113,7 @@ export default function AnnouncementsPage() {
 
         {/* 1 — Plantillas */}
         <section
-          className="rounded-2xl border p-5"
-          style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+          className="glass rounded-2xl p-5"
         >
           <p
             className="text-sm font-semibold mb-3"
@@ -177,8 +170,7 @@ export default function AnnouncementsPage() {
 
         {/* 2 — Selector de productos */}
         <section
-          className="rounded-2xl border p-5"
-          style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+          className="glass rounded-2xl p-5"
         >
           <p className="text-sm font-semibold mb-3" style={{ color: 'var(--text)' }}>
             🛒 Agregar productos al mensaje
@@ -226,8 +218,7 @@ export default function AnnouncementsPage() {
         {/* 3 — Editor + publicar */}
         <form
           onSubmit={(e) => void handlePublish(e)}
-          className="rounded-2xl border p-5 flex flex-col gap-3"
-          style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+          className="glass rounded-2xl p-5 flex flex-col gap-3"
         >
           <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
             ✏️ Mensaje
@@ -259,7 +250,7 @@ export default function AnnouncementsPage() {
               type="submit"
               disabled={sending || !text.trim()}
               className="rounded-xl px-6 py-2 text-sm font-semibold disabled:opacity-50"
-              style={{ backgroundColor: 'var(--primary)', color: '#07080A' }}
+              className="bg-gradient-teal-violet shadow-glow text-white"
             >
               {sending ? 'Publicando…' : '📤 Publicar en canal'}
             </button>
@@ -278,8 +269,7 @@ export default function AnnouncementsPage() {
         {/* 4 — Historial */}
         {history.length > 0 && (
           <section
-            className="rounded-2xl border p-4"
-            style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+            className="glass rounded-2xl p-4"
           >
             <p
               className="mb-3 text-xs font-semibold uppercase tracking-wide"
@@ -292,7 +282,7 @@ export default function AnnouncementsPage() {
                 <div
                   key={i}
                   className="rounded-xl border p-3"
-                  style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }}
+                  style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}
                 >
                   <p
                     className="whitespace-pre-wrap text-sm"

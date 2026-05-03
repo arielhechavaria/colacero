@@ -145,8 +145,7 @@ export default function OrdersPage() {
 
         {data == null || data.windows.length === 0 ? (
           <div
-            className="rounded-2xl p-10 text-center border"
-            style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+            className="glass rounded-2xl p-10 text-center"
           >
             <p style={{ color: 'var(--muted)' }}>No hay ventanas de recogida para hoy</p>
           </div>

@@ -147,20 +147,14 @@ export default function WindowsPage() {
   const grouped = groupByDate(windows)
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
-      {/* Header */}
+    <main className="min-h-screen">
       <header
-        className="sticky top-0 z-10 border-b px-6 py-4"
-        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+        className="sticky top-0 z-10 glass px-6 py-4"
+        style={{ borderBottom: '1px solid var(--glass-border)' }}
       >
         <div className="flex items-center justify-between">
           <div>
-            <h1
-              className="text-lg font-bold"
-              style={{ fontFamily: 'var(--font-display)', color: 'var(--text)' }}
-            >
-              Ventanas de recogida
-            </h1>
+            <h1 className="text-lg font-bold text-gradient">Ventanas de recogida</h1>
             <p className="text-sm" style={{ color: 'var(--muted)' }}>
               Configurá los horarios de entrega
             </p>
@@ -170,14 +164,13 @@ export default function WindowsPage() {
               onClick={() => void handleGenerate()}
               disabled={generating}
               className="rounded-xl px-4 py-2 text-sm font-semibold disabled:opacity-50"
-              style={{ backgroundColor: 'var(--primary-dim)', color: 'var(--primary)', border: '1px solid var(--border-glow)' }}
+              style={{ background: 'var(--primary-dim)', color: 'var(--primary)', border: '1px solid var(--border-glow)' }}
             >
               {generating ? '…' : '📅 Generar mañana'}
             </button>
             <button
               onClick={() => setShowForm((v) => !v)}
-              className="rounded-xl px-4 py-2 text-sm font-semibold"
-              style={{ backgroundColor: 'var(--primary)', color: '#07080A' }}
+              className="rounded-xl px-4 py-2 text-sm font-semibold text-white bg-gradient-teal-violet shadow-glow"
             >
               {showForm ? 'Cancelar' : '+ Nueva'}
             </button>
@@ -207,8 +200,7 @@ export default function WindowsPage() {
         {showForm && (
           <form
             onSubmit={(e) => void handleCreate(e)}
-            className="rounded-2xl border p-5 flex flex-col gap-3"
-            style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+            className="glass rounded-2xl p-5 flex flex-col gap-3"
           >
             <p
               className="font-semibold"
@@ -276,8 +268,7 @@ export default function WindowsPage() {
             <button
               type="submit"
               disabled={saving}
-              className="w-full rounded-xl py-2.5 text-sm font-semibold disabled:opacity-50"
-              style={{ backgroundColor: 'var(--primary)', color: '#07080A' }}
+              className="w-full rounded-xl py-2.5 text-sm font-semibold text-white bg-gradient-teal-violet shadow-glow disabled:opacity-50"
             >
               {saving ? 'Creando…' : 'Crear ventana'}
             </button>
@@ -287,8 +278,7 @@ export default function WindowsPage() {
         {/* Windows grouped by date */}
         {Object.keys(grouped).length === 0 ? (
           <div
-            className="rounded-2xl border p-10 text-center"
-            style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+            className="glass rounded-2xl p-10 text-center"
           >
             <p style={{ color: 'var(--muted)' }}>No hay ventanas configuradas</p>
             <button
@@ -303,8 +293,7 @@ export default function WindowsPage() {
           Object.entries(grouped).map(([date, wins]) => (
             <section
               key={date}
-              className="rounded-2xl border p-4"
-              style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+              className="glass rounded-2xl p-4"
             >
               <p
                 className="mb-3 text-sm font-semibold capitalize"
@@ -316,11 +305,11 @@ export default function WindowsPage() {
                 {wins.map((w) => (
                   <div
                     key={w.id}
-                    className="flex items-center justify-between rounded-xl border px-4 py-3"
+                    className="flex items-center justify-between rounded-xl px-4 py-3"
                     style={{
-                      backgroundColor: 'var(--surface)',
-                      borderColor:     'var(--border)',
-                      opacity:         w.isOpen ? 1 : 0.55,
+                      background:  'var(--glass-bg)',
+                      border:      '1px solid var(--glass-border)',
+                      opacity:     w.isOpen ? 1 : 0.5,
                     }}
                   >
                     <div>
