@@ -142,6 +142,26 @@ export async function ownerOrderRoutes(app: FastifyInstance) {
         select: { id: true, status: true },
       })
 
+      // A2 — Notificar al cliente cuando su pedido está listo
+      if (newStatus === 'READY') {
+        const orderData = await app.prisma.order.findUnique({
+          where:  { id: orderId },
+          select: {
+            pickupCode:   true,
+            customer:     { select: { telegramId: true } },
+            pickupWindow: { select: { endTime: true } },
+          },
+        })
+        if (orderData?.customer.telegramId) {
+          void app.notifQueue.add('customer_ready', {
+            type:       'customer_ready',
+            chatId:     orderData.customer.telegramId,
+            pickupCode: orderData.pickupCode ?? '—',
+            endTime:    orderData.pickupWindow?.endTime ?? '',
+          })
+        }
+      }
+
       return reply.send({
         id:     updated.id,
         status: updated.status,

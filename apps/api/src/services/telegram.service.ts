@@ -1,27 +1,34 @@
 export interface TelegramProvider {
   sendChannelMessage(text: string): Promise<void>
+  sendDirectMessage(chatId: string, text: string): Promise<void>
 }
 
 const mockProvider: TelegramProvider = {
   async sendChannelMessage(text) {
     console.log(`[Telegram MOCK] → canal: ${text}`)
   },
+  async sendDirectMessage(chatId, text) {
+    console.log(`[Telegram MOCK] → DM ${chatId}: ${text}`)
+  },
 }
 
 function createBotApiProvider(token: string, channelId: string): TelegramProvider {
+  async function send(chatId: string, text: string): Promise<void> {
+    const url = `https://api.telegram.org/bot${token}/sendMessage`
+    const res = await fetch(url, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' }),
+    })
+    if (!res.ok) {
+      const body = await res.json() as { description?: string }
+      throw new Error(body.description ?? 'telegram_send_failed')
+    }
+  }
+
   return {
-    async sendChannelMessage(text) {
-      const url = `https://api.telegram.org/bot${token}/sendMessage`
-      const res = await fetch(url, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ chat_id: channelId, text, parse_mode: 'HTML' }),
-      })
-      if (!res.ok) {
-        const body = await res.json() as { description?: string }
-        throw new Error(body.description ?? 'telegram_send_failed')
-      }
-    },
+    sendChannelMessage: (text) => send(channelId, text),
+    sendDirectMessage:  (chatId, text) => send(chatId, text),
   }
 }
 

@@ -28,9 +28,10 @@ export const envSchema = z.object({
   WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
 
   // ── Telegram ───────────────────────────────────────────────────────
-  TELEGRAM_PROVIDER:   z.enum(['bot-api', 'mock']).default('mock'),
-  TELEGRAM_BOT_TOKEN:  z.string().optional(),
-  TELEGRAM_CHANNEL_ID: z.string().optional(),
+  TELEGRAM_PROVIDER:       z.enum(['bot-api', 'mock']).default('mock'),
+  TELEGRAM_BOT_TOKEN:      z.string().optional(),
+  TELEGRAM_CHANNEL_ID:     z.string().optional(), // canal público de anuncios
+  TELEGRAM_NOTIFY_CHAT_ID: z.string().optional(), // grupo interno del negocio
 
   // ── Upload de archivos ────────────────────────────────────────────
   UPLOAD_DIR:      z.string().default('./uploads'),

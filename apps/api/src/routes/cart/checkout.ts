@@ -1,4 +1,5 @@
 import type { FastifyInstance } from 'fastify'
+import { env } from '@colacero/env'
 import { createOrder } from '../../services/order.service.js'
 
 interface CheckoutBody {
@@ -49,6 +50,22 @@ export async function cartCheckoutRoutes(app: FastifyInstance) {
     if (!result.ok) {
       const status = result.reason === 'window_not_found' ? 404 : 409
       return reply.status(status).send({ error: result.reason })
+    }
+
+    // A1 — Notificar al negocio sobre el nuevo pedido
+    if (env.TELEGRAM_NOTIFY_CHAT_ID) {
+      const itemsText = result.items
+        .map((i: { name: string; quantity: number; unitLabel: string }) => `  • ${i.name} × ${i.quantity} ${i.unitLabel}`)
+        .join('\n')
+      void app.notifQueue.add('business_new_order', {
+        type:         'business_new_order',
+        chatId:       env.TELEGRAM_NOTIFY_CHAT_ID,
+        pickupCode:   result.pickupCode ?? '—',
+        customerName: req.body.customerName ?? 'Cliente',
+        itemsText,
+        windowTime:   `${result.pickupWindow.startTime} – ${result.pickupWindow.endTime}`,
+        total:        `$${Number(result.subtotal).toFixed(2)}`,
+      })
     }
 
     return reply.status(201).send({

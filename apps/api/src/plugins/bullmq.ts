@@ -5,10 +5,12 @@ import type { FastifyInstance } from 'fastify'
 import { env } from '@colacero/env'
 import { createTelegramProvider } from '../services/telegram.service.js'
 import { createAnnouncementWorker, ANNOUNCEMENT_QUEUE } from '../workers/announcement.worker.js'
+import { createNotificationWorker, NOTIFICATION_QUEUE, type NotifJobData } from '../workers/notification.worker.js'
 
 declare module 'fastify' {
   interface FastifyInstance {
-    queue: Queue
+    queue:      Queue
+    notifQueue: Queue<NotifJobData>
   }
 }
 
@@ -29,8 +31,10 @@ export const bullmqPlugin = fp(async (app: FastifyInstance) => {
 
   await connection.connect()
 
-  const queue = new Queue(ANNOUNCEMENT_QUEUE, { connection })
-  app.decorate('queue', queue)
+  const queue      = new Queue(ANNOUNCEMENT_QUEUE,  { connection })
+  const notifQueue = new Queue<NotifJobData>(NOTIFICATION_QUEUE, { connection })
+  app.decorate('queue',      queue)
+  app.decorate('notifQueue', notifQueue)
 
   // Don't start the worker in test mode — avoids teardown race conditions
   // where the connection close event fires after the test has ended.
@@ -41,15 +45,18 @@ export const bullmqPlugin = fp(async (app: FastifyInstance) => {
       env.TELEGRAM_CHANNEL_ID,
     )
 
-    const worker = createAnnouncementWorker(connection, telegram)
+    const announcementWorker  = createAnnouncementWorker(connection, telegram)
+    const notificationWorker  = createNotificationWorker(connection, telegram)
 
     app.addHook('onClose', async () => {
-      await worker.close()
+      await announcementWorker.close()
+      await notificationWorker.close()
     })
   }
 
   app.addHook('onClose', async () => {
     await queue.close()
+    await notifQueue.close()
     await connection.quit()
   })
 })
