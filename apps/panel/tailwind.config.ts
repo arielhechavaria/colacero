@@ -60,10 +60,9 @@ const config: Config = {
         mono:    ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
       },
       boxShadow: {
-        'glow':       '0 0 16px rgba(20,184,166,0.4)',
-        'glow-sm':    '0 0 8px rgba(20,184,166,0.3)',
-        'glow-violet':'0 0 16px rgba(168,85,247,0.4)',
-        'glow-accent':'0 0 16px rgba(168,85,247,0.35)',
+        'sm':  'var(--shadow-sm)',
+        'md':  'var(--shadow)',
+        'lg':  'var(--shadow-lg)',
       },
     },
   },
