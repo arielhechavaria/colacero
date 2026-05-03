@@ -348,6 +348,95 @@ export async function getTopProducts(
   return res.json() as Promise<TopProduct[]>
 }
 
+// ── Customers / CRM ───────────────────────────────────────────────────────────
+
+export type CustomerSegment = 'all' | 'active' | 'vip'
+
+export interface CustomerSummary {
+  id:          string
+  displayName: string | null
+  telegramId:  string | null
+  phone:       string | null
+  createdAt:   string
+  totalOrders: number
+  totalSpent:  number
+  lastOrderAt: string | null
+  isVip:       boolean
+  isActive:    boolean
+}
+
+export interface CustomerListResponse {
+  total: number
+  page:  number
+  limit: number
+  items: CustomerSummary[]
+}
+
+export interface CustomerOrderItem {
+  id:        string
+  name:      string
+  unitLabel: string
+  quantity:  number
+  subtotal:  number
+}
+
+export interface CustomerOrder {
+  id:          string
+  status:      OrderStatus
+  subtotal:    number
+  pickupCode:  string | null
+  confirmedAt: string | null
+  pickedUpAt:  string | null
+  items:       CustomerOrderItem[]
+}
+
+export interface CustomerDetail {
+  customer: {
+    id:          string
+    displayName: string | null
+    telegramId:  string | null
+    phone:       string | null
+    createdAt:   string
+    lastLoginAt: string | null
+  }
+  stats: {
+    totalOrders:    number
+    totalSpent:     number
+    lastOrderAt:    string | null
+    cancelledCount: number
+  }
+  orders: CustomerOrder[]
+}
+
+export async function getCustomers(
+  token:    string,
+  segment:  CustomerSegment = 'all',
+  search  = '',
+  page    = 1,
+  limit   = 20,
+): Promise<CustomerListResponse> {
+  const params = new URLSearchParams({ segment, page: String(page), limit: String(limit) })
+  if (search) params.set('search', search)
+  const res = await fetch(`${API_BASE}/api/owner/customers?${params}`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+    cache:   'no-store',
+  })
+  if (!res.ok) throw new Error('fetch_customers_failed')
+  return res.json() as Promise<CustomerListResponse>
+}
+
+export async function getCustomerDetail(
+  token:      string,
+  customerId: string,
+): Promise<CustomerDetail> {
+  const res = await fetch(`${API_BASE}/api/owner/customers/${customerId}`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+    cache:   'no-store',
+  })
+  if (!res.ok) throw new Error('fetch_customer_detail_failed')
+  return res.json() as Promise<CustomerDetail>
+}
+
 // ── Announcements ─────────────────────────────────────────────────────────────
 
 export async function publishAnnouncement(
