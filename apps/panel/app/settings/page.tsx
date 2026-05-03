@@ -67,9 +67,9 @@ function SaveBtn({ loading, label = 'Guardar' }: { loading: boolean; label?: str
 }
 
 function Toast({ msg, type }: { msg: string; type: 'ok' | 'error' }) {
-  const bg  = type === 'ok' ? 'rgba(20,184,166,0.12)' : 'rgba(248,113,113,0.08)'
-  const col = type === 'ok' ? '#14B8A6'               : 'var(--error)'
-  const brd = type === 'ok' ? 'rgba(20,184,166,0.3)'  : 'rgba(248,113,113,0.2)'
+  const bg  = type === 'ok' ? 'rgba(99,102,241,0.1)'  : 'rgba(248,113,113,0.08)'
+  const col = type === 'ok' ? '#818CF8'               : 'var(--error)'
+  const brd = type === 'ok' ? 'rgba(99,102,241,0.3)'  : 'rgba(248,113,113,0.2)'
   return (
     <div
       className="rounded-xl px-4 py-3 text-sm"
@@ -459,7 +459,7 @@ export default function SettingsPage() {
               className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
               style={
                 tab === key
-                  ? { background: 'linear-gradient(135deg, #14B8A6, #A855F7)', color: '#fff' }
+                  ? { background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: '#fff' }
                   : { color: 'var(--muted)', background: 'transparent' }
               }
             >

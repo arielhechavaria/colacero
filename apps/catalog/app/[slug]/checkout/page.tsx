@@ -195,7 +195,7 @@ export default function CheckoutPage() {
                 className="h-1.5 w-4 rounded-full transition-all"
                 style={{
                   background: i <= stepIdx
-                    ? 'linear-gradient(135deg, #14B8A6, #A855F7)'
+                    ? 'linear-gradient(135deg, #6366F1, #8B5CF6)'
                     : 'var(--border)',
                 }}
               />

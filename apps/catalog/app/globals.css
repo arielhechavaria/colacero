@@ -5,11 +5,11 @@
 /* ── Design Tokens — Light ───────────────────────────────────────────────── */
 :root {
   /* Palette */
-  --primary:       #0D9488;
-  --primary-dark:  #0F766E;
-  --primary-light: #CCFBF1;
-  --primary-dim:   rgba(13, 148, 136, 0.1);
-  --accent:        #7C3AED;
+  --primary:       #6366F1;
+  --primary-dark:  #4F46E5;
+  --primary-light: #EEF2FF;
+  --primary-dim:   rgba(99, 102, 241, 0.1);
+  --accent:        #8B5CF6;
 
   /* Surfaces */
   --bg:      #F8FAFC;
@@ -18,7 +18,7 @@
 
   /* Borders */
   --border:      rgba(15, 23, 42, 0.08);
-  --border-glow: rgba(13, 148, 136, 0.3);
+  --border-glow: rgba(99, 102, 241, 0.3);
 
   /* Text */
   --text:  #0F172A;
@@ -37,16 +37,16 @@
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 6px rgba(15, 23, 42, 0.04);
   --shadow:    0 4px 8px rgba(15, 23, 42, 0.06), 0 2px 20px rgba(15, 23, 42, 0.05);
   --shadow-lg: 0 10px 28px rgba(15, 23, 42, 0.1), 0 4px 10px rgba(15, 23, 42, 0.06);
-  --shadow-glow: 0 0 0 1px rgba(13,148,136,0.4), 0 4px 20px rgba(13,148,136,0.25), 0 0 40px rgba(124,58,237,0.12);
+  --shadow-glow: 0 0 0 1px rgba(99,102,241,0.4), 0 4px 20px rgba(99,102,241,0.25), 0 0 40px rgba(139,92,246,0.15);
 }
 
 /* ── Design Tokens — Dark ────────────────────────────────────────────────── */
 .dark {
   /* Palette */
-  --primary:       #2DD4BF;
-  --primary-dark:  #14B8A6;
-  --primary-light: rgba(45, 212, 191, 0.15);
-  --primary-dim:   rgba(45, 212, 191, 0.08);
+  --primary:       #818CF8;
+  --primary-dark:  #6366F1;
+  --primary-light: rgba(129, 140, 248, 0.15);
+  --primary-dim:   rgba(129, 140, 248, 0.08);
   --accent:        #A78BFA;
 
   /* Surfaces */
@@ -56,7 +56,7 @@
 
   /* Borders */
   --border:      rgba(255, 255, 255, 0.07);
-  --border-glow: rgba(45, 212, 191, 0.25);
+  --border-glow: rgba(129, 140, 248, 0.25);
 
   /* Text */
   --text:  #F1F5F9;
@@ -75,7 +75,7 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 6px rgba(0, 0, 0, 0.3);
   --shadow:    0 4px 8px rgba(0, 0, 0, 0.5), 0 2px 20px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.6), 0 4px 10px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 0 1px rgba(45,212,191,0.35), 0 4px 20px rgba(45,212,191,0.2), 0 0 40px rgba(167,139,250,0.12);
+  --shadow-glow: 0 0 0 1px rgba(129,140,248,0.4), 0 4px 20px rgba(99,102,241,0.25), 0 0 40px rgba(139,92,246,0.15);
 }
 
 /* ── Base ────────────────────────────────────────────────────────────────── */
@@ -137,20 +137,20 @@ body {
   }
 
   .bg-gradient-teal-violet {
-    background: linear-gradient(135deg, #14B8A6 0%, #A855F7 100%);
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
   }
   .dark .bg-gradient-teal-violet {
-    background: linear-gradient(135deg, #2DD4BF 0%, #A78BFA 100%);
+    background: linear-gradient(135deg, #818CF8 0%, #A78BFA 100%);
   }
 
   .text-gradient {
-    background: linear-gradient(135deg, #14B8A6, #A855F7);
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .dark .text-gradient {
-    background: linear-gradient(135deg, #2DD4BF, #A78BFA);
+    background: linear-gradient(135deg, #818CF8, #A78BFA);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -169,7 +169,7 @@ body {
 .animate-float { animation: float 6s ease-in-out infinite; }
 
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(45, 212, 191, 0.25); }
-  50%       { box-shadow: 0 0 50px rgba(45, 212, 191, 0.6), 0 0 70px rgba(167, 139, 250, 0.3); }
+  0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+  50%       { box-shadow: 0 0 50px rgba(99, 102, 241, 0.7), 0 0 70px rgba(139, 92, 246, 0.4); }
 }
 .animate-glow { animation: glow-pulse 2.5s ease-in-out infinite; }

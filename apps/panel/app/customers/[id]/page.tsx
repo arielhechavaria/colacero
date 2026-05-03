@@ -8,7 +8,7 @@ import { getCustomerDetail, type CustomerDetail, type CustomerOrder } from '../.
 // ── Status badge ──────────────────────────────────────────────────────────────
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
-  CONFIRMED: { label: 'Confirmado',  color: '#14B8A6', bg: 'rgba(20,184,166,0.12)'  },
+  CONFIRMED: { label: 'Confirmado',  color: '#818CF8', bg: 'rgba(99,102,241,0.12)'  },
   PREPARING: { label: 'Preparando',  color: '#F59E0B', bg: 'rgba(245,158,11,0.12)'  },
   READY:     { label: 'Listo',       color: '#A855F7', bg: 'rgba(168,85,247,0.12)'  },
   PICKED_UP: { label: 'Entregado',   color: '#10B981', bg: 'rgba(16,185,129,0.12)'  },

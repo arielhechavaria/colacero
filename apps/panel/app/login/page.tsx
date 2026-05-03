@@ -31,7 +31,7 @@ export default function LoginPage() {
       {/* Background orbs */}
       <div
         className="pointer-events-none absolute top-1/4 left-1/4 h-72 w-72 rounded-full opacity-20 blur-3xl animate-float"
-        style={{ background: 'radial-gradient(circle, #14B8A6, transparent)' }}
+        style={{ background: 'radial-gradient(circle, #6366F1, transparent)' }}
       />
       <div
         className="pointer-events-none absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full opacity-20 blur-3xl animate-float"

@@ -201,7 +201,7 @@ export default function DashboardPage() {
                 className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
                 style={
                   period === key
-                    ? { background: 'linear-gradient(135deg, #14B8A6, #A855F7)', color: '#fff' }
+                    ? { background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: '#fff' }
                     : { color: 'var(--muted)' }
                 }
               >

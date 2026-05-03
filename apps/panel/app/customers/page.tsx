@@ -51,7 +51,7 @@ function CustomerCard({ c }: { c: CustomerSummary }) {
             {c.isActive && !c.isVip && (
               <span
                 className="flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md"
-                style={{ background: 'rgba(20,184,166,0.15)', color: '#14B8A6' }}
+                style={{ background: 'rgba(99,102,241,0.12)', color: '#818CF8' }}
               >
                 activo
               </span>
@@ -151,7 +151,7 @@ export default function CustomersPage() {
               className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
               style={
                 segment === key
-                  ? { background: 'linear-gradient(135deg, #14B8A6, #A855F7)', color: '#fff' }
+                  ? { background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: '#fff' }
                   : { color: 'var(--muted)', background: 'transparent' }
               }
             >
