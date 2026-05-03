@@ -20,7 +20,7 @@ export async function telegramAuth(initData: string): Promise<TelegramAuthResult
   return res.json() as Promise<TelegramAuthResult>
 }
 
-export async function requestOtp(phone: string): Promise<{ ok: boolean }> {
+export async function requestOtp(phone: string): Promise<{ ok: boolean; _devCode?: string }> {
   const res = await fetch(`${API_BASE}/api/auth/customer/request-otp`, {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -30,7 +30,7 @@ export async function requestOtp(phone: string): Promise<{ ok: boolean }> {
     const body = await res.json() as { error: string }
     throw new Error(body.error ?? 'request_otp_failed')
   }
-  return res.json() as Promise<{ ok: boolean }>
+  return res.json() as Promise<{ ok: boolean; _devCode?: string }>
 }
 
 export interface VerifyOtpResult {

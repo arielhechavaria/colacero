@@ -31,6 +31,7 @@ export default function CheckoutPage() {
   const [selectedWindow, setSelectedWindow] = useState<string | null>(null)
   const [reservationIds, setReservationIds] = useState<string[]>([])
   const [notes, setNotes]                 = useState('')
+  const [devCode, setDevCode]             = useState<string | null>(null)
 
   // Leer reservationIds guardados por el drawer
   useEffect(() => {
@@ -73,7 +74,8 @@ export default function CheckoutPage() {
     setLoading(true)
     setError(null)
     try {
-      await requestOtp(customerPhone)
+      const otpResult = await requestOtp(customerPhone)
+      if (otpResult._devCode) setDevCode(otpResult._devCode)
       setPhone(customerPhone)
       setName(customerName)
       setStep('otp')
@@ -113,7 +115,8 @@ export default function CheckoutPage() {
   async function handleResendOtp() {
     setError(null)
     try {
-      await requestOtp(phone)
+      const otpResult = await requestOtp(phone)
+      if (otpResult._devCode) setDevCode(otpResult._devCode)
     } catch {
       setError('No pudimos reenviar el código.')
     }
@@ -250,13 +253,31 @@ export default function CheckoutPage() {
             />
           )}
           {step === 'otp' && (
-            <OtpInput
-              phone={phone}
-              onSubmit={handleOtpSubmit}
-              onResend={handleResendOtp}
-              loading={loading}
-              error={error}
-            />
+            <>
+              {devCode && (
+                <div
+                  className="mb-4 rounded-xl px-4 py-3 text-sm flex items-center gap-3"
+                  style={{
+                    background: 'rgba(251,191,36,0.1)',
+                    border:     '1px solid rgba(251,191,36,0.3)',
+                    color:      '#FCD34D',
+                  }}
+                >
+                  <span className="text-lg">🔧</span>
+                  <span>
+                    Modo demo — tu código es{' '}
+                    <strong className="font-mono tracking-widest">{devCode}</strong>
+                  </span>
+                </div>
+              )}
+              <OtpInput
+                phone={phone}
+                onSubmit={handleOtpSubmit}
+                onResend={handleResendOtp}
+                loading={loading}
+                error={error}
+              />
+            </>
           )}
           {step === 'window' && (
             <PickupWindowSelector

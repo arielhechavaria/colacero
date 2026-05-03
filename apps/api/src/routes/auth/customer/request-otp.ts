@@ -50,6 +50,8 @@ export async function requestOtpRoute(app: FastifyInstance) {
     await storeOtp(app.redis, phone, otp, env.OTP_TTL_SECONDS)
     await whatsapp.sendOtp(phone, otp)
 
-    return reply.send({ ok: true })
+    // En modo mock devolvemos el código en la respuesta para poder testear
+    const isMock = env.WHATSAPP_PROVIDER === 'mock'
+    return reply.send({ ok: true, ...(isMock ? { _devCode: otp } : {}) })
   })
 }
