@@ -4,29 +4,23 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { getCustomerDetail, type CustomerDetail, type CustomerOrder } from '../../../lib/api'
+import { Badge } from '@/components/ui/badge'
 
 // ── Status badge ──────────────────────────────────────────────────────────────
 
-const STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
-  CONFIRMED: { label: 'Confirmado',  color: '#818CF8', bg: 'rgba(99,102,241,0.12)'  },
-  PREPARING: { label: 'Preparando',  color: '#F59E0B', bg: 'rgba(245,158,11,0.12)'  },
-  READY:     { label: 'Listo',       color: '#A855F7', bg: 'rgba(168,85,247,0.12)'  },
-  PICKED_UP: { label: 'Entregado',   color: '#10B981', bg: 'rgba(16,185,129,0.12)'  },
-  CANCELLED: { label: 'Cancelado',   color: '#EF4444', bg: 'rgba(239,68,68,0.12)'   },
-  EXPIRED:   { label: 'Expirado',    color: '#6B7280', bg: 'rgba(107,114,128,0.12)' },
-  DRAFT:     { label: 'Borrador',    color: '#6B7280', bg: 'rgba(107,114,128,0.12)' },
+const STATUS_META: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'success' | 'warning' | 'outline' }> = {
+  CONFIRMED: { label: 'Confirmado', variant: 'default'     },
+  PREPARING: { label: 'Preparando', variant: 'warning'     },
+  READY:     { label: 'Listo',      variant: 'success'     },
+  PICKED_UP: { label: 'Entregado',  variant: 'success'     },
+  CANCELLED: { label: 'Cancelado',  variant: 'destructive' },
+  EXPIRED:   { label: 'Expirado',   variant: 'secondary'   },
+  DRAFT:     { label: 'Borrador',   variant: 'secondary'   },
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const meta = STATUS_META[status] ?? { label: status, color: 'var(--muted)', bg: 'var(--surface)' }
-  return (
-    <span
-      className="text-xs font-semibold px-2 py-0.5 rounded-lg"
-      style={{ color: meta.color, background: meta.bg }}
-    >
-      {meta.label}
-    </span>
-  )
+  const meta = STATUS_META[status] ?? { label: status, variant: 'outline' as const }
+  return <Badge variant={meta.variant}>{meta.label}</Badge>
 }
 
 // ── Order accordion item ──────────────────────────────────────────────────────
@@ -157,12 +151,9 @@ export default function CustomerDetailPage() {
           </Link>
           <h1 className="text-lg font-bold text-gradient truncate">{loading ? 'Cargando…' : name}</h1>
           {isVip && !loading && (
-            <span
-              className="flex-shrink-0 text-xs font-bold px-2 py-0.5 rounded-md"
-              style={{ background: 'rgba(168,85,247,0.15)', color: '#A855F7' }}
-            >
+            <Badge variant="secondary" className="flex-shrink-0 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
               ⭐ VIP
-            </span>
+            </Badge>
           )}
         </div>
       </header>

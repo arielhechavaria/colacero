@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { getOrders, patchOrderStatus } from '../../lib/api'
 import type { Order, OrderStatus } from '../../lib/api'
+import { Button } from '@/components/ui/button'
+import { Badge }  from '@/components/ui/badge'
 
 const POLL_INTERVAL_MS = 15_000
 
@@ -106,13 +108,9 @@ export default function QueuePage() {
                 {lastUpdated.toLocaleTimeString('es-CU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
             )}
-            <button
-              onClick={() => void fetchQueue(true)}
-              className="rounded-xl px-4 py-2 text-sm font-semibold"
-              style={{ background: 'var(--primary-dim)', color: 'var(--primary)', border: '1px solid var(--border-glow)' }}
-            >
+            <Button variant="outline" size="sm" onClick={() => void fetchQueue(true)}>
               Actualizar
-            </button>
+            </Button>
           </div>
         </div>
       </header>
@@ -172,19 +170,9 @@ export default function QueuePage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <span
-                      className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                      style={{
-                        backgroundColor: order.status === 'PREPARING'
-                          ? urgent ? 'rgba(255,61,85,0.12)' : 'rgba(255,176,32,0.12)'
-                          : 'rgba(0,212,190,0.1)',
-                        color: order.status === 'PREPARING'
-                          ? urgent ? 'var(--error)' : 'var(--warning)'
-                          : 'var(--primary)',
-                      }}
-                    >
+                    <Badge variant={order.status === 'PREPARING' ? (urgent ? 'destructive' : 'warning') : 'default'}>
                       {order.status === 'PREPARING' ? 'Preparando' : 'Confirmado'}
-                    </span>
+                    </Badge>
                     {order.confirmedAt && (
                       <p
                         className="mt-1 text-xs"
@@ -224,33 +212,35 @@ export default function QueuePage() {
                 {/* Actions */}
                 <div className="flex gap-2">
                   {order.status === 'CONFIRMED' && (
-                    <button
+                    <Button
+                      variant="warning"
+                      size="sm"
+                      className="flex-1"
                       disabled={actionLoading}
                       onClick={() => void handleAction(order.id, 'PREPARING')}
-                      className="flex-1 rounded-xl py-2 text-sm font-semibold disabled:opacity-50"
-                      style={{ backgroundColor: 'rgba(255,176,32,0.15)', color: 'var(--warning)' }}
                     >
                       Empezar preparación
-                    </button>
+                    </Button>
                   )}
                   {order.status === 'PREPARING' && (
-                    <button
+                    <Button
+                      variant="success"
+                      size="sm"
+                      className="flex-1"
                       disabled={actionLoading}
                       onClick={() => void handleAction(order.id, 'READY')}
-                      className="flex-1 rounded-xl py-2 text-sm font-semibold disabled:opacity-50"
-                      style={{ backgroundColor: 'rgba(0,214,143,0.15)', color: 'var(--success)' }}
                     >
                       Marcar listo ✓
-                    </button>
+                    </Button>
                   )}
-                  <button
+                  <Button
+                    variant="destructive"
+                    size="sm"
                     disabled={actionLoading}
                     onClick={() => void handleAction(order.id, 'CANCELLED')}
-                    className="rounded-xl px-4 py-2 text-sm font-semibold disabled:opacity-50"
-                    style={{ backgroundColor: 'rgba(255,61,85,0.1)', color: 'var(--error)' }}
                   >
                     Cancelar
-                  </button>
+                  </Button>
                 </div>
               </div>
             )

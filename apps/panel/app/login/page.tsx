@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { loginOwner } from '../../lib/api'
+import { Button } from '@/components/ui/button'
+import { Input }  from '@/components/ui/input'
+import { Label }  from '@/components/ui/label'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -58,40 +61,26 @@ export default function LoginPage() {
           </p>
 
           <form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-4">
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
-                Email
-              </label>
-              <input
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2 transition-colors"
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.5)',
-                  borderColor:     'var(--glass-border)',
-                  color:           'var(--text)',
-                }}
                 placeholder="owner@negocio.com"
               />
             </div>
 
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
-                Contraseña
-              </label>
-              <input
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="password">Contraseña</Label>
+              <Input
+                id="password"
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2 transition-colors"
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.5)',
-                  borderColor:     'var(--glass-border)',
-                  color:           'var(--text)',
-                }}
                 placeholder="••••••••"
               />
             </div>
@@ -102,13 +91,13 @@ export default function LoginPage() {
               </p>
             )}
 
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl py-3 text-sm font-semibold text-white disabled:opacity-50 mt-1 bg-gradient-teal-violet shadow-glow transition-all hover:shadow-glow-violet"
+              className="w-full mt-1 bg-gradient-teal-violet shadow-glow hover:opacity-90"
             >
               {loading ? 'Ingresando…' : 'Ingresar →'}
-            </button>
+            </Button>
           </form>
         </div>
       </div>

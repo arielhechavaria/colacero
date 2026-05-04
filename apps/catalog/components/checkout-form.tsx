@@ -1,6 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input }  from '@/components/ui/input'
+import { Label }  from '@/components/ui/label'
 
 interface Props {
   onSubmit: (name: string, phone: string) => Promise<void>
@@ -29,50 +32,32 @@ export function CheckoutForm({ onSubmit, loading, error }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div>
-        <label
-          className="mb-1 block text-sm font-medium"
-          style={{ color: 'var(--text)' }}
-        >
-          Tu nombre{' '}
-          <span style={{ color: 'var(--muted)' }}>(opcional)</span>
-        </label>
-        <input
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="checkout-name">
+          Tu nombre <span className="normal-case font-normal opacity-60">(opcional)</span>
+        </Label>
+        <Input
+          id="checkout-name"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Ej: María García"
-          className="w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]"
-          style={{
-            backgroundColor: 'var(--surface)',
-            borderColor: 'var(--border)',
-            color: 'var(--text)',
-          }}
         />
       </div>
 
-      <div>
-        <label
-          className="mb-1 block text-sm font-medium"
-          style={{ color: 'var(--text)' }}
-        >
-          Tu número de Telegram{' '}
-          <span style={{ color: 'var(--error)' }}>*</span>
-        </label>
-        <input
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="checkout-phone">
+          Tu número de Telegram <span className="text-[var(--error)]">*</span>
+        </Label>
+        <Input
+          id="checkout-phone"
           type="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="Ej: 58901234"
           required
-          className="w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]"
-          style={{
-            backgroundColor: 'var(--surface)',
-            borderColor: 'var(--border)',
-            color: 'var(--text)',
-          }}
         />
-        <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>
+        <p className="text-xs" style={{ color: 'var(--muted)' }}>
           Recibirás un código de verificación por Telegram
         </p>
       </div>
@@ -86,13 +71,13 @@ export function CheckoutForm({ onSubmit, loading, error }: Props) {
         </p>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={loading || phone.trim() === ''}
-        className="w-full rounded-xl py-3 text-sm font-semibold text-white disabled:opacity-50 bg-gradient-teal-violet shadow-glow"
+        className="w-full bg-gradient-teal-violet shadow-glow hover:opacity-90"
       >
         {loading ? 'Enviando código…' : 'Recibir código por Telegram'}
-      </button>
+      </Button>
     </form>
   )
 }

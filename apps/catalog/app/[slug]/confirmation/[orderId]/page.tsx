@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { getOrder, type OrderDetail } from '../../../../lib/client-api'
+import { Button } from '@/components/ui/button'
 
 function formatDate(iso: string): string {
   const date = new Date(iso)
@@ -90,13 +91,9 @@ export default function ConfirmationPage() {
         style={{ backgroundColor: 'var(--bg)' }}
       >
         <p style={{ color: 'var(--muted)' }}>{error ?? 'Pedido no encontrado.'}</p>
-        <button
-          onClick={() => router.push(`/${slug}`)}
-          className="rounded-xl px-6 py-3 text-sm font-semibold"
-          style={{ backgroundColor: 'var(--primary)', color: 'var(--sidebar)' }}
-        >
+        <Button onClick={() => router.push(`/${slug}`)}>
           Volver al catálogo
-        </button>
+        </Button>
       </main>
     )
   }
@@ -205,12 +202,12 @@ export default function ConfirmationPage() {
         </section>
 
         {/* CTA gradiente */}
-        <button
+        <Button
+          className="w-full bg-gradient-teal-violet shadow-glow hover:opacity-90"
           onClick={() => router.push(`/${slug}`)}
-          className="w-full rounded-xl py-3 text-sm font-semibold text-white bg-gradient-teal-violet shadow-glow"
         >
           Volver al catálogo
-        </button>
+        </Button>
 
       </div>
     </main>

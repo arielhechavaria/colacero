@@ -8,6 +8,9 @@ import {
   type CustomerSegment,
   type CustomerSummary,
 } from '../../lib/api'
+import { Button } from '@/components/ui/button'
+import { Badge }  from '@/components/ui/badge'
+import { Input }  from '@/components/ui/input'
 
 // ── Segment tabs ──────────────────────────────────────────────────────────────
 
@@ -40,22 +43,8 @@ function CustomerCard({ c }: { c: CustomerSummary }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold truncate" style={{ color: 'var(--text)' }}>{name}</p>
-            {c.isVip && (
-              <span
-                className="flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md"
-                style={{ background: 'rgba(168,85,247,0.15)', color: '#A855F7' }}
-              >
-                VIP
-              </span>
-            )}
-            {c.isActive && !c.isVip && (
-              <span
-                className="flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md"
-                style={{ background: 'rgba(99,102,241,0.12)', color: '#818CF8' }}
-              >
-                activo
-              </span>
-            )}
+            {c.isVip && <Badge variant="secondary" className="flex-shrink-0 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">VIP ⭐</Badge>}
+            {c.isActive && !c.isVip && <Badge variant="default" className="flex-shrink-0">activo</Badge>}
           </div>
           {contact && (
             <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--muted)' }}>{contact}</p>
@@ -145,18 +134,14 @@ export default function CustomersPage() {
         {/* Segment tabs */}
         <div className="flex gap-1 mt-3">
           {SEGMENTS.map(({ key, label, icon }) => (
-            <button
+            <Button
               key={key}
+              size="sm"
+              variant={segment === key ? 'default' : 'ghost'}
               onClick={() => changeSegment(key)}
-              className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
-              style={
-                segment === key
-                  ? { background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: '#fff' }
-                  : { color: 'var(--muted)', background: 'transparent' }
-              }
             >
               {icon} {label}
-            </button>
+            </Button>
           ))}
         </div>
       </header>
@@ -164,18 +149,13 @@ export default function CustomersPage() {
       <div className="px-6 py-5 flex flex-col gap-4">
         {/* Search */}
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--muted)' }}>🔍</span>
-          <input
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm pointer-events-none" style={{ color: 'var(--muted)' }}>🔍</span>
+          <Input
             type="search"
             placeholder="Buscar por nombre o teléfono…"
             value={search}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none"
-            style={{
-              background: 'var(--glass-bg)',
-              border:     '1px solid var(--glass-border)',
-              color:      'var(--text)',
-            }}
+            className="pl-9"
           />
         </div>
 

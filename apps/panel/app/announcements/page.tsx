@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { publishAnnouncement, getProducts, type Product } from '../../lib/api'
+import { Button }   from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 
 interface SentAnnouncement {
   text:   string
@@ -122,49 +124,21 @@ export default function AnnouncementsPage() {
             ⚡ Plantillas rápidas
           </p>
           <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => applyTemplate(buildDailyTemplate(products))}
-              className="rounded-xl px-3 py-1.5 text-xs font-semibold"
-              style={{
-                backgroundColor: 'var(--primary-dim)',
-                color:           'var(--primary)',
-                border:          '1px solid var(--border-glow)',
-              }}
-            >
+            <Button variant="outline" size="sm" onClick={() => applyTemplate(buildDailyTemplate(products))}>
               📅 Anuncio diario
-            </button>
-            <button
-              onClick={() => applyTemplate(buildOfferTemplate(products))}
-              className="rounded-xl px-3 py-1.5 text-xs font-semibold"
-              style={{
-                backgroundColor: 'rgba(255,176,32,0.08)',
-                color:           'var(--warning)',
-                border:          '1px solid rgba(255,176,32,0.2)',
-              }}
-            >
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => applyTemplate(buildOfferTemplate(products))}>
               🔥 Oferta especial
-            </button>
-            <button
-              onClick={() => applyTemplate(buildReminderTemplate())}
-              className="rounded-xl px-3 py-1.5 text-xs font-semibold"
-              style={{
-                backgroundColor: 'rgba(255,176,32,0.08)',
-                color:           'var(--warning)',
-                border:          '1px solid rgba(255,176,32,0.2)',
-              }}
-            >
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => applyTemplate(buildReminderTemplate())}>
               ⏰ Recordatorio
-            </button>
-            <button
-              disabled
-              title="Próximamente"
-              className="flex items-center gap-1.5 rounded-xl border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-medium text-purple-400 cursor-not-allowed dark:border-purple-900 dark:bg-purple-950/30 dark:text-purple-600"
-            >
+            </Button>
+            <Button variant="ghost" size="sm" disabled className="cursor-not-allowed opacity-50">
               ✨ Generar con IA
-              <span className="rounded-full bg-purple-100 px-1.5 py-0.5 text-[10px] font-semibold text-purple-500 dark:bg-purple-900/50">
+              <span className="ml-1.5 rounded-full bg-[var(--primary-dim)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--primary)]">
                 Próx.
               </span>
-            </button>
+            </Button>
           </div>
         </section>
 
@@ -224,19 +198,13 @@ export default function AnnouncementsPage() {
             ✏️ Mensaje
           </p>
 
-          <textarea
+          <Textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={'Escribí tu anuncio o usá una plantilla ↑'}
+            placeholder="Escribí tu anuncio o usá una plantilla ↑"
             rows={7}
             maxLength={MAX_CHARS}
-            className="w-full resize-none rounded-xl border px-3 py-2.5 text-sm outline-none"
-            style={{
-              backgroundColor: 'var(--surface)',
-              borderColor:     'var(--border)',
-              color:           'var(--text)',
-              fontFamily:      'var(--font-mono)',
-            }}
+            className="resize-none font-mono"
           />
 
           <div className="flex items-center justify-between">
@@ -246,13 +214,13 @@ export default function AnnouncementsPage() {
             >
               {charsLeft} caracteres restantes
             </span>
-            <button
+            <Button
               type="submit"
               disabled={sending || !text.trim()}
-              className="rounded-xl px-6 py-2 text-sm font-semibold disabled:opacity-50 bg-gradient-teal-violet shadow-glow text-white"
+              className="bg-gradient-teal-violet shadow-glow hover:opacity-90"
             >
               {sending ? 'Publicando…' : '📤 Publicar en canal'}
-            </button>
+            </Button>
           </div>
 
           {error != null && (

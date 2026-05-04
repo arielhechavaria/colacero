@@ -5,6 +5,7 @@ import { getProductFallbackImage } from '../../lib/product-images'
 import { AddToCartButton } from '../../components/add-to-cart-button'
 import { Logo } from '../../components/logo'
 import { ThemeToggle } from '../../components/theme-toggle'
+import { Badge } from '@/components/ui/badge'
 
 export const revalidate = 60 // ISR — revalida cada 60s
 
@@ -18,33 +19,12 @@ function StockLabel({ inventory }: { inventory: CatalogProduct['inventory'] }) {
   const { quantityAvailable, lowStockThreshold } = inventory
 
   if (quantityAvailable === 0) {
-    return (
-      <span
-        className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
-        style={{ backgroundColor: 'rgba(255,61,85,0.1)', color: 'var(--error)' }}
-      >
-        Sin stock
-      </span>
-    )
+    return <Badge variant="destructive">Sin stock</Badge>
   }
   if (quantityAvailable <= lowStockThreshold) {
-    return (
-      <span
-        className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
-        style={{ backgroundColor: 'rgba(255,176,32,0.12)', color: 'var(--warning)' }}
-      >
-        Últimas {quantityAvailable}
-      </span>
-    )
+    return <Badge variant="warning">Últimas {quantityAvailable}</Badge>
   }
-  return (
-    <span
-      className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
-      style={{ backgroundColor: 'rgba(0,214,143,0.12)', color: 'var(--success)' }}
-    >
-      Disponible
-    </span>
-  )
+  return <Badge variant="success">Disponible</Badge>
 }
 
 function ProductRow({ product }: { product: CatalogProduct }) {

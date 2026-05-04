@@ -1,6 +1,8 @@
 'use client'
 
 import type { Order, OrderStatus } from '../lib/api'
+import { Button } from '@/components/ui/button'
+import { Badge }  from '@/components/ui/badge'
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
   DRAFT:     'Borrador',
@@ -74,39 +76,24 @@ export function OrderCard({ order, onAction, loading }: Props) {
       {!isDone && (
         <div className="flex gap-1.5">
           {order.status === 'CONFIRMED' && (
-            <ActionBtn
-              label="Preparar"
-              bgColor="rgba(255,176,32,0.15)"
-              textColor="var(--warning)"
-              onClick={() => void onAction(order.id, 'PREPARING')}
-              disabled={loading}
-            />
+            <Button variant="warning" size="sm" className="flex-1" disabled={loading} onClick={() => void onAction(order.id, 'PREPARING')}>
+              Preparar
+            </Button>
           )}
           {order.status === 'PREPARING' && (
-            <ActionBtn
-              label="Listo ✓"
-              bgColor="rgba(0,214,143,0.15)"
-              textColor="var(--success)"
-              onClick={() => void onAction(order.id, 'READY')}
-              disabled={loading}
-            />
+            <Button variant="success" size="sm" className="flex-1" disabled={loading} onClick={() => void onAction(order.id, 'READY')}>
+              Listo ✓
+            </Button>
           )}
           {order.status === 'READY' && (
-            <ActionBtn
-              label="Entregado"
-              gradient
-              onClick={() => void onAction(order.id, 'PICKED_UP')}
-              disabled={loading}
-            />
+            <Button size="sm" className="flex-1 bg-gradient-teal-violet shadow-glow hover:opacity-90" disabled={loading} onClick={() => void onAction(order.id, 'PICKED_UP')}>
+              Entregado
+            </Button>
           )}
           {order.status !== 'PICKED_UP' && (
-            <ActionBtn
-              label="×"
-              bgColor="rgba(255,61,85,0.1)"
-              textColor="var(--error)"
-              onClick={() => void onAction(order.id, 'CANCELLED')}
-              disabled={loading}
-            />
+            <Button variant="destructive" size="sm" disabled={loading} onClick={() => void onAction(order.id, 'CANCELLED')}>
+              ×
+            </Button>
           )}
         </div>
       )}
@@ -115,45 +102,12 @@ export function OrderCard({ order, onAction, loading }: Props) {
 }
 
 function StatusDot({ status }: { status: OrderStatus }) {
-  const colorMap: Partial<Record<OrderStatus, string>> = {
-    CONFIRMED: 'var(--warning)',
-    PREPARING: 'var(--primary)',
-    READY:     'var(--success)',
+  const variantMap: Partial<Record<OrderStatus, 'warning' | 'default' | 'success'>> = {
+    CONFIRMED: 'warning',
+    PREPARING: 'default',
+    READY:     'success',
   }
-  const color = colorMap[status] ?? 'var(--muted)'
-  return (
-    <span
-      className="inline-block h-2 w-2 rounded-full flex-shrink-0 mt-1"
-      style={{ backgroundColor: color }}
-    />
-  )
-}
-
-function ActionBtn({
-  label,
-  bgColor,
-  textColor = 'var(--text)',
-  gradient = false,
-  onClick,
-  disabled,
-}: {
-  label:      string
-  bgColor?:   string
-  textColor?: string
-  gradient?:  boolean
-  onClick:    () => void
-  disabled:   boolean
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`flex-1 rounded-lg py-1.5 text-xs font-semibold disabled:opacity-40 transition-opacity ${
-        gradient ? 'bg-gradient-teal-violet text-white shadow-glow' : ''
-      }`}
-      style={gradient ? undefined : { backgroundColor: bgColor, color: textColor }}
-    >
-      {label}
-    </button>
-  )
+  const variant = variantMap[status]
+  if (!variant) return null
+  return <Badge variant={variant}>{STATUS_LABEL[status]}</Badge>
 }

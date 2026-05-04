@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { getOrderByCode, type TrackingOrder } from '../../../../lib/client-api'
+import { Badge }  from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 
 const POLL_INTERVAL_MS  = 30_000
 const TERMINAL_STATUSES = new Set(['PICKED_UP', 'CANCELLED', 'EXPIRED'])
@@ -116,12 +118,9 @@ export default function TrackPage() {
         <p className="text-sm" style={{ color: 'var(--muted)' }}>
           Revisá el código e intentá de nuevo.
         </p>
-        <Link
-          href={`/${slug}`}
-          className="rounded-xl px-6 py-3 text-sm font-semibold text-white bg-gradient-teal-violet shadow-glow"
-        >
-          Volver al catálogo
-        </Link>
+        <Button asChild className="bg-gradient-teal-violet shadow-glow hover:opacity-90">
+          <Link href={`/${slug}`}>Volver al catálogo</Link>
+        </Button>
       </main>
     )
   }
@@ -160,12 +159,17 @@ export default function TrackPage() {
           style={{ borderColor: cfg.color, borderWidth: '2px' }}
         >
           <div className="flex items-center gap-3">
-            <span
-              className="rounded-full px-3 py-1.5 text-sm font-semibold"
-              style={{ backgroundColor: cfg.bg, color: cfg.color }}
+            <Badge
+              variant={
+                order.status === 'READY'     ? 'success'     :
+                order.status === 'CANCELLED' ? 'destructive' :
+                order.status === 'CONFIRMED' ? 'warning'     :
+                'default'
+              }
+              className="text-sm px-3 py-1.5"
             >
               {cfg.label}
-            </span>
+            </Badge>
           </div>
           {cfg.hint && (
             <p className="mt-2 text-sm" style={{ color: 'var(--text)' }}>
@@ -254,12 +258,9 @@ export default function TrackPage() {
           </div>
         </section>
 
-        <Link
-          href={`/${slug}`}
-          className="w-full rounded-xl py-3 text-sm font-semibold text-center text-white bg-gradient-teal-violet shadow-glow"
-        >
-          Volver al catálogo
-        </Link>
+        <Button asChild className="w-full bg-gradient-teal-violet shadow-glow hover:opacity-90">
+          <Link href={`/${slug}`}>Volver al catálogo</Link>
+        </Button>
 
       </div>
     </main>

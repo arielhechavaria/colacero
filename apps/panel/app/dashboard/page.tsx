@@ -15,6 +15,8 @@ import {
   type WeeklyDay,
   type StockAlert,
 } from '../../lib/api'
+import { Button } from '@/components/ui/button'
+import { Badge }  from '@/components/ui/badge'
 
 // ── Period selector ───────────────────────────────────────────────────────────
 
@@ -244,27 +246,17 @@ function StockAlertsList({ alerts }: { alerts: StockAlert[] }) {
         <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
           Alertas de stock
         </p>
-        <span
-          className="text-xs font-semibold px-2 py-0.5 rounded-full"
-          style={{ background: 'rgba(255,61,85,0.12)', color: 'var(--error)' }}
-        >
+        <Badge variant="destructive">
           {alerts.length} producto{alerts.length !== 1 ? 's' : ''}
-        </span>
+        </Badge>
       </div>
       <ul className="flex flex-col gap-2">
         {alerts.map((a) => (
           <li key={a.productId} className="flex items-center justify-between text-sm">
             <span style={{ color: 'var(--text)' }}>{a.name}</span>
-            <span
-              className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ml-3"
-              style={
-                a.status === 'out'
-                  ? { background: 'rgba(255,61,85,0.12)',   color: 'var(--error)'   }
-                  : { background: 'rgba(255,176,32,0.12)', color: 'var(--warning)' }
-              }
-            >
+            <Badge variant={a.status === 'out' ? 'destructive' : 'warning'} className="ml-3 flex-shrink-0">
               {a.status === 'out' ? 'Sin stock' : `${a.quantityAvailable} restantes`}
-            </span>
+            </Badge>
           </li>
         ))}
       </ul>
@@ -336,23 +328,16 @@ export default function DashboardPage() {
           <h1 className="text-lg font-bold text-gradient">Dashboard</h1>
 
           {/* Period tabs */}
-          <div
-            className="flex rounded-xl p-0.5 gap-0.5"
-            style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid var(--glass-border)' }}
-          >
+          <div className="flex gap-1">
             {PERIODS.map(({ key, label }) => (
-              <button
+              <Button
                 key={key}
+                size="sm"
+                variant={period === key ? 'default' : 'ghost'}
                 onClick={() => changePeriod(key)}
-                className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
-                style={
-                  period === key
-                    ? { background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: '#fff' }
-                    : { color: 'var(--muted)' }
-                }
               >
                 {label}
-              </button>
+              </Button>
             ))}
           </div>
         </div>

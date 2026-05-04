@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { Button } from '@/components/ui/button'
 
 interface Props {
   phone:    string
@@ -83,22 +84,22 @@ export function OtpInput({ phone, onSubmit, onResend, loading, error }: Props) {
         </p>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={loading || otp.length < 6}
-        className="w-full rounded-xl py-3 text-sm font-semibold text-white disabled:opacity-50 bg-gradient-teal-violet shadow-glow"
+        className="w-full bg-gradient-teal-violet shadow-glow hover:opacity-90"
       >
         {loading ? 'Verificando…' : 'Verificar código'}
-      </button>
+      </Button>
 
-      <button
+      <Button
         type="button"
+        variant="link"
+        className="w-full"
         onClick={() => void onResend()}
-        className="text-center text-sm underline"
-        style={{ color: 'var(--primary)' }}
       >
         Reenviar código
-      </button>
+      </Button>
     </form>
   )
 }

@@ -14,6 +14,8 @@ const buttonVariants = cva(
         secondary:   'bg-[var(--surface)] text-[var(--text)] hover:bg-[var(--border)]',
         ghost:       'bg-transparent text-[var(--text)] hover:bg-[var(--primary-dim)] hover:text-[var(--primary)]',
         link:        'text-[var(--primary)] underline-offset-4 hover:underline',
+        success:     'bg-[rgba(0,214,143,0.15)] text-[var(--success)] hover:bg-[rgba(0,214,143,0.25)]',
+        warning:     'bg-[rgba(255,176,32,0.15)] text-[var(--warning)] hover:bg-[rgba(255,176,32,0.25)]',
       },
       size: {
         default: 'h-9 px-4 py-2',

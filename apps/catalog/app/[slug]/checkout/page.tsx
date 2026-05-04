@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { Button } from '@/components/ui/button'
 import { CheckoutForm }           from '../../../components/checkout-form'
 import { OtpInput }               from '../../../components/otp-input'
 import { PickupWindowSelector }   from '../../../components/pickup-window-selector'
@@ -177,13 +178,9 @@ export default function CheckoutPage() {
         style={{ borderBottom: '1px solid var(--glass-border)' }}
       >
         <div className="mx-auto max-w-lg flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="text-sm font-medium"
-            style={{ color: 'var(--primary)' }}
-          >
+          <Button variant="ghost" size="sm" onClick={() => router.back()} className="px-2">
             ←
-          </button>
+          </Button>
           <div className="flex-1">
             <p className="text-xs" style={{ color: 'var(--muted)' }}>
               Confirmar pedido

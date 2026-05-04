@@ -15,31 +15,14 @@ import {
   type StaffMember,
   type CurrentUser,
 } from '../../lib/api'
+import { Button }   from '@/components/ui/button'
+import { Input }    from '@/components/ui/input'
+import { Label }    from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 // ── Shared UI ─────────────────────────────────────────────────────────────────
 
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--muted)' }}>
-      {children}
-    </label>
-  )
-}
-
-function GlassInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <input
-      {...props}
-      className="w-full rounded-xl px-4 py-2.5 text-sm outline-none"
-      style={{
-        background: 'var(--glass-bg)',
-        border:     '1px solid var(--glass-border)',
-        color:      'var(--text)',
-      }}
-    />
-  )
-}
-
+// GlassSelect has no Shadcn equivalent — keep it as is
 function GlassSelect(props: React.SelectHTMLAttributes<HTMLSelectElement> & { children: React.ReactNode }) {
   return (
     <select
@@ -51,18 +34,6 @@ function GlassSelect(props: React.SelectHTMLAttributes<HTMLSelectElement> & { ch
         color:      'var(--text)',
       }}
     />
-  )
-}
-
-function SaveBtn({ loading, label = 'Guardar' }: { loading: boolean; label?: string }) {
-  return (
-    <button
-      type="submit"
-      disabled={loading}
-      className="rounded-xl px-6 py-2.5 text-sm font-semibold text-white bg-gradient-teal-violet shadow-glow disabled:opacity-50 transition-opacity"
-    >
-      {loading ? 'Guardando…' : label}
-    </button>
   )
 }
 
@@ -162,21 +133,22 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
                 {catalogUrl}
               </p>
             </div>
-            <button
+            <Button
               type="button"
+              className="w-fit bg-gradient-teal-violet shadow-glow hover:opacity-90"
               onClick={() => void navigator.clipboard.writeText(catalogUrl)}
-              className="rounded-xl px-4 py-2 text-sm font-semibold text-white bg-gradient-teal-violet shadow-glow w-fit"
             >
               Copiar link
-            </button>
+            </Button>
           </div>
         </div>
       </div>
 
       <div className="glass rounded-2xl p-5 flex flex-col gap-4">
-        <div>
-          <FieldLabel>Nombre del negocio</FieldLabel>
-          <GlassInput
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="biz-name">Nombre del negocio</Label>
+          <Input
+            id="biz-name"
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
             placeholder="El Fogón ColaCero"
@@ -185,26 +157,23 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
           />
         </div>
 
-        <div>
-          <FieldLabel>Descripción</FieldLabel>
-          <textarea
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="biz-desc">Descripción</Label>
+          <Textarea
+            id="biz-desc"
             value={form.description}
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
             placeholder="Breve descripción del negocio…"
             rows={3}
             disabled={!isOwner}
-            className="w-full rounded-xl px-4 py-2.5 text-sm outline-none resize-none"
-            style={{
-              background: 'var(--glass-bg)',
-              border:     '1px solid var(--glass-border)',
-              color:      'var(--text)',
-            }}
+            className="resize-none"
           />
         </div>
 
-        <div>
-          <FieldLabel>Zona horaria</FieldLabel>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="biz-tz">Zona horaria</Label>
           <GlassSelect
+            id="biz-tz"
             value={form.timezone}
             onChange={(e) => setForm((f) => ({ ...f, timezone: e.target.value }))}
             disabled={!isOwner}
@@ -220,7 +189,11 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
             Slug: <span className="font-mono">{profile.slug}</span>
             {' · '}Plan: <span className="font-semibold">{profile.subscriptionStatus}</span>
           </p>
-          {isOwner && <SaveBtn loading={saving} />}
+          {isOwner && (
+            <Button type="submit" disabled={saving} className="bg-gradient-teal-violet shadow-glow hover:opacity-90">
+              {saving ? 'Guardando…' : 'Guardar'}
+            </Button>
+          )}
         </div>
 
         {!isOwner && (
@@ -305,13 +278,13 @@ function StaffTab({ token, currentUserId, isOwner }: { token: string; currentUse
                   </p>
                 </div>
                 {isOwner && u.id !== currentUserId && (
-                  <button
+                  <Button
+                    variant="destructive"
+                    size="sm"
                     onClick={() => void handleDelete(u.id, u.email)}
-                    className="text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors"
-                    style={{ color: 'var(--error)', background: 'rgba(248,113,113,0.08)' }}
                   >
                     Eliminar
-                  </button>
+                  </Button>
                 )}
               </li>
             ))}
@@ -324,9 +297,10 @@ function StaffTab({ token, currentUserId, isOwner }: { token: string; currentUse
         showForm ? (
           <form onSubmit={handleAdd} className="glass rounded-2xl p-5 flex flex-col gap-3">
             <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Nuevo miembro</p>
-            <div>
-              <FieldLabel>Email</FieldLabel>
-              <GlassInput
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="staff-email">Email</Label>
+              <Input
+                id="staff-email"
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
@@ -334,9 +308,10 @@ function StaffTab({ token, currentUserId, isOwner }: { token: string; currentUse
                 required
               />
             </div>
-            <div>
-              <FieldLabel>Contraseña inicial</FieldLabel>
-              <GlassInput
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="staff-pass">Contraseña inicial</Label>
+              <Input
+                id="staff-pass"
                 type="password"
                 value={form.password}
                 onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
@@ -345,9 +320,10 @@ function StaffTab({ token, currentUserId, isOwner }: { token: string; currentUse
                 required
               />
             </div>
-            <div>
-              <FieldLabel>Rol</FieldLabel>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="staff-role">Rol</Label>
               <GlassSelect
+                id="staff-role"
                 value={form.role}
                 onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as 'OWNER' | 'STAFF' }))}
               >
@@ -356,24 +332,21 @@ function StaffTab({ token, currentUserId, isOwner }: { token: string; currentUse
               </GlassSelect>
             </div>
             <div className="flex gap-2 pt-1">
-              <SaveBtn loading={saving} label="Agregar miembro" />
-              <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="rounded-xl px-4 py-2.5 text-sm font-semibold"
-                style={{ color: 'var(--muted)', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}
-              >
+              <Button type="submit" disabled={saving} className="bg-gradient-teal-violet shadow-glow hover:opacity-90">
+                {saving ? 'Guardando…' : 'Agregar miembro'}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
                 Cancelar
-              </button>
+              </Button>
             </div>
           </form>
         ) : (
-          <button
+          <Button
+            className="w-full bg-gradient-teal-violet shadow-glow hover:opacity-90"
             onClick={() => setShowForm(true)}
-            className="rounded-xl px-4 py-2.5 text-sm font-semibold text-white bg-gradient-teal-violet shadow-glow w-full"
           >
             + Agregar miembro del equipo
-          </button>
+          </Button>
         )
       )}
     </div>
@@ -415,18 +388,20 @@ function PasswordTab({ token }: { token: string }) {
       {feedback && <Toast {...feedback} />}
 
       <div className="glass rounded-2xl p-5 flex flex-col gap-4">
-        <div>
-          <FieldLabel>Contraseña actual</FieldLabel>
-          <GlassInput
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="pwd-current">Contraseña actual</Label>
+          <Input
+            id="pwd-current"
             type="password"
             value={form.current}
             onChange={(e) => setForm((f) => ({ ...f, current: e.target.value }))}
             required
           />
         </div>
-        <div>
-          <FieldLabel>Nueva contraseña</FieldLabel>
-          <GlassInput
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="pwd-next">Nueva contraseña</Label>
+          <Input
+            id="pwd-next"
             type="password"
             value={form.next}
             onChange={(e) => setForm((f) => ({ ...f, next: e.target.value }))}
@@ -435,9 +410,10 @@ function PasswordTab({ token }: { token: string }) {
             required
           />
         </div>
-        <div>
-          <FieldLabel>Confirmar nueva contraseña</FieldLabel>
-          <GlassInput
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="pwd-confirm">Confirmar nueva contraseña</Label>
+          <Input
+            id="pwd-confirm"
             type="password"
             value={form.confirm}
             onChange={(e) => setForm((f) => ({ ...f, confirm: e.target.value }))}
@@ -446,7 +422,9 @@ function PasswordTab({ token }: { token: string }) {
           />
         </div>
         <div className="pt-1">
-          <SaveBtn loading={saving} label="Cambiar contraseña" />
+          <Button type="submit" disabled={saving} className="bg-gradient-teal-violet shadow-glow hover:opacity-90">
+            {saving ? 'Guardando…' : 'Cambiar contraseña'}
+          </Button>
         </div>
       </div>
     </form>
@@ -501,18 +479,14 @@ export default function SettingsPage() {
         {/* Tabs */}
         <div className="flex gap-1 mt-3">
           {TABS.map(({ key, label, icon }) => (
-            <button
+            <Button
               key={key}
+              size="sm"
+              variant={tab === key ? 'default' : 'ghost'}
               onClick={() => setTab(key)}
-              className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
-              style={
-                tab === key
-                  ? { background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: '#fff' }
-                  : { color: 'var(--muted)', background: 'transparent' }
-              }
             >
               {icon} {label}
-            </button>
+            </Button>
           ))}
         </div>
       </header>

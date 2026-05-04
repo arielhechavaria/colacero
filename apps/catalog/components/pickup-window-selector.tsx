@@ -1,6 +1,10 @@
 'use client'
 
 import type { PickupWindow } from '../lib/client-api'
+import { Button }   from '@/components/ui/button'
+import { Label }    from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Badge }    from '@/components/ui/badge'
 
 interface Props {
   windows:       PickupWindow[]
@@ -13,6 +17,7 @@ interface Props {
   onNotesChange: (v: string) => void
 }
 
+// Textarea needs to be created for catalog too
 function formatDate(iso: string): string {
   const date = new Date(iso)
   return date.toLocaleDateString('es-CU', {
@@ -64,33 +69,26 @@ export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, l
                 {w.startTime} – {w.endTime}
               </p>
             </div>
-            <span
-              className="text-xs font-medium"
-              style={{ color: w.spotsLeft <= 2 ? 'var(--warning)' : 'var(--success)' }}
-            >
+            <Badge variant={w.spotsLeft <= 2 ? 'warning' : 'success'}>
               {w.spotsLeft === 1 ? 'Último lugar' : `${w.spotsLeft} lugares`}
-            </span>
+            </Badge>
           </label>
         ))}
       </div>
 
       {/* Notas opcionales */}
-      <div>
-        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
-          ¿Alguna indicación? <span className="normal-case font-normal">(opcional)</span>
-        </label>
-        <textarea
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="pickup-notes">
+          ¿Alguna indicación? <span className="normal-case font-normal opacity-60">(opcional)</span>
+        </Label>
+        <Textarea
+          id="pickup-notes"
           value={notes}
           onChange={(e) => onNotesChange(e.target.value)}
           placeholder="Sin cebolla, alérgico a…"
           rows={2}
           maxLength={500}
-          className="w-full resize-none rounded-xl border px-3 py-2.5 text-sm outline-none"
-          style={{
-            backgroundColor: 'var(--surface)',
-            borderColor:     'var(--border)',
-            color:           'var(--text)',
-          }}
+          className="resize-none"
         />
       </div>
 
@@ -103,13 +101,13 @@ export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, l
         </p>
       )}
 
-      <button
+      <Button
         onClick={() => void onConfirm()}
         disabled={loading || selected === null}
-        className="w-full rounded-xl py-3 text-sm font-semibold text-white disabled:opacity-50 bg-gradient-teal-violet shadow-glow"
+        className="w-full bg-gradient-teal-violet shadow-glow hover:opacity-90"
       >
         {loading ? 'Confirmando pedido…' : 'Confirmar pedido'}
-      </button>
+      </Button>
     </div>
   )
 }
