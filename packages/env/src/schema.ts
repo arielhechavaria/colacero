@@ -32,6 +32,7 @@ export const envSchema = z.object({
   TELEGRAM_BOT_TOKEN:      z.string().optional(),
   TELEGRAM_CHANNEL_ID:     z.string().optional(), // canal público de anuncios
   TELEGRAM_NOTIFY_CHAT_ID: z.string().optional(), // grupo interno del negocio
+  CATALOG_URL:             z.string().url().optional(), // URL pública del catálogo (Mini App button)
 
   // ── Upload de archivos ────────────────────────────────────────────
   UPLOAD_DIR:      z.string().default('./uploads'),

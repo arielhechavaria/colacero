@@ -12,13 +12,26 @@ const mockProvider: TelegramProvider = {
   },
 }
 
-function createBotApiProvider(token: string, channelId: string): TelegramProvider {
-  async function send(chatId: string, text: string): Promise<void> {
+function createBotApiProvider(
+  token:      string,
+  channelId:  string,
+  catalogUrl?: string,
+): TelegramProvider {
+  async function send(
+    chatId:      string,
+    text:        string,
+    replyMarkup?: object,
+  ): Promise<void> {
     const url = `https://api.telegram.org/bot${token}/sendMessage`
     const res = await fetch(url, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' }),
+      body:    JSON.stringify({
+        chat_id:      chatId,
+        text,
+        parse_mode:   'HTML',
+        ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
+      }),
     })
     if (!res.ok) {
       const body = await res.json() as { description?: string }
@@ -26,22 +39,32 @@ function createBotApiProvider(token: string, channelId: string): TelegramProvide
     }
   }
 
+  // Inline keyboard with Mini App button — only when catalogUrl is configured
+  const miniAppMarkup = catalogUrl
+    ? {
+        inline_keyboard: [[
+          { text: '🛒 Ver catálogo', web_app: { url: catalogUrl } },
+        ]],
+      }
+    : undefined
+
   return {
-    sendChannelMessage: (text) => send(channelId, text),
+    sendChannelMessage: (text) => send(channelId, text, miniAppMarkup),
     sendDirectMessage:  (chatId, text) => send(chatId, text),
   }
 }
 
 export function createTelegramProvider(
-  provider: 'mock' | 'bot-api',
-  token?:   string,
-  channel?: string,
+  provider:    'mock' | 'bot-api',
+  token?:      string,
+  channel?:    string,
+  catalogUrl?: string,
 ): TelegramProvider {
   if (provider === 'bot-api') {
     if (!token || !channel) {
       throw new Error('TELEGRAM_BOT_TOKEN and TELEGRAM_CHANNEL_ID are required for bot-api provider')
     }
-    return createBotApiProvider(token, channel)
+    return createBotApiProvider(token, channel, catalogUrl)
   }
   return mockProvider
 }

@@ -43,6 +43,7 @@ export const bullmqPlugin = fp(async (app: FastifyInstance) => {
       env.TELEGRAM_PROVIDER,
       env.TELEGRAM_BOT_TOKEN,
       env.TELEGRAM_CHANNEL_ID,
+      env.CATALOG_URL,
     )
 
     const announcementWorker  = createAnnouncementWorker(connection, telegram)
