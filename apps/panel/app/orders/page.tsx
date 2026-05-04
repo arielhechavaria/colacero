@@ -2,11 +2,15 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { format, parseISO } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react'
 import { getOrders, patchOrderStatus } from '../../lib/api'
 import type { DayOrders, OrderStatus } from '../../lib/api'
 import { WindowGroup } from '../../components/window-group'
-import { Button } from '@/components/ui/button'
-import { Input }  from '@/components/ui/input'
+import { Button }   from '@/components/ui/button'
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
+import { Calendar } from '@/components/ui/calendar'
 
 const POLL_INTERVAL_MS = 15_000
 
@@ -22,30 +26,21 @@ function offsetDate(date: string, days: number): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Havana' }).format(d)
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso + 'T00:00:00').toLocaleDateString('es-CU', {
-    weekday: 'long',
-    day:     'numeric',
-    month:   'long',
-  })
-}
-
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function OrdersPage() {
   const router = useRouter()
 
-  const [selectedDate,   setSelectedDate]   = useState(() => todayHavana())
-  const [data,           setData]           = useState<DayOrders | null>(null)
-  const [loading,        setLoading]        = useState(true)
-  const [actionLoading,  setActionLoading]  = useState(false)
-  const [error,          setError]          = useState<string | null>(null)
-  const [lastUpdated,    setLastUpdated]    = useState<Date | null>(null)
+  const [selectedDate,  setSelectedDate]  = useState(() => todayHavana())
+  const [calOpen,       setCalOpen]       = useState(false)
+  const [data,          setData]          = useState<DayOrders | null>(null)
+  const [loading,       setLoading]       = useState(true)
+  const [actionLoading, setActionLoading] = useState(false)
+  const [error,         setError]         = useState<string | null>(null)
+  const [lastUpdated,   setLastUpdated]   = useState<Date | null>(null)
 
-  const tokenRef       = useRef<string | null>(null)
+  const tokenRef        = useRef<string | null>(null)
   const selectedDateRef = useRef(selectedDate)
-
-  // Keep ref in sync so the polling closure always reads the latest date
   useEffect(() => { selectedDateRef.current = selectedDate }, [selectedDate])
 
   const fetchOrders = useCallback(async (showLoader = false) => {
@@ -64,7 +59,6 @@ export default function OrdersPage() {
     }
   }, [])
 
-  // Initial auth check
   useEffect(() => {
     const token = sessionStorage.getItem('panel_token')
     if (!token) { router.replace('/login'); return }
@@ -73,17 +67,13 @@ export default function OrdersPage() {
   }, [fetchOrders, router])
 
   // Re-fetch when date changes
-  useEffect(() => {
-    void fetchOrders(true)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate])
+  useEffect(() => { void fetchOrders(true) }, [selectedDate])
 
-  // Polling (only active on today — historical dates don't need live updates)
+  // Polling — only on today
   useEffect(() => {
     const id = setInterval(() => {
-      if (selectedDateRef.current === todayHavana()) {
-        void fetchOrders(false)
-      }
+      if (selectedDateRef.current === todayHavana()) void fetchOrders(false)
     }, POLL_INTERVAL_MS)
     return () => clearInterval(id)
   }, [fetchOrders])
@@ -100,9 +90,7 @@ export default function OrdersPage() {
           ...prev,
           windows: prev.windows.map((w) => ({
             ...w,
-            orders: w.orders.map((o) =>
-              o.id === orderId ? { ...o, status: newStatus } : o
-            ),
+            orders: w.orders.map((o) => o.id === orderId ? { ...o, status: newStatus } : o),
           })),
         }
       })
@@ -114,14 +102,10 @@ export default function OrdersPage() {
     }
   }, [fetchOrders])
 
-  // ── Date navigation helpers ──────────────────────────────────────────────
+  const today   = todayHavana()
+  const isToday = selectedDate === today
 
-  const today    = todayHavana()
-  const isToday  = selectedDate === today
-
-  function goTo(date: string) {
-    setSelectedDate(date)
-  }
+  function goTo(date: string) { setSelectedDate(date) }
 
   if (loading) {
     return (
@@ -143,11 +127,7 @@ export default function OrdersPage() {
                 {lastUpdated.toLocaleTimeString('es-CU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void fetchOrders(true)}
-            >
+            <Button variant="outline" size="sm" onClick={() => void fetchOrders(true)}>
               Actualizar
             </Button>
           </div>
@@ -156,64 +136,59 @@ export default function OrdersPage() {
         {/* Date navigation */}
         <div className="flex items-center gap-2">
           <Button
-            variant="ghost"
-            size="icon"
+            variant="ghost" size="icon"
             onClick={() => goTo(offsetDate(selectedDate, -1))}
             aria-label="Día anterior"
-            className="h-9 w-9 flex-shrink-0"
           >
-            ←
+            <ChevronLeft className="h-4 w-4" />
           </Button>
 
-          <Input
-            type="date"
-            value={selectedDate}
-            max={today}
-            onChange={(e) => { if (e.target.value) goTo(e.target.value) }}
-            className="flex-1 text-center font-mono text-sm cursor-pointer"
-          />
+          <Popover open={calOpen} onOpenChange={setCalOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="flex-1 justify-start gap-2 font-normal">
+                <CalendarIcon className="h-4 w-4 opacity-60" />
+                <span className="capitalize">
+                  {format(parseISO(selectedDate), "EEEE d 'de' MMMM", { locale: es })}
+                </span>
+                {!isToday && (
+                  <span className="ml-auto text-[10px] opacity-50">histórico</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={parseISO(selectedDate)}
+                onSelect={(d) => {
+                  if (d) { goTo(format(d, 'yyyy-MM-dd')); setCalOpen(false) }
+                }}
+                disabled={(d) => d > new Date()}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
 
           <Button
-            variant="ghost"
-            size="icon"
+            variant="ghost" size="icon"
             onClick={() => goTo(offsetDate(selectedDate, 1))}
             disabled={isToday}
             aria-label="Día siguiente"
-            className="h-9 w-9 flex-shrink-0"
           >
-            →
+            <ChevronRight className="h-4 w-4" />
           </Button>
 
           {!isToday && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => goTo(today)}
-              className="flex-shrink-0"
-            >
+            <Button variant="outline" size="sm" onClick={() => goTo(today)}>
               Hoy
             </Button>
           )}
         </div>
-
-        {data && (
-          <p className="text-xs capitalize mt-1.5" style={{ color: 'var(--muted)' }}>
-            {formatDate(selectedDate)}
-            {!isToday && <span className="ml-2 opacity-60">(histórico)</span>}
-          </p>
-        )}
       </header>
 
       <div className="px-6 py-5 flex flex-col gap-4">
         {error != null && (
-          <div
-            className="rounded-xl px-4 py-3 text-sm"
-            style={{
-              backgroundColor: 'rgba(255,61,85,0.08)',
-              color:           'var(--error)',
-              border:          '1px solid rgba(255,61,85,0.2)',
-            }}
-          >
+          <div className="rounded-xl px-4 py-3 text-sm"
+            style={{ backgroundColor: 'rgba(255,61,85,0.08)', color: 'var(--error)', border: '1px solid rgba(255,61,85,0.2)' }}>
             {error}
           </div>
         )}
@@ -223,17 +198,12 @@ export default function OrdersPage() {
             <p style={{ color: 'var(--muted)' }}>
               {isToday
                 ? 'No hay ventanas de recogida para hoy'
-                : `No hay pedidos para el ${formatDate(selectedDate)}`}
+                : `No hay pedidos para el ${format(parseISO(selectedDate), "d 'de' MMMM", { locale: es })}`}
             </p>
           </div>
         ) : (
           data.windows.map((w) => (
-            <WindowGroup
-              key={w.id}
-              window={w}
-              onAction={handleAction}
-              loading={actionLoading}
-            />
+            <WindowGroup key={w.id} window={w} onAction={handleAction} loading={actionLoading} />
           ))
         )}
       </div>
