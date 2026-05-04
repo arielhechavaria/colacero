@@ -11,6 +11,19 @@ import {
   type Product,
   type CreateProductInput,
 } from '../../lib/api'
+import { Button }   from '@/components/ui/button'
+import { Input }    from '@/components/ui/input'
+import { Label }    from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Badge }    from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog'
 
 // ── Stock badge ───────────────────────────────────────────────────────────────
 
@@ -20,27 +33,12 @@ function StockBadge({ inv }: { inv: Product['inventory'] }) {
   const { quantityAvailable, lowStockThreshold } = inv
 
   if (quantityAvailable === 0) {
-    return (
-      <span className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
-        style={{ background: 'rgba(248,113,113,0.15)', color: 'var(--error)' }}>
-        Sin stock
-      </span>
-    )
+    return <Badge variant="destructive">Sin stock</Badge>
   }
   if (quantityAvailable <= lowStockThreshold) {
-    return (
-      <span className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
-        style={{ background: 'rgba(251,191,36,0.15)', color: 'var(--warning)' }}>
-        Bajo: {quantityAvailable}
-      </span>
-    )
+    return <Badge variant="warning">Bajo: {quantityAvailable}</Badge>
   }
-  return (
-    <span className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
-      style={{ background: 'rgba(52,211,153,0.15)', color: 'var(--success)' }}>
-      {quantityAvailable} disponibles
-    </span>
-  )
+  return <Badge variant="success">{quantityAvailable} disponibles</Badge>
 }
 
 // ── Inventory adjuster (inline) ───────────────────────────────────────────────
@@ -88,14 +86,13 @@ function InventoryAdjuster({
         title="Reducir stock"
       >−</button>
 
-      <input
+      <Input
         type="number"
         min="1"
         value={delta}
         onChange={(e) => setDelta(e.target.value)}
         placeholder="Cant."
-        className="w-16 rounded-lg border px-2 py-1 text-xs text-center outline-none font-mono"
-        style={{ background: 'rgba(255,255,255,0.15)', borderColor: 'var(--glass-border)', color: 'var(--text)' }}
+        className="w-16 text-xs text-center font-mono h-7"
       />
 
       <button
@@ -180,20 +177,21 @@ function ProductCard({
 
       {/* Actions */}
       <div className="flex gap-2 mt-1 pt-3" style={{ borderTop: '1px solid var(--glass-border)' }}>
-        <button
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1"
           onClick={() => onEdit(product)}
-          className="flex-1 rounded-xl py-2 text-xs font-semibold transition-all"
-          style={{ background: 'var(--primary-dim)', color: 'var(--primary)', border: '1px solid var(--border-glow)' }}
         >
           Editar
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="destructive"
+          size="sm"
           onClick={() => onDelete(product)}
-          className="rounded-xl px-3 py-2 text-xs font-semibold transition-all"
-          style={{ background: 'rgba(248,113,113,0.1)', color: 'var(--error)' }}
         >
           Eliminar
-        </button>
+        </Button>
       </div>
     </div>
   )
@@ -231,11 +229,13 @@ function productToForm(p: Product): FormValues {
 }
 
 function ProductModal({
+  open,
   editing,
   token,
   onSave,
   onClose,
 }: {
+  open:     boolean
   editing:  Product | null
   token:    string
   onSave:   (p: Product) => void
@@ -244,6 +244,12 @@ function ProductModal({
   const [form, setForm]       = useState<FormValues>(editing ? productToForm(editing) : EMPTY)
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState<string | null>(null)
+
+  // Sync form when editing target changes
+  useEffect(() => {
+    setForm(editing ? productToForm(editing) : EMPTY)
+    setError(null)
+  }, [editing, open])
 
   function set(field: keyof FormValues, val: string) {
     setForm((f) => ({ ...f, [field]: val }))
@@ -292,152 +298,168 @@ function ProductModal({
     }
   }
 
-  const inputCls = 'w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition-colors'
-  const inputStyle = { background: 'rgba(255,255,255,0.15)', borderColor: 'var(--glass-border)', color: 'var(--text)' }
-  const labelCls  = 'block text-xs font-semibold uppercase tracking-wide mb-1'
-
   return (
-    /* Backdrop */
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <div className="glass rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg font-bold text-gradient">
-              {editing ? 'Editar producto' : 'Nuevo producto'}
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-2xl leading-none"
-              style={{ color: 'var(--muted)' }}
-            >×</button>
+    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {editing ? 'Editar producto' : 'Nuevo producto'}
+          </DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-4">
+          {/* Nombre */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="prod-name">Nombre *</Label>
+            <Input
+              id="prod-name"
+              required
+              value={form.name}
+              onChange={(e) => set('name', e.target.value)}
+              placeholder="Ej: Carne de cerdo"
+            />
           </div>
 
-          <form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-4">
-            {/* Nombre */}
-            <div>
-              <label className={labelCls} style={{ color: 'var(--muted)' }}>Nombre *</label>
-              <input
-                required value={form.name} onChange={(e) => set('name', e.target.value)}
-                placeholder="Ej: Carne de cerdo"
-                className={inputCls} style={inputStyle}
+          {/* Precio + Unidad */}
+          <div className="flex gap-3">
+            <div className="flex-1 flex flex-col gap-1.5">
+              <Label htmlFor="prod-price">Precio *</Label>
+              <Input
+                id="prod-price"
+                required
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.unitPrice}
+                onChange={(e) => set('unitPrice', e.target.value)}
+                placeholder="0.00"
+                className="font-mono"
               />
             </div>
+            <div className="w-28 flex flex-col gap-1.5">
+              <Label htmlFor="prod-unit">Unidad</Label>
+              <Input
+                id="prod-unit"
+                value={form.unitLabel}
+                onChange={(e) => set('unitLabel', e.target.value)}
+                placeholder="unidad"
+              />
+            </div>
+          </div>
 
-            {/* Precio + Unidad */}
+          {/* SKU */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="prod-sku">
+              SKU{' '}
+              <span style={{ color: 'var(--muted)', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
+                (opcional)
+              </span>
+            </Label>
+            <Input
+              id="prod-sku"
+              value={form.sku}
+              onChange={(e) => set('sku', e.target.value)}
+              placeholder="Ej: CERDO-001"
+              className="font-mono"
+            />
+          </div>
+
+          {/* Descripción */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="prod-desc">Descripción</Label>
+            <Textarea
+              id="prod-desc"
+              value={form.description}
+              onChange={(e) => set('description', e.target.value)}
+              rows={2}
+              placeholder="Descripción breve..."
+              className="resize-none"
+            />
+          </div>
+
+          {/* Stock inicial — solo en creación */}
+          {!editing && (
             <div className="flex gap-3">
-              <div className="flex-1">
-                <label className={labelCls} style={{ color: 'var(--muted)' }}>Precio *</label>
-                <input
-                  required type="number" min="0" step="0.01"
-                  value={form.unitPrice} onChange={(e) => set('unitPrice', e.target.value)}
-                  placeholder="0.00"
-                  className={`${inputCls} font-mono`} style={inputStyle}
+              <div className="flex-1 flex flex-col gap-1.5">
+                <Label htmlFor="prod-qty">Stock inicial</Label>
+                <Input
+                  id="prod-qty"
+                  type="number"
+                  min="0"
+                  value={form.initialQuantity}
+                  onChange={(e) => set('initialQuantity', e.target.value)}
+                  className="font-mono"
                 />
               </div>
-              <div className="w-28">
-                <label className={labelCls} style={{ color: 'var(--muted)' }}>Unidad</label>
-                <input
-                  value={form.unitLabel} onChange={(e) => set('unitLabel', e.target.value)}
-                  placeholder="unidad"
-                  className={inputCls} style={inputStyle}
+              <div className="flex-1 flex flex-col gap-1.5">
+                <Label htmlFor="prod-threshold">Alerta bajo stock</Label>
+                <Input
+                  id="prod-threshold"
+                  type="number"
+                  min="0"
+                  value={form.lowStockThreshold}
+                  onChange={(e) => set('lowStockThreshold', e.target.value)}
+                  className="font-mono"
                 />
               </div>
             </div>
+          )}
 
-            {/* SKU */}
-            <div>
-              <label className={labelCls} style={{ color: 'var(--muted)' }}>SKU <span style={{ color: 'var(--muted)', fontWeight: 400, textTransform: 'none' }}>(opcional)</span></label>
-              <input
-                value={form.sku} onChange={(e) => set('sku', e.target.value)}
-                placeholder="Ej: CERDO-001"
-                className={`${inputCls} font-mono`} style={inputStyle}
-              />
-            </div>
+          {/* Imagen URL */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="prod-img">URL de imagen</Label>
+            <Input
+              id="prod-img"
+              type="url"
+              value={form.imageUrl}
+              onChange={(e) => set('imageUrl', e.target.value)}
+              placeholder="https://..."
+            />
+          </div>
 
-            {/* Descripción */}
-            <div>
-              <label className={labelCls} style={{ color: 'var(--muted)' }}>Descripción</label>
-              <textarea
-                value={form.description} onChange={(e) => set('description', e.target.value)}
-                rows={2} placeholder="Descripción breve..."
-                className={inputCls} style={{ ...inputStyle, resize: 'none' }}
-              />
-            </div>
+          {error && (
+            <p
+              className="rounded-xl px-3 py-2 text-sm"
+              style={{ background: 'rgba(248,113,113,0.1)', color: 'var(--error)' }}
+            >
+              {error}
+            </p>
+          )}
 
-            {/* Stock inicial — solo en creación */}
-            {!editing && (
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <label className={labelCls} style={{ color: 'var(--muted)' }}>Stock inicial</label>
-                  <input
-                    type="number" min="0"
-                    value={form.initialQuantity} onChange={(e) => set('initialQuantity', e.target.value)}
-                    className={`${inputCls} font-mono`} style={inputStyle}
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className={labelCls} style={{ color: 'var(--muted)' }}>Alerta bajo stock</label>
-                  <input
-                    type="number" min="0"
-                    value={form.lowStockThreshold} onChange={(e) => set('lowStockThreshold', e.target.value)}
-                    className={`${inputCls} font-mono`} style={inputStyle}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Imagen URL */}
-            <div>
-              <label className={labelCls} style={{ color: 'var(--muted)' }}>URL de imagen</label>
-              <input
-                type="url" value={form.imageUrl} onChange={(e) => set('imageUrl', e.target.value)}
-                placeholder="https://..."
-                className={inputCls} style={inputStyle}
-              />
-            </div>
-
-            {error && (
-              <p className="rounded-xl px-3 py-2 text-sm"
-                style={{ background: 'rgba(248,113,113,0.1)', color: 'var(--error)' }}>
-                {error}
-              </p>
-            )}
-
-            <div className="flex gap-3 mt-1">
-              <button
-                type="button" onClick={onClose}
-                className="flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all"
-                style={{ border: '1px solid var(--glass-border)', color: 'var(--muted)' }}
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit" disabled={loading}
-                className="flex-[2] rounded-xl py-2.5 text-sm font-semibold text-white disabled:opacity-50 bg-gradient-teal-violet shadow-glow"
-              >
-                {loading ? 'Guardando…' : editing ? 'Guardar cambios' : 'Crear producto'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={onClose}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="flex-[2]"
+            >
+              {loading ? 'Guardando…' : editing ? 'Guardar cambios' : 'Crear producto'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   )
 }
 
-// ── Delete confirmation modal ─────────────────────────────────────────────────
+// ── Delete confirmation dialog ────────────────────────────────────────────────
 
-function DeleteModal({
+function DeleteDialog({
+  open,
   product,
   token,
   onDeleted,
   onClose,
 }: {
-  product:   Product
+  open:      boolean
+  product:   Product | null
   token:     string
   onDeleted: (id: string) => void
   onClose:   () => void
@@ -445,12 +467,12 @@ function DeleteModal({
   const [loading, setLoading] = useState(false)
 
   async function confirm() {
+    if (!product) return
     setLoading(true)
     try {
       await deleteProduct(token, product.id)
       onDeleted(product.id)
     } catch {
-      /* silently close — the product may have orders */
       onClose()
     } finally {
       setLoading(false)
@@ -458,36 +480,30 @@ function DeleteModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
-    >
-      <div className="glass rounded-2xl w-full max-w-sm p-6">
-        <h2 className="text-base font-bold mb-2" style={{ color: 'var(--text)' }}>
-          ¿Desactivar producto?
-        </h2>
-        <p className="text-sm mb-5" style={{ color: 'var(--muted)' }}>
-          <strong style={{ color: 'var(--text)' }}>{product.name}</strong> se ocultará del catálogo. Podés reactivarlo luego.
-        </p>
-        <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 rounded-xl py-2.5 text-sm font-semibold"
-            style={{ border: '1px solid var(--glass-border)', color: 'var(--muted)' }}
-          >
+    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>¿Desactivar producto?</DialogTitle>
+          <DialogDescription>
+            <strong style={{ color: 'var(--text)' }}>{product?.name}</strong> se ocultará del catálogo.
+            Podés reactivarlo luego.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" className="flex-1" onClick={onClose}>
             Cancelar
-          </button>
-          <button
-            onClick={() => void confirm()}
+          </Button>
+          <Button
+            variant="destructive"
+            className="flex-1"
             disabled={loading}
-            className="flex-1 rounded-xl py-2.5 text-sm font-semibold disabled:opacity-50"
-            style={{ background: 'rgba(248,113,113,0.15)', color: 'var(--error)' }}
+            onClick={() => void confirm()}
           >
             {loading ? 'Desactivando…' : 'Desactivar'}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -544,7 +560,6 @@ export default function ProductsPage() {
   }
 
   function handleDeleted(id: string) {
-    // Soft-delete — marca isActive=false
     setProducts((prev) => prev.map((p) => p.id === id ? { ...p, isActive: false } : p))
     closeModal()
   }
@@ -588,7 +603,7 @@ export default function ProductsPage() {
 
   return (
     <main className="min-h-screen">
-      {/* Header glass */}
+      {/* Header */}
       <header
         className="sticky top-0 z-10 glass px-6 py-4"
         style={{ borderBottom: '1px solid var(--glass-border)' }}
@@ -600,12 +615,9 @@ export default function ProductsPage() {
               {products.filter((p) => p.isActive).length} activos · {products.filter((p) => !p.isActive).length} inactivos
             </p>
           </div>
-          <button
-            onClick={openCreate}
-            className="flex-shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold text-white bg-gradient-teal-violet shadow-glow"
-          >
+          <Button onClick={openCreate}>
             + Nuevo producto
-          </button>
+          </Button>
         </div>
 
         {/* Search */}
@@ -614,16 +626,11 @@ export default function ProductsPage() {
             className="absolute left-3 top-1/2 -translate-y-1/2 text-sm"
             style={{ color: 'var(--muted)' }}
           >🔍</span>
-          <input
+          <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nombre o SKU…"
-            className="w-full rounded-xl border py-2.5 pl-9 pr-4 text-sm outline-none"
-            style={{
-              background:   'rgba(255,255,255,0.1)',
-              borderColor:  'var(--glass-border)',
-              color:        'var(--text)',
-            }}
+            className="pl-9"
           />
         </div>
       </header>
@@ -641,12 +648,7 @@ export default function ProductsPage() {
             <p className="text-4xl mb-3">📦</p>
             <p className="font-semibold mb-1" style={{ color: 'var(--text)' }}>Todavía no tenés productos</p>
             <p className="text-sm mb-5" style={{ color: 'var(--muted)' }}>Creá tu primer producto para que aparezca en el catálogo</p>
-            <button
-              onClick={openCreate}
-              className="rounded-xl px-6 py-2.5 text-sm font-semibold text-white bg-gradient-teal-violet shadow-glow"
-            >
-              + Crear primer producto
-            </button>
+            <Button onClick={openCreate}>+ Crear primer producto</Button>
           </div>
         )}
 
@@ -695,24 +697,22 @@ export default function ProductsPage() {
         )}
       </div>
 
-      {/* Modals */}
-      {(modal === 'create' || modal === 'edit') && (
-        <ProductModal
-          editing={modal === 'edit' ? target : null}
-          token={token}
-          onSave={handleSaved}
-          onClose={closeModal}
-        />
-      )}
+      {/* Dialogs */}
+      <ProductModal
+        open={modal === 'create' || modal === 'edit'}
+        editing={modal === 'edit' ? target : null}
+        token={token}
+        onSave={handleSaved}
+        onClose={closeModal}
+      />
 
-      {modal === 'delete' && target && (
-        <DeleteModal
-          product={target}
-          token={token}
-          onDeleted={handleDeleted}
-          onClose={closeModal}
-        />
-      )}
+      <DeleteDialog
+        open={modal === 'delete'}
+        product={target}
+        token={token}
+        onDeleted={handleDeleted}
+        onClose={closeModal}
+      />
     </main>
   )
 }

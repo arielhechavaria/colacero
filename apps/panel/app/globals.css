@@ -4,6 +4,8 @@
 
 /* ── Design Tokens — Light ───────────────────────────────────────────────── */
 :root {
+  --radius: 0.5rem;
+
   /* Palette */
   --primary:       #6366F1;
   --primary-dark:  #4F46E5;
