@@ -39,11 +39,12 @@ function createBotApiProvider(
     }
   }
 
-  // Inline keyboard with Mini App button — only when catalogUrl is configured
+  // Inline keyboard with URL button — web_app type is only valid in private chats,
+  // so we use a plain url button which works in channels and opens Telegram's in-app browser
   const miniAppMarkup = catalogUrl
     ? {
         inline_keyboard: [[
-          { text: '🛒 Ver catálogo', web_app: { url: catalogUrl } },
+          { text: '🛒 Ver catálogo', url: catalogUrl },
         ]],
       }
     : undefined
