@@ -45,9 +45,9 @@ export default function LoginPage() {
         {/* Logo mark */}
         <div className="flex justify-center mb-8">
           <div className="animate-float">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-teal-violet text-white text-2xl font-black shadow-glow animate-glow">
-              C
-            </div>
+                      <div className="flex items-center justify-center rounded-2xl bg-slate-950/60 px-4 py-3 shadow-glow">
+                          <Logo size="md" variant="page" className="h-8 w-auto" />
+                      </div>
           </div>
         </div>
 
