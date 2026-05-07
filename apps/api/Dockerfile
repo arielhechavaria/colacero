@@ -18,6 +18,7 @@ RUN pnpm install --frozen-lockfile
 # Copiar código fuente
 COPY packages/ packages/
 COPY apps/api/ apps/api/
+COPY apps/api/public apps/api/public
 
 # Generar Prisma client y compilar paquetes internos + API
 RUN pnpm --filter @colacero/db run generate

@@ -1,6 +1,8 @@
 import Fastify from 'fastify'
 import sensible from '@fastify/sensible'
 import cors from '@fastify/cors'
+import fs from 'node:fs'
+import path from 'node:path'
 import { prismaPlugin } from './plugins/prisma.js'
 import { authPlugin } from './plugins/auth.js'
 import { redisPlugin } from './plugins/redis.js'
@@ -67,6 +69,21 @@ export function buildServer() {
     status: 'ok',
     ts:     new Date().toISOString(),
   }))
+
+  // ── Landing HTML para la raíz de la API ─────────────────────
+    const landingHtmlPath = path.join(
+        process.cwd(),
+        'public',
+        'api-landing.html',
+    )
+    const landingHtml = fs.readFileSync(landingHtmlPath, 'utf8')
+
+    app.get('/', async (req, reply) => {
+        return reply
+            .type('text/html; charset=utf-8')
+            .send(landingHtml)
+    })
+
 
   return app
 }
