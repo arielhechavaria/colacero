@@ -7,9 +7,10 @@ interface CartContextValue {
   items: CartItem[]
   total: number
   itemCount: number
-  add:    (item: Omit<CartItem, 'quantity'>) => void
-  remove: (productId: string) => void
-  clear:  () => void
+  add:       (item: Omit<CartItem, 'quantity'>) => void
+  remove:    (productId: string) => void
+  removeAll: (productId: string) => void
+  clear:     () => void
 }
 
 const CartContext = createContext<CartContextValue | null>(null)

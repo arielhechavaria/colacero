@@ -13,6 +13,7 @@ export interface CartItem {
 type CartAction =
   | { type: 'ADD'; item: Omit<CartItem, 'quantity'> }
   | { type: 'REMOVE'; productId: string }
+  | { type: 'REMOVE_ALL'; productId: string }
   | { type: 'CLEAR' }
   | { type: 'HYDRATE'; state: CartState }
 
@@ -51,6 +52,8 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         ),
       }
     }
+    case 'REMOVE_ALL':
+      return { items: state.items.filter((i) => i.productId !== action.productId) }
     case 'CLEAR':
       return { items: [] }
     case 'HYDRATE':
@@ -94,8 +97,9 @@ export function useCart() {
     items: state.items,
     total,
     itemCount,
-    add:   (item: Omit<CartItem, 'quantity'>) => dispatch({ type: 'ADD', item }),
-    remove:(productId: string) => dispatch({ type: 'REMOVE', productId }),
-    clear: () => dispatch({ type: 'CLEAR' }),
+    add:       (item: Omit<CartItem, 'quantity'>) => dispatch({ type: 'ADD', item }),
+    remove:    (productId: string) => dispatch({ type: 'REMOVE', productId }),
+    removeAll: (productId: string) => dispatch({ type: 'REMOVE_ALL', productId }),
+    clear:     () => dispatch({ type: 'CLEAR' }),
   }
 }

@@ -1,18 +1,62 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useRouter, useParams, usePathname } from 'next/navigation'
 import { useCartContext } from '../context/cart-context'
 import { reserveStock } from '../lib/client-api'
 
+interface StockInfo {
+  products: Array<{
+    id: string
+    inventory?: { quantityAvailable: number } | null
+    unitLabel: string
+  }>
+}
+
 export function CartDrawer() {
-  const { items, total, itemCount, remove, clear } = useCartContext()
+  const { items, total, itemCount, remove, removeAll, clear } = useCartContext()
   const pathname = usePathname()
   const [open, setOpen]       = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState<string | null>(null)
+  const [stockWarnings, setStockWarnings] = useState<string[]>([])
   const router = useRouter()
   const params = useParams<{ slug: string }>()
+
+  const syncStock = useCallback(async () => {
+    if (items.length === 0) return
+    try {
+      const res = await fetch(`/api/catalog/${params.slug}`)
+      if (!res.ok) return
+      const data = await res.json() as StockInfo
+      const stockMap = new Map(
+        data.products.map((p) => [p.id, p.inventory?.quantityAvailable ?? 0])
+      )
+      const warnings: string[] = []
+      for (const item of items) {
+        const available = stockMap.get(item.productId)
+        if (available === undefined || available === 0) {
+          removeAll(item.productId)
+          warnings.push(`"${item.name}" ya no está disponible`)
+        } else if (available < item.quantity) {
+          // Reduce quantity to available — remove until quantity matches
+          for (let i = item.quantity; i > available; i--) {
+            remove(item.productId)
+          }
+          warnings.push(`Ajustamos "${item.name}" a ${available} ${item.unitLabel}`)
+        }
+      }
+      if (warnings.length > 0) setStockWarnings(warnings)
+    } catch {
+      // Fallo silencioso — no bloquear apertura del carrito
+    }
+  }, [items, params.slug, remove, removeAll])
+
+  function handleOpen() {
+    setOpen(true)
+    setStockWarnings([])
+    void syncStock()
+  }
 
   async function handleCheckout() {
     if (items.length === 0) return
@@ -57,7 +101,7 @@ export function CartDrawer() {
       {/* FAB — botón flotante gradiente */}
       {!open && (
         <button
-          onClick={() => setOpen(true)}
+          onClick={handleOpen}
           className="fixed z-30 flex items-center gap-2.5 rounded-2xl px-4 py-3.5 bg-gradient-teal-violet shadow-glow text-white"
           style={{
             bottom:    'calc(1.5rem + env(safe-area-inset-bottom))',
@@ -109,6 +153,20 @@ export function CartDrawer() {
           </button>
         </div>
 
+        {stockWarnings.length > 0 && (
+          <ul className="mb-3 flex flex-col gap-1">
+            {stockWarnings.map((w, i) => (
+              <li
+                key={i}
+                className="rounded-lg px-3 py-1.5 text-xs"
+                style={{ backgroundColor: 'rgba(255,176,32,0.12)', color: 'var(--warning)' }}
+              >
+                ⚠️ {w}
+              </li>
+            ))}
+          </ul>
+        )}
+
         {items.length === 0 ? (
           <p className="py-8 text-center" style={{ color: 'var(--muted)' }}>
             El carrito está vacío
@@ -130,9 +188,19 @@ export function CartDrawer() {
                       {item.quantity} × ${Number(item.unitPrice).toFixed(2)}
                     </p>
                   </div>
-                  <p className="font-semibold font-mono" style={{ color: 'var(--primary)' }}>
-                    ${(Number(item.unitPrice) * item.quantity).toFixed(2)}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold font-mono" style={{ color: 'var(--primary)' }}>
+                      ${(Number(item.unitPrice) * item.quantity).toFixed(2)}
+                    </p>
+                    <button
+                      onClick={() => removeAll(item.productId)}
+                      className="text-lg leading-none opacity-40 hover:opacity-100 transition-opacity"
+                      style={{ color: 'var(--muted)' }}
+                      aria-label={`Quitar ${item.name}`}
+                    >
+                      ✕
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
