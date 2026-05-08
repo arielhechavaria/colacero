@@ -72,7 +72,8 @@ export function buildServer() {
 
   // ── Landing HTML para la raíz de la API ─────────────────────
     const landingHtmlPath = path.join(
-        process.cwd(),
+        new URL('.', import.meta.url).pathname,
+        '..',
         'public',
         'api-landing.html',
     )
