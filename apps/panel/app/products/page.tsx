@@ -206,13 +206,14 @@ interface FormValues {
   unitPrice:          string
   unitLabel:          string
   imageUrl:           string
+  category:           string
   initialQuantity:    string
   lowStockThreshold:  string
 }
 
 const EMPTY: FormValues = {
   name: '', sku: '', description: '', unitPrice: '', unitLabel: 'unidad',
-  imageUrl: '', initialQuantity: '0', lowStockThreshold: '5',
+  imageUrl: '', category: '', initialQuantity: '0', lowStockThreshold: '5',
 }
 
 function productToForm(p: Product): FormValues {
@@ -223,6 +224,7 @@ function productToForm(p: Product): FormValues {
     unitPrice:         String(p.unitPrice),
     unitLabel:         p.unitLabel,
     imageUrl:          p.imageUrl ?? '',
+    category:          p.category ?? '',
     initialQuantity:   String(p.inventory?.quantityAvailable ?? 0),
     lowStockThreshold: String(p.inventory?.lowStockThreshold ?? 5),
   }
@@ -232,14 +234,16 @@ function ProductModal({
   open,
   editing,
   token,
+  existingCategories,
   onSave,
   onClose,
 }: {
-  open:     boolean
-  editing:  Product | null
-  token:    string
-  onSave:   (p: Product) => void
-  onClose:  () => void
+  open:                boolean
+  editing:             Product | null
+  token:               string
+  existingCategories:  string[]
+  onSave:              (p: Product) => void
+  onClose:             () => void
 }) {
   const [form, setForm]       = useState<FormValues>(editing ? productToForm(editing) : EMPTY)
   const [loading, setLoading] = useState(false)
@@ -265,9 +269,10 @@ function ProductModal({
           name:      form.name.trim(),
           unitPrice: parseFloat(form.unitPrice),
           unitLabel: form.unitLabel.trim() || 'unidad',
-          ...(form.sku.trim()         ? { sku:         form.sku.trim()         } : {}),
-          ...(form.description.trim() ? { description: form.description.trim() } : {}),
-          ...(form.imageUrl.trim()    ? { imageUrl:    form.imageUrl.trim()    } : {}),
+          ...(form.sku.trim()          ? { sku:         form.sku.trim()          } : {}),
+          ...(form.description.trim()  ? { description: form.description.trim()  } : {}),
+          ...(form.imageUrl.trim()     ? { imageUrl:    form.imageUrl.trim()     } : {}),
+          ...(form.category.trim()     ? { category:    form.category.trim()     } : { category: null }),
         })
         onSave(updated)
       } else {
@@ -280,6 +285,7 @@ function ProductModal({
           ...(form.sku.trim()         ? { sku:         form.sku.trim()         } : {}),
           ...(form.description.trim() ? { description: form.description.trim() } : {}),
           ...(form.imageUrl.trim()    ? { imageUrl:    form.imageUrl.trim()    } : {}),
+          ...(form.category.trim()    ? { category:    form.category.trim()    } : {}),
         }
         const created = await createProduct(token, input)
         onSave(created)
@@ -404,6 +410,28 @@ function ProductModal({
               </div>
             </div>
           )}
+
+          {/* Categoría */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="prod-category">
+              Categoría{' '}
+              <span style={{ color: 'var(--muted)', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
+                (opcional)
+              </span>
+            </Label>
+            <Input
+              id="prod-category"
+              list="categories-list"
+              value={form.category}
+              onChange={(e) => set('category', e.target.value)}
+              placeholder="Ej: Carnes, Granos, Lácteos…"
+            />
+            <datalist id="categories-list">
+              {existingCategories.map((cat) => (
+                <option key={cat} value={cat} />
+              ))}
+            </datalist>
+          </div>
 
           {/* Imagen URL */}
           <div className="flex flex-col gap-1.5">
@@ -702,6 +730,7 @@ export default function ProductsPage() {
         open={modal === 'create' || modal === 'edit'}
         editing={modal === 'edit' ? target : null}
         token={token}
+        existingCategories={[...new Set(products.map((p) => p.category).filter((c): c is string => c != null && c !== ''))].sort()}
         onSave={handleSaved}
         onClose={closeModal}
       />

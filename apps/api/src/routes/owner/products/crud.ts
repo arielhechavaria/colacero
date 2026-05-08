@@ -7,6 +7,7 @@ interface ProductBody {
   unitPrice:          number
   unitLabel?:         string
   imageUrl?:          string
+  category?:          string
   initialQuantity?:   number
   lowStockThreshold?: number
 }
@@ -18,6 +19,7 @@ interface ProductPatchBody {
   unitPrice?:   number
   unitLabel?:   string
   imageUrl?:    string
+  category?:    string | null
   isActive?:    boolean
 }
 
@@ -62,6 +64,7 @@ export async function crudRoutes(app: FastifyInstance) {
           unitPrice:          { type: 'number', minimum: 0 },
           unitLabel:          { type: 'string' },
           imageUrl:           { type: 'string' },
+          category:           { type: 'string' },
           initialQuantity:    { type: 'integer', minimum: 0 },
           lowStockThreshold:  { type: 'integer', minimum: 0 },
         },
@@ -76,7 +79,7 @@ export async function crudRoutes(app: FastifyInstance) {
 
     const {
       name, sku, description,
-      unitPrice, unitLabel, imageUrl,
+      unitPrice, unitLabel, imageUrl, category,
       initialQuantity   = 0,
       lowStockThreshold = 5,
     } = req.body
@@ -93,6 +96,7 @@ export async function crudRoutes(app: FastifyInstance) {
           // String @default: omit if undefined so Prisma applies the default
           ...(unitLabel !== undefined ? { unitLabel } : {}),
           imageUrl:    imageUrl    ?? null,
+          category:    category    ?? null,
           inventory: {
             create: { quantityAvailable: initialQuantity, lowStockThreshold },
           },
@@ -143,6 +147,7 @@ export async function crudRoutes(app: FastifyInstance) {
           unitPrice:   { type: 'number', minimum: 0 },
           unitLabel:   { type: 'string' },
           imageUrl:    { type: 'string' },
+          category:    { type: ['string', 'null'] },
           isActive:    { type: 'boolean' },
         },
       },

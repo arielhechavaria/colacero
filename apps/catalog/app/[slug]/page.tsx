@@ -1,96 +1,13 @@
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
-import { getCatalog, type CatalogProduct } from '../../lib/api'
-import { getProductFallbackImage } from '../../lib/product-images'
-import { AddToCartButton } from '../../components/add-to-cart-button'
+import { getCatalog } from '../../lib/api'
 import { Logo } from '../../components/logo'
 import { ThemeToggle } from '../../components/theme-toggle'
-import { Badge } from '@/components/ui/badge'
+import { CatalogView } from '../../components/catalog-view'
 
 export const revalidate = 60 // ISR — revalida cada 60s
 
 interface Props {
   params: Promise<{ slug: string }>
-}
-
-function StockLabel({ inventory }: { inventory: CatalogProduct['inventory'] }) {
-  if (inventory == null) return null
-
-  const { quantityAvailable, lowStockThreshold } = inventory
-
-  if (quantityAvailable === 0) {
-    return <Badge variant="destructive">Sin stock</Badge>
-  }
-  if (quantityAvailable <= lowStockThreshold) {
-    return <Badge variant="warning">Últimas {quantityAvailable}</Badge>
-  }
-  return <Badge variant="success">Disponible</Badge>
-}
-
-function ProductRow({ product }: { product: CatalogProduct }) {
-  const outOfStock  = product.inventory?.quantityAvailable === 0
-  const imageSrc    = product.imageUrl ?? getProductFallbackImage(product.name)
-
-  return (
-    <article
-      className={`glass flex gap-3 rounded-2xl p-3 transition-all ${outOfStock ? 'opacity-50' : ''}`}
-    >
-      {/* Imagen */}
-      <div
-        className="relative h-[88px] w-[88px] flex-shrink-0 overflow-hidden rounded-xl"
-        style={{ backgroundColor: 'var(--surface)' }}
-      >
-        {imageSrc != null ? (
-          <Image
-            src={imageSrc}
-            alt={product.name}
-            fill
-            sizes="88px"
-            className="object-cover"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-3xl">
-            📦
-          </div>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="flex flex-1 flex-col justify-between py-0.5">
-        <div>
-          <h2
-            className="font-semibold text-sm leading-snug"
-            style={{ color: 'var(--text)' }}
-          >
-            {product.name}
-          </h2>
-          {product.description != null && (
-            <p
-              className="mt-0.5 text-xs line-clamp-1"
-              style={{ color: 'var(--muted)' }}
-            >
-              {product.description}
-            </p>
-          )}
-        </div>
-
-        <div className="flex items-end justify-between">
-          <div>
-            <p className="text-base font-mono font-bold text-gradient">
-              ${Number(product.unitPrice).toFixed(2)}
-            </p>
-            <p className="text-[11px]" style={{ color: 'var(--muted)' }}>
-              por {product.unitLabel}
-            </p>
-          </div>
-          <div className="flex flex-col items-end gap-1">
-            <StockLabel inventory={product.inventory ?? null} />
-            <AddToCartButton product={product} disabled={outOfStock} />
-          </div>
-        </div>
-      </div>
-    </article>
-  )
 }
 
 export default async function CatalogPage({ params }: Props) {
@@ -129,25 +46,17 @@ export default async function CatalogPage({ params }: Props) {
         </div>
       </header>
 
-      {/* Lista de productos — pb extra para el FAB */}
-      <div className="mx-auto max-w-lg px-4 py-4" style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}>
+      {/* Productos — pb extra para el FAB */}
+      <div
+        className="mx-auto max-w-lg px-4 py-4"
+        style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}
+      >
         {data.products.length === 0 ? (
           <p className="py-16 text-center" style={{ color: 'var(--muted)' }}>
             Este negocio aún no tiene productos publicados.
           </p>
         ) : (
-          <div className="flex flex-col gap-3">
-            <p
-              className="text-xs font-semibold uppercase tracking-wide"
-              style={{ color: 'var(--muted)' }}
-            >
-              {data.products.length}{' '}
-              {data.products.length === 1 ? 'producto disponible' : 'productos disponibles'}
-            </p>
-            {data.products.map((product) => (
-              <ProductRow key={product.id} product={product} />
-            ))}
-          </div>
+          <CatalogView products={data.products} />
         )}
       </div>
     </main>

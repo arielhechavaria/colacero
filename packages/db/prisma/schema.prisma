@@ -66,6 +66,7 @@ model Product {
   unitPrice   Decimal  @db.Decimal(10, 2)
   unitLabel   String   @default("unidad")
   imageUrl    String?
+  category    String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

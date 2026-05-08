@@ -7,6 +7,7 @@ export interface CatalogProduct {
   unitPrice: string // Prisma Decimal → string en JSON
   unitLabel: string
   imageUrl?: string | null
+  category?: string | null
   isActive: boolean
   inventory?: {
     quantityAvailable: number

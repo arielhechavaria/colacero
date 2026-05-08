@@ -197,6 +197,7 @@ export interface Product {
   unitPrice:   number
   unitLabel:   string
   imageUrl:    string | null
+  category:    string | null
   isActive:    boolean
   createdAt:   string
   inventory:   Inventory | null
@@ -209,6 +210,7 @@ export interface CreateProductInput {
   unitPrice:          number
   unitLabel?:         string
   imageUrl?:          string
+  category?:          string
   initialQuantity?:   number
   lowStockThreshold?: number
 }
