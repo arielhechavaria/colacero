@@ -5,9 +5,12 @@ import { useRouter } from 'next/navigation'
 import { format, parseISO, addDays } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react'
+import { toast } from 'sonner'
 import { getOrders, patchOrderStatus } from '../../lib/api'
 import type { DayOrders, OrderStatus } from '../../lib/api'
 import { WindowGroup } from '../../components/window-group'
+import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState } from '../../components/empty-state'
 import { Button }   from '@/components/ui/button'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
@@ -53,7 +56,9 @@ export default function OrdersPage() {
       setLastUpdated(new Date())
       setError(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar pedidos')
+      const msg = err instanceof Error ? err.message : 'Error al cargar pedidos'
+      toast.error(msg)
+      setError(msg)
     } finally {
       if (showLoader) setLoading(false)
     }
@@ -95,7 +100,9 @@ export default function OrdersPage() {
         }
       })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al actualizar estado')
+      const msg = err instanceof Error ? err.message : 'Error al actualizar estado'
+      toast.error(msg)
+      setError(msg)
       void fetchOrders(false)
     } finally {
       setActionLoading(false)
@@ -111,8 +118,27 @@ export default function OrdersPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p style={{ color: 'var(--muted)' }}>Cargando pedidos…</p>
+      <main className="min-h-screen">
+        <div className="px-6 py-5 flex flex-col gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="glass rounded-2xl p-5 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-5 w-20" />
+              </div>
+              {Array.from({ length: 2 }).map((_, j) => (
+                <div key={j} className="flex items-center gap-3 rounded-xl border p-3" style={{ borderColor: 'var(--border)' }}>
+                  <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
+                  <div className="flex-1 flex flex-col gap-1.5">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-3 w-40" />
+                  </div>
+                  <Skeleton className="h-8 w-20 rounded-lg" />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       </main>
     )
   }
@@ -199,13 +225,13 @@ export default function OrdersPage() {
         )}
 
         {data == null || data.windows.length === 0 ? (
-          <div className="glass rounded-2xl p-10 text-center">
-            <p style={{ color: 'var(--muted)' }}>
-              {isToday
-                ? 'No hay ventanas de recogida para hoy'
-                : `No hay pedidos para el ${format(parseISO(selectedDate), "d 'de' MMMM", { locale: es })}`}
-            </p>
-          </div>
+          <EmptyState
+            icon={isToday ? '📭' : '📅'}
+            title={isToday ? 'Sin pedidos por ahora' : 'Ningún pedido este día'}
+            description={isToday
+              ? 'Cuando lleguen pedidos para hoy, los vas a ver acá actualizados cada 15 segundos.'
+              : `No hay pedidos registrados para el ${format(parseISO(selectedDate), "d 'de' MMMM", { locale: es })}.`}
+          />
         ) : (
           data.windows.map((w) => (
             <WindowGroup key={w.id} window={w} onAction={handleAction} loading={actionLoading} />

@@ -11,11 +11,14 @@ import {
   type Product,
   type CreateProductInput,
 } from '../../lib/api'
+import { toast } from 'sonner'
 import { Button }   from '@/components/ui/button'
 import { Input }    from '@/components/ui/input'
 import { Label }    from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge }    from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState } from '../../components/empty-state'
 import {
   Dialog,
   DialogContent,
@@ -302,13 +305,13 @@ function ProductModal({
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'error'
-      setError(
-        msg === 'sku_duplicate'
-          ? 'Ya existe un producto con ese SKU'
-          : msg === 'create_product_failed' || msg === 'update_product_failed'
-            ? 'Error al guardar el producto'
-            : msg,
-      )
+      const friendly = msg === 'sku_duplicate'
+        ? 'Ya existe un producto con ese SKU'
+        : msg === 'create_product_failed' || msg === 'update_product_failed'
+          ? 'Error al guardar el producto'
+          : msg
+      toast.error(friendly)
+      setError(friendly)
     } finally {
       setLoading(false)
     }
@@ -590,6 +593,7 @@ export default function ProductsPage() {
       setProducts(list)
       setError(null)
     } catch {
+      toast.error('Error al cargar productos')
       setError('Error al cargar productos')
     } finally {
       setLoading(false)
@@ -618,6 +622,7 @@ export default function ProductsPage() {
       }
       return [p, ...prev]
     })
+    toast.success(modal === 'create' ? 'Producto creado' : 'Producto actualizado')
     closeModal()
   }
 
@@ -675,8 +680,26 @@ export default function ProductsPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p style={{ color: 'var(--muted)' }}>Cargando productos…</p>
+      <main className="min-h-screen">
+        <div className="px-6 py-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="glass rounded-2xl p-5 flex flex-col gap-3">
+              <div className="flex items-start justify-between">
+                <div className="flex flex-col gap-2 flex-1">
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+                <Skeleton className="h-6 w-16 rounded-full" />
+              </div>
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-3/4" />
+              <div className="flex gap-2 mt-1">
+                <Skeleton className="h-8 w-20 rounded-lg" />
+                <Skeleton className="h-8 w-20 rounded-lg" />
+              </div>
+            </div>
+          ))}
+        </div>
       </main>
     )
   }
@@ -758,12 +781,12 @@ export default function ProductsPage() {
         )}
 
         {products.length === 0 && !error && (
-          <div className="glass rounded-2xl p-10 text-center">
-            <p className="text-4xl mb-3">📦</p>
-            <p className="font-semibold mb-1" style={{ color: 'var(--text)' }}>Todavía no tenés productos</p>
-            <p className="text-sm mb-5" style={{ color: 'var(--muted)' }}>Creá tu primer producto para que aparezca en el catálogo</p>
-            <Button onClick={openCreate}>+ Crear primer producto</Button>
-          </div>
+          <EmptyState
+            icon="📦"
+            title="Todavía no tenés productos"
+            description="Creá tu primer producto para que aparezca en el catálogo y los clientes puedan hacer pedidos."
+            action={{ label: '+ Crear primer producto', onClick: openCreate }}
+          />
         )}
 
         {/* Activos */}

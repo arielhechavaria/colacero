@@ -16,7 +16,9 @@ import {
   type WeeklyDay,
   type StockAlert,
 } from '../../lib/api'
+import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { PeriodSelector } from '../../components/period-selector'
 
 // ── KPI card ──────────────────────────────────────────────────────────────────
@@ -296,6 +298,7 @@ export default function DashboardPage() {
       setWeeklyDays(wk)
       setStockAlerts(sa)
     } catch {
+      toast.error('Error al cargar estadísticas')
       setError('Error al cargar estadísticas')
     } finally {
       setLoading(false)
@@ -335,8 +338,36 @@ export default function DashboardPage() {
         )}
 
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <p style={{ color: 'var(--muted)' }}>Cargando métricas…</p>
+          <div className="flex flex-col gap-5">
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="glass rounded-2xl p-5 flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-6 w-6 rounded-full" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                  <Skeleton className="h-9 w-24" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+              ))}
+            </div>
+            <div className="glass rounded-2xl p-5">
+              <Skeleton className="h-3 w-32 mb-3" />
+              <Skeleton className="h-3 w-full rounded-full" />
+              <Skeleton className="h-3 w-24 mt-2" />
+            </div>
+            <div className="glass rounded-2xl p-5 flex flex-col gap-3">
+              <Skeleton className="h-3 w-40 mb-1" />
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex flex-col gap-1">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <Skeleton className="h-1.5 w-full rounded-full" />
+                </div>
+              ))}
+            </div>
           </div>
         ) : summary ? (
           <>

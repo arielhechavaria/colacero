@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
+import { Toaster } from 'sonner'
 import './globals.css'
 import { AppShell } from '../components/app-shell'
 
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AppShell>
           {children}
         </AppShell>
+        <Toaster position="top-right" richColors closeButton />
       </body>
     </html>
   )

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { publishAnnouncement, getProducts, type Product } from '../../lib/api'
 import { Button }   from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -85,8 +86,11 @@ export default function AnnouncementsPage() {
       setHistory(prev => [{ text: text.trim(), sentAt: new Date(), jobId: result.jobId ?? '' }, ...prev])
       setText('')
       setSelected(new Set())
+      toast.success('Publicado en el canal de Telegram')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al publicar')
+      const msg = err instanceof Error ? err.message : 'Error al publicar'
+      toast.error(msg)
+      setError(msg)
     } finally {
       setSending(false)
     }
@@ -241,9 +245,13 @@ export default function AnnouncementsPage() {
               Publicados esta sesión
             </p>
             {history.length === 0 ? (
-              <p className="text-xs py-4 text-center" style={{ color: 'var(--muted)' }}>
-                Aún no publicaste nada en esta sesión
-              </p>
+              <div className="py-6 flex flex-col items-center gap-2 text-center">
+                <span className="text-3xl">📤</span>
+                <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>Sin publicaciones aún</p>
+                <p className="text-xs" style={{ color: 'var(--muted)' }}>
+                  Escribí un mensaje y publicalo en tu canal de Telegram.
+                </p>
+              </div>
             ) : (
               <div className="flex flex-col gap-3 overflow-y-auto max-h-[70vh]">
                 {history.map((item, i) => (
