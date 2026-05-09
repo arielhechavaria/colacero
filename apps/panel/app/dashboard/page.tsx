@@ -53,7 +53,7 @@ function KpiCard({
   href?:     string
 }) {
   const card = (
-    <div className={`glass rounded-2xl p-5 flex flex-col gap-1 ${href ? 'transition-opacity hover:opacity-80 cursor-pointer' : ''}`}>
+    <div className={`glass rounded-2xl p-5 flex flex-col gap-1 ${href ? 'transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer' : ''}`}>
       <div className="flex items-center justify-between mb-1">
         <span className="text-xl">{icon}</span>
         <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>

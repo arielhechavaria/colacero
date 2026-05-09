@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { cn } from '@/lib/utils'
 import { ThemeToggle } from './theme-toggle'
 
 const NAV_ITEMS = [
@@ -55,12 +56,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all hover:opacity-80"
-                style={{
-                  backgroundColor: isActive ? 'var(--primary-dim)' : 'transparent',
-                  color:           isActive ? 'var(--primary)' : 'var(--muted)',
-                  border:          isActive ? '1px solid var(--border-glow)' : '1px solid transparent',
-                }}
+                className={cn(
+                  'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 border',
+                  isActive
+                    ? 'bg-[var(--primary-dim)] text-[var(--primary)] border-[var(--border-glow)]'
+                    : 'text-[var(--muted)] border-transparent hover:bg-[var(--primary-dim)] hover:text-[var(--primary)]',
+                )}
               >
                 <span className="text-base flex-shrink-0">{item.icon}</span>
                 <span className="truncate">{item.label}</span>

@@ -27,7 +27,7 @@ export function OrderCard({ order, onAction, loading }: Props) {
     order.status === 'EXPIRED'
 
   return (
-    <div className={`glass rounded-xl p-3 transition-all ${isDone ? 'opacity-40' : ''}`}>
+    <div className={`glass rounded-xl p-3 transition-all hover:shadow-md ${isDone ? 'opacity-40' : ''}`}>
       {/* Code + customer + status dot */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0">
