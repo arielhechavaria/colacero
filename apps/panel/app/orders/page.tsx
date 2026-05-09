@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { format, parseISO } from 'date-fns'
+import { format, parseISO, addDays } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react'
 import { getOrders, patchOrderStatus } from '../../lib/api'
@@ -104,6 +104,8 @@ export default function OrdersPage() {
 
   const today   = todayHavana()
   const isToday = selectedDate === today
+  const isFuture = selectedDate > today
+  const maxDate = format(addDays(new Date(), 30), 'yyyy-MM-dd')
 
   function goTo(date: string) { setSelectedDate(date) }
 
@@ -150,8 +152,11 @@ export default function OrdersPage() {
                 <span className="capitalize">
                   {format(parseISO(selectedDate), "EEEE d 'de' MMMM", { locale: es })}
                 </span>
-                {!isToday && (
+                {!isToday && !isFuture && (
                   <span className="ml-auto text-[10px] opacity-50">histórico</span>
+                )}
+                {isFuture && (
+                  <span className="ml-auto text-[10px] opacity-50">futuro</span>
                 )}
               </Button>
             </PopoverTrigger>
@@ -162,7 +167,7 @@ export default function OrdersPage() {
                 onSelect={(d) => {
                   if (d) { goTo(format(d, 'yyyy-MM-dd')); setCalOpen(false) }
                 }}
-                disabled={(d) => d > new Date()}
+                disabled={(d) => d > addDays(new Date(), 30)}
                 initialFocus
               />
             </PopoverContent>
@@ -171,7 +176,7 @@ export default function OrdersPage() {
           <Button
             variant="ghost" size="icon"
             onClick={() => goTo(offsetDate(selectedDate, 1))}
-            disabled={isToday}
+            disabled={selectedDate >= maxDate}
             aria-label="Día siguiente"
           >
             <ChevronRight className="h-4 w-4" />
