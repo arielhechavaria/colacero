@@ -51,7 +51,7 @@ function StockBadge({ inv, unitLabel }: { inv: Product['inventory']; unitLabel: 
   return <Badge variant="success">{quantityAvailable} {unitLabel}</Badge>
 }
 
-// ── Inventory adjuster (inline) ───────────────────────────────────────────────
+// ── Inventory adjuster (inline spinner) ──────────────────────────────────────
 
 function InventoryAdjuster({
   product,
@@ -63,57 +63,78 @@ function InventoryAdjuster({
   onUpdated: (p: Product) => void
 }) {
   const inv = product.inventory
-  const [delta, setDelta]     = useState('')
+  const [value, setValue]     = useState(String(inv?.quantityAvailable ?? 0))
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState<string | null>(null)
 
+  // Sync when parent updates (e.g. after concurrent save)
+  useEffect(() => {
+    setValue(String(inv?.quantityAvailable ?? 0))
+  }, [inv?.quantityAvailable])
+
   if (!inv) return null
 
-  async function apply(sign: 1 | -1) {
-    const n = parseInt(delta, 10)
-    if (isNaN(n) || n <= 0) return
+  async function saveTo(newQty: number) {
+    if (newQty === inv!.quantityAvailable) return
     setLoading(true)
     setError(null)
     try {
-      const newQty = Math.max(0, inv!.quantityAvailable + sign * n)
       const updated = await adjustInventory(token, product.id, inv!.version, newQty)
       onUpdated({ ...product, inventory: updated })
-      setDelta('')
     } catch (e) {
-      setError(e instanceof Error && e.message === 'adjust_inventory_failed' ? 'Conflicto de versión, recargá' : 'Error')
+      setValue(String(inv!.quantityAvailable))
+      setError(e instanceof Error && e.message === 'adjust_inventory_failed' ? 'Conflicto — recargá' : 'Error')
     } finally {
       setLoading(false)
     }
   }
 
+  function step(delta: 1 | -1) {
+    const next = Math.max(0, (parseInt(value, 10) || 0) + delta)
+    setValue(String(next))
+    void saveTo(next)
+  }
+
+  function handleBlur() {
+    const parsed = parseInt(value, 10)
+    const next   = isNaN(parsed) ? inv!.quantityAvailable : Math.max(0, parsed)
+    setValue(String(next))
+    void saveTo(next)
+  }
+
   return (
-    <div className="flex items-center gap-1.5 mt-2">
+    <div className="flex items-center gap-1 mt-2">
+      <span className="text-[10px] font-medium mr-1" style={{ color: 'var(--muted)' }}>Stock</span>
+
       <button
-        onClick={() => void apply(-1)}
-        disabled={loading || delta === ''}
+        onClick={() => step(-1)}
+        disabled={loading || parseInt(value, 10) <= 0}
         className="h-7 w-7 rounded-lg text-sm font-bold disabled:opacity-30 transition-all"
         style={{ background: 'rgba(248,113,113,0.12)', color: 'var(--error)' }}
-        title="Reducir stock"
+        title="Quitar 1"
       >−</button>
 
-      <Input
+      <input
         type="number"
-        min="1"
-        value={delta}
-        onChange={(e) => setDelta(e.target.value)}
-        placeholder="Cant."
-        className="w-16 text-xs text-center font-mono h-7"
+        min="0"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={handleBlur}
+        onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+        disabled={loading}
+        className="w-16 text-xs text-center font-mono h-7 rounded-md border bg-transparent disabled:opacity-50"
+        style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
       />
 
       <button
-        onClick={() => void apply(1)}
-        disabled={loading || delta === ''}
+        onClick={() => step(1)}
+        disabled={loading}
         className="h-7 w-7 rounded-lg text-sm font-bold disabled:opacity-30 transition-all"
         style={{ background: 'rgba(52,211,153,0.12)', color: 'var(--success)' }}
-        title="Agregar stock"
+        title="Agregar 1"
       >+</button>
 
-      {error && <span className="text-[11px]" style={{ color: 'var(--error)' }}>{error}</span>}
+      {error && <span className="text-[10px] ml-1" style={{ color: 'var(--error)' }}>{error}</span>}
     </div>
   )
 }
