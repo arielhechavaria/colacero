@@ -210,7 +210,7 @@ export interface CreateProductInput {
   unitPrice:          number
   unitLabel?:         string
   imageUrl?:          string
-  category?:          string
+  category?:          string | null
   initialQuantity?:   number
   lowStockThreshold?: number
 }
