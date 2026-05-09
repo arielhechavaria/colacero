@@ -41,14 +41,23 @@ function ProductRow({ product }: { product: CatalogProduct }) {
 
   return (
     <article
-      className={`glass flex gap-3 rounded-2xl p-3 transition-all ${outOfStock ? 'opacity-50' : ''}`}
+      className={`glass flex gap-3 rounded-2xl p-3 transition-all duration-200 ${
+        outOfStock ? 'opacity-50' : 'hover:scale-[1.02] hover:shadow-md'
+      }`}
     >
       <div
-        className="relative h-[88px] w-[88px] flex-shrink-0 overflow-hidden rounded-xl"
+        className="relative h-[88px] w-[88px] flex-shrink-0 overflow-hidden rounded-xl animate-pulse"
         style={{ backgroundColor: 'var(--surface)' }}
       >
         {imageSrc != null ? (
-          <Image src={imageSrc} alt={product.name} fill sizes="88px" className="object-cover" />
+          <Image
+            src={imageSrc}
+            alt={product.name}
+            fill
+            sizes="88px"
+            className="object-cover"
+            onLoad={(e) => (e.currentTarget.parentElement!.style.animation = 'none')}
+          />
         ) : (
           <div className="flex h-full items-center justify-center text-3xl">📦</div>
         )}
@@ -242,7 +251,7 @@ export function CatalogView({ products }: Props) {
           Sin resultados. Probá con otro término.
         </p>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="grid gap-3 lg:grid-cols-2">
           {filtered.map((product) => (
             <ProductRow key={product.id} product={product} />
           ))}
