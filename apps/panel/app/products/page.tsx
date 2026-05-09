@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   getProducts,
@@ -25,9 +25,16 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 
+// ── Unit options ──────────────────────────────────────────────────────────────
+
+const UNIT_OPTIONS = [
+  'unidad', 'libra', 'kg', 'litro', 'saco',
+  'caja', 'paquete', 'docena', 'bandeja', 'bolsa',
+]
+
 // ── Stock badge ───────────────────────────────────────────────────────────────
 
-function StockBadge({ inv }: { inv: Product['inventory'] }) {
+function StockBadge({ inv, unitLabel }: { inv: Product['inventory']; unitLabel: string }) {
   if (!inv) return <span style={{ color: 'var(--muted)', fontSize: 12 }}>Sin inventario</span>
 
   const { quantityAvailable, lowStockThreshold } = inv
@@ -36,9 +43,9 @@ function StockBadge({ inv }: { inv: Product['inventory'] }) {
     return <Badge variant="destructive">Sin stock</Badge>
   }
   if (quantityAvailable <= lowStockThreshold) {
-    return <Badge variant="warning">Bajo: {quantityAvailable}</Badge>
+    return <Badge variant="warning">{quantityAvailable} / {lowStockThreshold} {unitLabel}</Badge>
   }
-  return <Badge variant="success">{quantityAvailable} disponibles</Badge>
+  return <Badge variant="success">{quantityAvailable} {unitLabel}</Badge>
 }
 
 // ── Inventory adjuster (inline) ───────────────────────────────────────────────
@@ -169,7 +176,7 @@ function ProductCard({
             / {product.unitLabel}
           </span>
         </p>
-        <StockBadge inv={product.inventory} />
+        <StockBadge inv={product.inventory} unitLabel={product.unitLabel} />
       </div>
 
       {/* Inventory adjuster */}
@@ -245,13 +252,16 @@ function ProductModal({
   onSave:              (p: Product) => void
   onClose:             () => void
 }) {
-  const [form, setForm]       = useState<FormValues>(editing ? productToForm(editing) : EMPTY)
-  const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState<string | null>(null)
+  const [form, setForm]               = useState<FormValues>(editing ? productToForm(editing) : EMPTY)
+  const [isCustomUnit, setIsCustomUnit] = useState(() => !UNIT_OPTIONS.includes(form.unitLabel))
+  const [loading, setLoading]         = useState(false)
+  const [error, setError]             = useState<string | null>(null)
 
   // Sync form when editing target changes
   useEffect(() => {
-    setForm(editing ? productToForm(editing) : EMPTY)
+    const f = editing ? productToForm(editing) : EMPTY
+    setForm(f)
+    setIsCustomUnit(!UNIT_OPTIONS.includes(f.unitLabel))
     setError(null)
   }, [editing, open])
 
@@ -342,14 +352,36 @@ function ProductModal({
                 className="font-mono"
               />
             </div>
-            <div className="w-28 flex flex-col gap-1.5">
+            <div className="w-40 flex flex-col gap-1.5">
               <Label htmlFor="prod-unit">Unidad</Label>
-              <Input
+              <select
                 id="prod-unit"
-                value={form.unitLabel}
-                onChange={(e) => set('unitLabel', e.target.value)}
-                placeholder="unidad"
-              />
+                value={isCustomUnit ? '__custom__' : form.unitLabel}
+                onChange={(e) => {
+                  if (e.target.value === '__custom__') {
+                    setIsCustomUnit(true)
+                    set('unitLabel', '')
+                  } else {
+                    setIsCustomUnit(false)
+                    set('unitLabel', e.target.value)
+                  }
+                }}
+                className="h-9 w-full rounded-md border px-2 text-sm"
+                style={{ background: 'var(--glass-bg)', borderColor: 'var(--glass-border)', color: 'var(--text)' }}
+              >
+                {UNIT_OPTIONS.map((u) => (
+                  <option key={u} value={u}>{u}</option>
+                ))}
+                <option value="__custom__">Otro…</option>
+              </select>
+              {isCustomUnit && (
+                <Input
+                  value={form.unitLabel}
+                  onChange={(e) => set('unitLabel', e.target.value)}
+                  placeholder="Ej: arroba"
+                  className="mt-1"
+                />
+              )}
             </div>
           </div>
 
@@ -544,6 +576,8 @@ export default function ProductsPage() {
   const [loading,  setLoading]  = useState(true)
   const [error,    setError]    = useState<string | null>(null)
   const [search,   setSearch]   = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('')
+  const [sortBy,   setSortBy]   = useState('name-asc')
 
   const [modal,  setModal]  = useState<'create' | 'edit' | 'delete' | null>(null)
   const [target, setTarget] = useState<Product | null>(null)
@@ -605,14 +639,34 @@ export default function ProductsPage() {
     } catch { /* ignore */ }
   }
 
-  // ── filter ────────────────────────────────────────────────────────────────
+  // ── filter + sort (in-memory) ─────────────────────────────────────────────
 
-  const filtered = search.trim()
-    ? products.filter((p) =>
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        (p.sku ?? '').toLowerCase().includes(search.toLowerCase())
-      )
-    : products
+  const categories = useMemo(() =>
+    [...new Set(products.map((p) => p.category).filter((c): c is string => c != null && c !== ''))].sort(),
+    [products],
+  )
+
+  const filtered = useMemo(() => {
+    let list = products.filter((p) => {
+      const q = search.trim().toLowerCase()
+      const matchSearch = !q ||
+        p.name.toLowerCase().includes(q) ||
+        (p.sku ?? '').toLowerCase().includes(q)
+      const matchCat = !categoryFilter || p.category === categoryFilter
+      return matchSearch && matchCat
+    })
+
+    return [...list].sort((a, b) => {
+      switch (sortBy) {
+        case 'name-asc':   return a.name.localeCompare(b.name)
+        case 'price-asc':  return Number(a.unitPrice) - Number(b.unitPrice)
+        case 'price-desc': return Number(b.unitPrice) - Number(a.unitPrice)
+        case 'stock-asc':  return (a.inventory?.quantityAvailable ?? 0) - (b.inventory?.quantityAvailable ?? 0)
+        case 'stock-desc': return (b.inventory?.quantityAvailable ?? 0) - (a.inventory?.quantityAvailable ?? 0)
+        default:           return 0
+      }
+    })
+  }, [products, search, categoryFilter, sortBy])
 
   const active   = filtered.filter((p) => p.isActive)
   const inactive = filtered.filter((p) => !p.isActive)
@@ -648,18 +702,50 @@ export default function ProductsPage() {
           </Button>
         </div>
 
-        {/* Search */}
-        <div className="mt-3 relative">
-          <span
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-sm"
-            style={{ color: 'var(--muted)' }}
-          >🔍</span>
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nombre o SKU…"
-            className="pl-9"
-          />
+        {/* Toolbar */}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {/* Search */}
+          <div className="relative flex-1 min-w-40">
+            <span
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-sm"
+              style={{ color: 'var(--muted)' }}
+            >🔍</span>
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por nombre o SKU…"
+              className="pl-9"
+            />
+          </div>
+
+          {/* Category filter */}
+          {categories.length > 0 && (
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="h-9 rounded-md border px-3 text-sm"
+              style={{ background: 'var(--glass-bg)', borderColor: 'var(--glass-border)', color: 'var(--text)' }}
+            >
+              <option value="">Todas las categorías</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          )}
+
+          {/* Sort */}
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="h-9 rounded-md border px-3 text-sm"
+            style={{ background: 'var(--glass-bg)', borderColor: 'var(--glass-border)', color: 'var(--text)' }}
+          >
+            <option value="name-asc">Nombre A-Z</option>
+            <option value="price-asc">Precio ↑</option>
+            <option value="price-desc">Precio ↓</option>
+            <option value="stock-asc">Stock ↑</option>
+            <option value="stock-desc">Stock ↓</option>
+          </select>
         </div>
       </header>
 
