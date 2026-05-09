@@ -1,13 +1,15 @@
 import type { FastifyInstance } from 'fastify'
 
-type Period = 'today' | 'week' | 'month'
+type Period = 'today' | 'yesterday' | 'last7' | 'last30' | 'week' | 'month' | 'lastMonth'
+
+const PERIOD_VALUES = ['today', 'yesterday', 'last7', 'last30', 'week', 'month', 'lastMonth'] as const
 
 // Spread when passing to Prisma — avoids readonly vs mutable mismatch
 const BILLABLE = ['CONFIRMED', 'PREPARING', 'READY', 'PICKED_UP'] as const
 type BillableStatus = typeof BILLABLE[number]
 
-interface StatsQuery { period?: string }
-interface TopQuery   { period?: string; limit?: string }
+interface StatsQuery { period?: string; start?: string; end?: string }
+interface TopQuery   { period?: string; start?: string; end?: string; limit?: string }
 
 export async function ownerStatsRoutes(app: FastifyInstance) {
   // ── GET /api/owner/stats/summary?period=today|week|month ──────────────────
@@ -20,7 +22,9 @@ export async function ownerStatsRoutes(app: FastifyInstance) {
       querystring: {
         type:       'object',
         properties: {
-          period: { type: 'string', enum: ['today', 'week', 'month'] },
+          period: { type: 'string', enum: [...PERIOD_VALUES] },
+          start:  { type: 'string', format: 'date' },
+          end:    { type: 'string', format: 'date' },
         },
       },
     },
@@ -28,8 +32,7 @@ export async function ownerStatsRoutes(app: FastifyInstance) {
     const { businessId } = req.user
     if (!businessId) return reply.status(403).send({ error: 'forbidden' })
 
-    const period = (req.query.period ?? 'today') as Period
-    const start  = getPeriodStart(period)
+    const { start, end } = resolveRange(req.query)
 
     const billableStatuses: BillableStatus[] = [...BILLABLE]
 
@@ -38,7 +41,7 @@ export async function ownerStatsRoutes(app: FastifyInstance) {
         where: {
           businessId,
           status:      { in: billableStatuses },
-          confirmedAt: { gte: start },
+          confirmedAt: { gte: start, lt: end },
         },
         _sum: { subtotal: true },
       }),
@@ -46,21 +49,21 @@ export async function ownerStatsRoutes(app: FastifyInstance) {
         where: {
           businessId,
           status:      { in: billableStatuses },
-          confirmedAt: { gte: start },
+          confirmedAt: { gte: start, lt: end },
         },
       }),
       app.prisma.order.count({
         where: {
           businessId,
           status:      'PICKED_UP',
-          confirmedAt: { gte: start },
+          confirmedAt: { gte: start, lt: end },
         },
       }),
       app.prisma.order.count({
         where: {
           businessId,
           status:      'CANCELLED',
-          confirmedAt: { gte: start },
+          confirmedAt: { gte: start, lt: end },
         },
       }),
     ])
@@ -71,8 +74,8 @@ export async function ownerStatsRoutes(app: FastifyInstance) {
     const fulfillment = totalCount  > 0 ? (deliveredCount / totalCount) * 100 : 0
 
     return reply.send({
-      period,
       periodStart:     start.toISOString(),
+      periodEnd:       end.toISOString(),
       revenue:         Math.round(revenue * 100) / 100,
       ordersCount,
       deliveredCount,
@@ -92,7 +95,9 @@ export async function ownerStatsRoutes(app: FastifyInstance) {
       querystring: {
         type:       'object',
         properties: {
-          period: { type: 'string', enum: ['today', 'week', 'month'] },
+          period: { type: 'string', enum: [...PERIOD_VALUES] },
+          start:  { type: 'string', format: 'date' },
+          end:    { type: 'string', format: 'date' },
           limit:  { type: 'string' },
         },
       },
@@ -101,9 +106,8 @@ export async function ownerStatsRoutes(app: FastifyInstance) {
     const { businessId } = req.user
     if (!businessId) return reply.status(403).send({ error: 'forbidden' })
 
-    const period = (req.query.period ?? 'today') as Period
     const limit  = Math.min(parseInt(req.query.limit ?? '5', 10) || 5, 20)
-    const start  = getPeriodStart(period)
+    const { start, end } = resolveRange(req.query)
 
     const billableStatuses: BillableStatus[] = [...BILLABLE]
 
@@ -113,7 +117,7 @@ export async function ownerStatsRoutes(app: FastifyInstance) {
         order: {
           businessId,
           status:      { in: billableStatuses },
-          confirmedAt: { gte: start },
+          confirmedAt: { gte: start, lt: end },
         },
       },
       _sum:     { quantity: true, subtotal: true },
@@ -302,27 +306,87 @@ export async function ownerStatsRoutes(app: FastifyInstance) {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function getPeriodStart(period: Period): Date {
-  // Get today's date in Havana timezone
+/**
+ * Resuelve el rango temporal a partir de query params.
+ * Prioridad: si vienen `start` y `end` válidos → usar esos.
+ * Sino → usar preset `period` (default `today`).
+ *
+ * `end` es exclusivo (Prisma `lt`). `start` y `end` se calculan en TZ Havana.
+ */
+function resolveRange(query: { period?: string; start?: string; end?: string }): {
+  start: Date
+  end: Date
+} {
+  // Custom range: ?start=YYYY-MM-DD&end=YYYY-MM-DD (end inclusivo desde la perspectiva del usuario)
+  if (query.start && query.end) {
+    const s = parseLocalDate(query.start)
+    const e = parseLocalDate(query.end)
+    if (s && e) {
+      // Sumar 1 día a end para hacerlo exclusivo
+      const endExclusive = new Date(e)
+      endExclusive.setDate(endExclusive.getDate() + 1)
+      return { start: s, end: endExclusive }
+    }
+  }
+
+  const period = (query.period ?? 'today') as Period
+  return getPresetRange(period)
+}
+
+function parseLocalDate(s: string): Date | null {
+  // YYYY-MM-DD
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null
+  const d = new Date(`${s}T00:00:00`)
+  return Number.isNaN(d.getTime()) ? null : d
+}
+
+function todayHavana(): Date {
   const havana = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'America/Havana',
     year: 'numeric', month: '2-digit', day: '2-digit',
   }).format(new Date())
+  return new Date(`${havana}T00:00:00`)
+}
 
-  const today = new Date(`${havana}T00:00:00`)
+function getPresetRange(period: Period): { start: Date; end: Date } {
+  const today = todayHavana()
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1)
 
-  if (period === 'today') return today
+  switch (period) {
+    case 'today':
+      return { start: today, end: tomorrow }
 
-  if (period === 'week') {
-    const dow = today.getDay()                 // 0=Sun, 1=Mon…
-    const diff = dow === 0 ? -6 : 1 - dow     // back to Monday
-    const mon = new Date(today)
-    mon.setDate(today.getDate() + diff)
-    return mon
+    case 'yesterday': {
+      const y = new Date(today); y.setDate(today.getDate() - 1)
+      return { start: y, end: today }
+    }
+
+    case 'last7': {
+      const s = new Date(today); s.setDate(today.getDate() - 6) // últimos 7 incluyendo hoy
+      return { start: s, end: tomorrow }
+    }
+
+    case 'last30': {
+      const s = new Date(today); s.setDate(today.getDate() - 29)
+      return { start: s, end: tomorrow }
+    }
+
+    case 'week': {
+      const dow = today.getDay()                  // 0=Sun, 1=Mon…
+      const diff = dow === 0 ? -6 : 1 - dow      // retroceder a lunes
+      const mon = new Date(today); mon.setDate(today.getDate() + diff)
+      return { start: mon, end: tomorrow }
+    }
+
+    case 'month': {
+      const m = new Date(today); m.setDate(1)
+      return { start: m, end: tomorrow }
+    }
+
+    case 'lastMonth': {
+      const start = new Date(today); start.setMonth(today.getMonth() - 1); start.setDate(1)
+      const end   = new Date(today); end.setDate(1) // primer día del mes actual = exclusivo
+      return { start, end }
+    }
   }
-
-  // month — 1st of current month
-  const m = new Date(today)
-  m.setDate(1)
-  return m
 }

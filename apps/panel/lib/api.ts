@@ -305,11 +305,26 @@ export async function adjustInventory(
 
 // ── Stats / Dashboard ─────────────────────────────────────────────────────────
 
-export type StatsPeriod = 'today' | 'week' | 'month'
+export type StatsPeriod =
+  | 'today'
+  | 'yesterday'
+  | 'last7'
+  | 'last30'
+  | 'week'
+  | 'month'
+  | 'lastMonth'
+  | 'custom'
+
+export interface StatsRange {
+  /** Preset key. Si es 'custom', usar `start`/`end` (YYYY-MM-DD). */
+  period?: StatsPeriod
+  start?:  string
+  end?:    string
+}
 
 export interface StatsSummary {
-  period:          StatsPeriod
   periodStart:     string
+  periodEnd:       string
   revenue:         number
   ordersCount:     number
   deliveredCount:  number
@@ -326,11 +341,23 @@ export interface TopProduct {
   totalRev:  number
 }
 
+function buildStatsQuery(range: StatsRange): string {
+  const params = new URLSearchParams()
+  if (range.period === 'custom' && range.start && range.end) {
+    params.set('start', range.start)
+    params.set('end',   range.end)
+  } else if (range.period) {
+    params.set('period', range.period)
+  }
+  return params.toString()
+}
+
 export async function getStatsSummary(
   token: string,
-  period: StatsPeriod = 'today',
+  range: StatsRange = { period: 'today' },
 ): Promise<StatsSummary> {
-  const res = await fetch(`${API_BASE}/api/owner/stats/summary?period=${period}`, {
+  const qs = buildStatsQuery(range)
+  const res = await fetch(`${API_BASE}/api/owner/stats/summary?${qs}`, {
     headers: { 'Authorization': `Bearer ${token}` },
     cache:   'no-store',
   })
@@ -340,10 +367,11 @@ export async function getStatsSummary(
 
 export async function getTopProducts(
   token: string,
-  period: StatsPeriod = 'today',
+  range: StatsRange = { period: 'today' },
   limit = 5,
 ): Promise<TopProduct[]> {
-  const res = await fetch(`${API_BASE}/api/owner/stats/top-products?period=${period}&limit=${limit}`, {
+  const qs = buildStatsQuery(range)
+  const res = await fetch(`${API_BASE}/api/owner/stats/top-products?${qs}&limit=${limit}`, {
     headers: { 'Authorization': `Bearer ${token}` },
     cache:   'no-store',
   })

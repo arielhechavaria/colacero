@@ -8,23 +8,15 @@ import {
   getCoPurchases,
   getWeeklyTrends,
   getStockAlerts,
-  type StatsPeriod,
+  type StatsRange,
   type StatsSummary,
   type TopProduct,
   type CoPurchasePair,
   type WeeklyDay,
   type StockAlert,
 } from '../../lib/api'
-import { Button } from '@/components/ui/button'
-import { Badge }  from '@/components/ui/badge'
-
-// ── Period selector ───────────────────────────────────────────────────────────
-
-const PERIODS: { key: StatsPeriod; label: string }[] = [
-  { key: 'today', label: 'Hoy'           },
-  { key: 'week',  label: 'Esta semana'   },
-  { key: 'month', label: 'Este mes'      },
-]
+import { Badge } from '@/components/ui/badge'
+import { PeriodSelector } from '../../components/period-selector'
 
 // ── KPI card ──────────────────────────────────────────────────────────────────
 
@@ -269,24 +261,24 @@ function StockAlertsList({ alerts }: { alerts: StockAlert[] }) {
 export default function DashboardPage() {
   const router = useRouter()
 
-  const [period,     setPeriod]     = useState<StatsPeriod>('today')
-  const [summary,    setSummary]    = useState<StatsSummary | null>(null)
-  const [topProds,   setTopProds]   = useState<TopProduct[]>([])
+  const [range,       setRange]       = useState<StatsRange>({ period: 'today' })
+  const [summary,     setSummary]     = useState<StatsSummary | null>(null)
+  const [topProds,    setTopProds]    = useState<TopProduct[]>([])
   const [coPurchases, setCoPurchases] = useState<CoPurchasePair[]>([])
   const [weeklyDays,  setWeeklyDays]  = useState<WeeklyDay[]>([])
   const [stockAlerts, setStockAlerts] = useState<StockAlert[]>([])
-  const [loading,    setLoading]    = useState(true)
-  const [error,      setError]      = useState<string | null>(null)
+  const [loading,     setLoading]     = useState(true)
+  const [error,       setError]       = useState<string | null>(null)
 
   const tokenRef = useRef<string | null>(null)
 
-  const load = useCallback(async (tok: string, p: StatsPeriod) => {
+  const load = useCallback(async (tok: string, r: StatsRange) => {
     setLoading(true)
     setError(null)
     try {
       const [s, t, co, wk, sa] = await Promise.all([
-        getStatsSummary(tok, p),
-        getTopProducts(tok, p, 5),
+        getStatsSummary(tok, r),
+        getTopProducts(tok, r, 5),
         getCoPurchases(tok),
         getWeeklyTrends(tok),
         getStockAlerts(tok),
@@ -307,13 +299,8 @@ export default function DashboardPage() {
     const token = sessionStorage.getItem('panel_token')
     if (!token) { router.replace('/login'); return }
     tokenRef.current = token
-    void load(token, period)
-  }, [load, router, period])
-
-  function changePeriod(p: StatsPeriod) {
-    setPeriod(p)
-    // load is triggered by the effect above via period dependency
-  }
+    void load(token, range)
+  }, [load, router, range])
 
   // ── render ────────────────────────────────────────────────────────────────
 
@@ -327,19 +314,8 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-lg font-bold text-gradient">Dashboard</h1>
 
-          {/* Period tabs */}
-          <div className="flex gap-1">
-            {PERIODS.map(({ key, label }) => (
-              <Button
-                key={key}
-                size="sm"
-                variant={period === key ? 'default' : 'ghost'}
-                onClick={() => changePeriod(key)}
-              >
-                {label}
-              </Button>
-            ))}
-          </div>
+          {/* Period selector */}
+          <PeriodSelector range={range} onChange={setRange} />
         </div>
       </header>
 
