@@ -476,8 +476,8 @@ export default function SettingsPage() {
           )}
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 mt-3">
+          {/* Tabs — mobile only */}
+        <div className="flex gap-1 mt-3 lg:hidden">
           {TABS.map(({ key, label, icon }) => (
             <Button
               key={key}
@@ -491,13 +491,34 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      <div className="px-6 py-5 max-w-2xl">
-        {loading || !token || !currentUser ? (
-          <div className="flex items-center justify-center py-20">
-            <p style={{ color: 'var(--muted)' }}>Cargando…</p>
-          </div>
-        ) : (
-          <>
+      {loading || !token || !currentUser ? (
+        <div className="flex items-center justify-center py-20">
+          <p style={{ color: 'var(--muted)' }}>Cargando…</p>
+        </div>
+      ) : (
+        <div className="px-6 py-5 lg:grid lg:grid-cols-[200px_1fr] lg:gap-6 lg:items-start">
+
+          {/* Sidebar — desktop only */}
+          <nav className="hidden lg:flex flex-col gap-1 glass rounded-2xl p-3">
+            {TABS.map(({ key, label, icon }) => (
+              <button
+                key={key}
+                onClick={() => setTab(key)}
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-left transition-colors"
+                style={
+                  tab === key
+                    ? { background: 'var(--primary-dim)', color: 'var(--primary)', fontWeight: 600 }
+                    : { color: 'var(--text)' }
+                }
+              >
+                <span>{icon}</span>
+                <span>{label}</span>
+              </button>
+            ))}
+          </nav>
+
+          {/* Content */}
+          <div>
             {tab === 'business' && (
               <BusinessTab token={token} isOwner={isOwner} />
             )}
@@ -507,9 +528,10 @@ export default function SettingsPage() {
             {tab === 'password' && (
               <PasswordTab token={token} />
             )}
-          </>
-        )}
-      </div>
+          </div>
+
+        </div>
+      )}
     </main>
   )
 }
