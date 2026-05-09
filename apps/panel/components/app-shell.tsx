@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import { ThemeToggle } from './theme-toggle'
 
 const NAV_ITEMS = [
@@ -80,7 +81,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* ── Main content ──────────────────────────────────────────── */}
       <main className="flex-1 min-h-screen lg:ml-[240px] pb-16 lg:pb-0">
-        {children}
+        <motion.div
+          key={pathname}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+        >
+          {children}
+        </motion.div>
       </main>
 
       {/* ── Bottom nav — mobile + tablet (<lg) ────────────────────── */}

@@ -17,9 +17,23 @@ import {
   type StockAlert,
 } from '../../lib/api'
 import { toast } from 'sonner'
+import { motion, type Variants } from 'framer-motion'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PeriodSelector } from '../../components/period-selector'
+
+const kpiGrid: Variants = {
+  hidden: {},
+  show:   { transition: { staggerChildren: 0.07 } },
+}
+const kpiCard: Variants = {
+  hidden: { opacity: 0, y: 14, scale: 0.97 },
+  show:   { opacity: 1, y: 0,  scale: 1, transition: { duration: 0.22, ease: 'easeOut' } },
+}
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' } },
+}
 
 // ── KPI card ──────────────────────────────────────────────────────────────────
 
@@ -371,51 +385,68 @@ export default function DashboardPage() {
           </div>
         ) : summary ? (
           <>
-            {/* KPI grid */}
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-              <KpiCard
-                icon="💰"
-                label="Ingresos"
-                value={`$${summary.revenue.toLocaleString('es', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                sub={`${summary.ordersCount} pedido${summary.ordersCount !== 1 ? 's' : ''}`}
-                gradient
-              />
-              <KpiCard
-                icon="📦"
-                label="Pedidos"
-                value={String(summary.ordersCount)}
-                sub={`${summary.cancelledCount} cancelado${summary.cancelledCount !== 1 ? 's' : ''}`}
-                href="/orders"
-              />
-              <KpiCard
-                icon="✅"
-                label="Entregados"
-                value={String(summary.deliveredCount)}
-                sub={`de ${summary.ordersCount + summary.cancelledCount} totales`}
-                href="/orders"
-              />
-              <KpiCard
-                icon="🧾"
-                label="Ticket medio"
-                value={summary.ordersCount > 0
-                  ? `$${summary.avgTicket.toFixed(2)}`
-                  : '—'}
-                gradient={summary.ordersCount > 0}
-              />
-            </div>
+            {/* KPI grid — staggered entrance */}
+            <motion.div
+              className="grid grid-cols-2 gap-4 lg:grid-cols-4"
+              variants={kpiGrid}
+              initial="hidden"
+              animate="show"
+            >
+              <motion.div variants={kpiCard}>
+                <KpiCard
+                  icon="💰"
+                  label="Ingresos"
+                  value={`$${summary.revenue.toLocaleString('es', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  sub={`${summary.ordersCount} pedido${summary.ordersCount !== 1 ? 's' : ''}`}
+                  gradient
+                />
+              </motion.div>
+              <motion.div variants={kpiCard}>
+                <KpiCard
+                  icon="📦"
+                  label="Pedidos"
+                  value={String(summary.ordersCount)}
+                  sub={`${summary.cancelledCount} cancelado${summary.cancelledCount !== 1 ? 's' : ''}`}
+                  href="/orders"
+                />
+              </motion.div>
+              <motion.div variants={kpiCard}>
+                <KpiCard
+                  icon="✅"
+                  label="Entregados"
+                  value={String(summary.deliveredCount)}
+                  sub={`de ${summary.ordersCount + summary.cancelledCount} totales`}
+                  href="/orders"
+                />
+              </motion.div>
+              <motion.div variants={kpiCard}>
+                <KpiCard
+                  icon="🧾"
+                  label="Ticket medio"
+                  value={summary.ordersCount > 0
+                    ? `$${summary.avgTicket.toFixed(2)}`
+                    : '—'}
+                  gradient={summary.ordersCount > 0}
+                />
+              </motion.div>
+            </motion.div>
 
             {/* Fulfillment */}
-            <FulfillmentBar
-              rate={summary.fulfillmentRate}
-              delivered={summary.deliveredCount}
-              total={summary.ordersCount + summary.cancelledCount}
-            />
+            <motion.div variants={fadeUp} initial="hidden" animate="show">
+              <FulfillmentBar
+                rate={summary.fulfillmentRate}
+                delivered={summary.deliveredCount}
+                total={summary.ordersCount + summary.cancelledCount}
+              />
+            </motion.div>
 
             {/* Top products */}
-            <TopProductsList items={topProds} />
+            <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.15 }}>
+              <TopProductsList items={topProds} />
+            </motion.div>
 
             {/* ── Inteligencia — independiente del período ── */}
-            <div className="mt-2">
+            <motion.div className="mt-2" variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.25 }}>
               <p
                 className="text-xs font-semibold uppercase tracking-widest mb-3"
                 style={{ color: 'var(--muted)' }}
@@ -427,7 +458,7 @@ export default function DashboardPage() {
                 <WeeklyChart     days={weeklyDays}    />
                 <CoPurchasesCard pairs={coPurchases}  />
               </div>
-            </div>
+            </motion.div>
           </>
         ) : null}
       </div>
