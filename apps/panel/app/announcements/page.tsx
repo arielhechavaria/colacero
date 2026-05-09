@@ -111,161 +111,163 @@ export default function AnnouncementsPage() {
         </div>
       </header>
 
-      <div className="px-6 py-5 flex flex-col gap-4 max-w-2xl">
+      <div className="px-6 py-5 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
 
-        {/* 1 — Plantillas */}
-        <section
-          className="glass rounded-2xl p-5"
-        >
-          <p
-            className="text-sm font-semibold mb-3"
-            style={{ color: 'var(--text)' }}
-          >
-            ⚡ Plantillas rápidas
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={() => applyTemplate(buildDailyTemplate(products))}>
-              📅 Anuncio diario
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => applyTemplate(buildOfferTemplate(products))}>
-              🔥 Oferta especial
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => applyTemplate(buildReminderTemplate())}>
-              ⏰ Recordatorio
-            </Button>
-            <Button variant="ghost" size="sm" disabled className="cursor-not-allowed opacity-50">
-              ✨ Generar con IA
-              <span className="ml-1.5 rounded-full bg-[var(--primary-dim)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--primary)]">
-                Próx.
-              </span>
-            </Button>
-          </div>
-        </section>
+        {/* ── Left column: editor ────────────────────────────────────────── */}
+        <div className="flex flex-col gap-4">
 
-        {/* 2 — Selector de productos */}
-        <section
-          className="glass rounded-2xl p-5"
-        >
-          <p className="text-sm font-semibold mb-3" style={{ color: 'var(--text)' }}>
-            🛒 Agregar productos al mensaje
-          </p>
-          {loadingP ? (
-            <p className="text-xs" style={{ color: 'var(--muted)' }}>Cargando productos…</p>
-          ) : activeProducts.length === 0 ? (
-            <p className="text-xs" style={{ color: 'var(--muted)' }}>No hay productos activos.</p>
-          ) : (
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {activeProducts.map(p => {
-                const on = selected.has(p.id)
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => toggleProduct(p)}
-                    className="flex flex-col items-start rounded-xl border p-3 text-left transition-colors"
-                    style={
-                      on
-                        ? { backgroundColor: 'var(--primary-dim)', borderColor: 'var(--primary)' }
-                        : { backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }
-                    }
-                  >
-                    <span
-                      className="text-xs font-semibold"
-                      style={{ color: on ? 'var(--primary)' : 'var(--text)' }}
-                    >
-                      {on ? '✓ ' : ''}{p.name}
-                    </span>
-                    <span className="mt-0.5 text-xs" style={{ color: 'var(--muted)' }}>
-                      ${p.unitPrice}/{p.unitLabel}
-                    </span>
-                    {p.inventory && (
-                      <span className="mt-1 text-[10px]" style={{ color: 'var(--muted)' }}>
-                        Stock: {p.inventory.quantityAvailable}
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* 3 — Editor + publicar */}
-        <form
-          onSubmit={(e) => void handlePublish(e)}
-          className="glass rounded-2xl p-5 flex flex-col gap-3"
-        >
-          <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
-            ✏️ Mensaje
-          </p>
-
-          <Textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Escribí tu anuncio o usá una plantilla ↑"
-            rows={7}
-            maxLength={MAX_CHARS}
-            className="resize-none font-mono"
-          />
-
-          <div className="flex items-center justify-between">
-            <span
-              className="text-xs"
-              style={{ color: charsLeft < 200 ? 'var(--warning)' : 'var(--muted)' }}
-            >
-              {charsLeft} caracteres restantes
-            </span>
-            <Button
-              type="submit"
-              disabled={sending || !text.trim()}
-              className="bg-gradient-teal-violet shadow-glow hover:opacity-90"
-            >
-              {sending ? 'Publicando…' : '📤 Publicar en canal'}
-            </Button>
-          </div>
-
-          {error != null && (
-            <p
-              className="rounded-xl px-3 py-2.5 text-sm"
-              style={{ backgroundColor: 'rgba(255,61,85,0.08)', color: 'var(--error)', border: '1px solid rgba(255,61,85,0.2)' }}
-            >
-              {error}
+          {/* 1 — Plantillas */}
+          <section className="glass rounded-2xl p-5">
+            <p className="text-sm font-semibold mb-3" style={{ color: 'var(--text)' }}>
+              ⚡ Plantillas rápidas
             </p>
-          )}
-        </form>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={() => applyTemplate(buildDailyTemplate(products))}>
+                📅 Anuncio diario
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => applyTemplate(buildOfferTemplate(products))}>
+                🔥 Oferta especial
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => applyTemplate(buildReminderTemplate())}>
+                ⏰ Recordatorio
+              </Button>
+              <Button variant="ghost" size="sm" disabled className="cursor-not-allowed opacity-50">
+                ✨ Generar con IA
+                <span className="ml-1.5 rounded-full bg-[var(--primary-dim)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--primary)]">
+                  Próx.
+                </span>
+              </Button>
+            </div>
+          </section>
 
-        {/* 4 — Historial */}
-        {history.length > 0 && (
-          <section
-            className="glass rounded-2xl p-4"
+          {/* 2 — Selector de productos */}
+          <section className="glass rounded-2xl p-5">
+            <p className="text-sm font-semibold mb-3" style={{ color: 'var(--text)' }}>
+              🛒 Agregar productos al mensaje
+            </p>
+            {loadingP ? (
+              <p className="text-xs" style={{ color: 'var(--muted)' }}>Cargando productos…</p>
+            ) : activeProducts.length === 0 ? (
+              <p className="text-xs" style={{ color: 'var(--muted)' }}>No hay productos activos.</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {activeProducts.map(p => {
+                  const on = selected.has(p.id)
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => toggleProduct(p)}
+                      className="flex flex-col items-start rounded-xl border p-3 text-left transition-colors"
+                      style={
+                        on
+                          ? { backgroundColor: 'var(--primary-dim)', borderColor: 'var(--primary)' }
+                          : { backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }
+                      }
+                    >
+                      <span
+                        className="text-xs font-semibold"
+                        style={{ color: on ? 'var(--primary)' : 'var(--text)' }}
+                      >
+                        {on ? '✓ ' : ''}{p.name}
+                      </span>
+                      <span className="mt-0.5 text-xs" style={{ color: 'var(--muted)' }}>
+                        ${p.unitPrice}/{p.unitLabel}
+                      </span>
+                      {p.inventory && (
+                        <span className="mt-1 text-[10px]" style={{ color: 'var(--muted)' }}>
+                          Stock: {p.inventory.quantityAvailable}
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* 3 — Editor + publicar */}
+          <form
+            onSubmit={(e) => void handlePublish(e)}
+            className="glass rounded-2xl p-5 flex flex-col gap-3"
           >
+            <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+              ✏️ Mensaje
+            </p>
+
+            <Textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Escribí tu anuncio o usá una plantilla ↑"
+              rows={7}
+              maxLength={MAX_CHARS}
+              className="resize-none font-mono"
+            />
+
+            <div className="flex items-center justify-between">
+              <span
+                className="text-xs"
+                style={{ color: charsLeft < 200 ? 'var(--warning)' : 'var(--muted)' }}
+              >
+                {charsLeft} caracteres restantes
+              </span>
+              <Button
+                type="submit"
+                disabled={sending || !text.trim()}
+                className="bg-gradient-teal-violet shadow-glow hover:opacity-90"
+              >
+                {sending ? 'Publicando…' : '📤 Publicar en canal'}
+              </Button>
+            </div>
+
+            {error != null && (
+              <p
+                className="rounded-xl px-3 py-2.5 text-sm"
+                style={{ backgroundColor: 'rgba(255,61,85,0.08)', color: 'var(--error)', border: '1px solid rgba(255,61,85,0.2)' }}
+              >
+                {error}
+              </p>
+            )}
+          </form>
+
+        </div>
+
+        {/* ── Right column: historial ────────────────────────────────────── */}
+        <div className="mt-4 lg:mt-0">
+          <section className="glass rounded-2xl p-4">
             <p
               className="mb-3 text-xs font-semibold uppercase tracking-wide"
               style={{ color: 'var(--muted)' }}
             >
               Publicados esta sesión
             </p>
-            <div className="flex flex-col gap-3">
-              {history.map((item, i) => (
-                <div
-                  key={i}
-                  className="rounded-xl border p-3"
-                  style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}
-                >
-                  <p
-                    className="whitespace-pre-wrap text-sm"
-                    style={{ color: 'var(--text)' }}
+            {history.length === 0 ? (
+              <p className="text-xs py-4 text-center" style={{ color: 'var(--muted)' }}>
+                Aún no publicaste nada en esta sesión
+              </p>
+            ) : (
+              <div className="flex flex-col gap-3 overflow-y-auto max-h-[70vh]">
+                {history.map((item, i) => (
+                  <div
+                    key={i}
+                    className="rounded-xl border p-3"
+                    style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}
                   >
-                    {item.text}
-                  </p>
-                  <p className="mt-1.5 text-xs" style={{ color: 'var(--muted)' }}>
-                    ✅ Enviado a las{' '}
-                    {item.sentAt.toLocaleTimeString('es-CU', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              ))}
-            </div>
+                    <p
+                      className="whitespace-pre-wrap text-sm"
+                      style={{ color: 'var(--text)' }}
+                    >
+                      {item.text}
+                    </p>
+                    <p className="mt-1.5 text-xs" style={{ color: 'var(--muted)' }}>
+                      ✅ Enviado a las{' '}
+                      {item.sentAt.toLocaleTimeString('es-CU', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
-        )}
+        </div>
 
       </div>
     </main>
