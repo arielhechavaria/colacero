@@ -97,49 +97,131 @@ type SeedOrder = {
   notes?: string
 }
 
-const HISTORIC_ORDERS: SeedOrder[] = [
-  // Co-purchase: Arroz + Frijoles negros (8 veces)
-  { daysAgo: 28, windowIdx: 0, forceSkus: ['ARROZ-01', 'FRIJOL-01'], extras: 1, customerIdx: 0, status: 'PICKED_UP' },
-  { daysAgo: 25, windowIdx: 1, forceSkus: ['ARROZ-01', 'FRIJOL-01'], extras: 1, customerIdx: 1, status: 'PICKED_UP' },
-  { daysAgo: 22, windowIdx: 0, forceSkus: ['ARROZ-01', 'FRIJOL-01'], extras: 0, customerIdx: 2, status: 'PICKED_UP' },
-  { daysAgo: 19, windowIdx: 1, forceSkus: ['ARROZ-01', 'FRIJOL-01'], extras: 2, customerIdx: 3, status: 'PICKED_UP' },
-  { daysAgo: 14, windowIdx: 0, forceSkus: ['ARROZ-01', 'FRIJOL-01'], extras: 1, customerIdx: 4, status: 'PICKED_UP' },
-  { daysAgo: 10, windowIdx: 1, forceSkus: ['ARROZ-01', 'FRIJOL-01'], extras: 1, customerIdx: 0, status: 'PICKED_UP' },
-  { daysAgo: 6,  windowIdx: 0, forceSkus: ['ARROZ-01', 'FRIJOL-01'], extras: 0, customerIdx: 5, status: 'PICKED_UP', notes: 'Por favor en bolsa de tela' },
-  { daysAgo: 3,  windowIdx: 1, forceSkus: ['ARROZ-01', 'FRIJOL-01'], extras: 1, customerIdx: 6, status: 'PICKED_UP' },
+// Notas variadas para inyectar realismo
+const NOTE_POOL = [
+  'Por favor en bolsa de tela',
+  'Sin grasa por favor',
+  'Para celíaco si es posible',
+  'Sin lactosa si tienen',
+  'Llamar al llegar al portón',
+  'Lo paga mi esposa, ya avisó',
+  'Si no hay aguacate, mango está bien',
+  'Tocar el timbre 2 veces',
+  'Dejar en la entrada del edificio',
+  'Apartamento 3B',
+] as const
 
-  // Co-purchase: Pollo + Aceite (6 veces)
-  { daysAgo: 26, windowIdx: 0, forceSkus: ['POLLO-01', 'ACEITE-01'], extras: 1, customerIdx: 1, status: 'PICKED_UP' },
-  { daysAgo: 21, windowIdx: 1, forceSkus: ['POLLO-01', 'ACEITE-01'], extras: 0, customerIdx: 2, status: 'PICKED_UP' },
-  { daysAgo: 17, windowIdx: 0, forceSkus: ['POLLO-01', 'ACEITE-01'], extras: 2, customerIdx: 5, status: 'PICKED_UP' },
-  { daysAgo: 12, windowIdx: 1, forceSkus: ['POLLO-01', 'ACEITE-01'], extras: 1, customerIdx: 7, status: 'PICKED_UP' },
-  { daysAgo: 7,  windowIdx: 0, forceSkus: ['POLLO-01', 'ACEITE-01'], extras: 1, customerIdx: 3, status: 'PICKED_UP', notes: 'Sin grasa por favor' },
-  { daysAgo: 2,  windowIdx: 1, forceSkus: ['POLLO-01', 'ACEITE-01'], extras: 0, customerIdx: 4, status: 'PICKED_UP' },
+// ── Generador procedural ────────────────────────────────────────────────────
+// Distribuye órdenes principalmente en abril (días 9-39 atrás desde 09-may-2026)
+// con cola en mayo y co-purchases armados a propósito.
 
-  // Co-purchase: Pan + Huevos (4 veces)
-  { daysAgo: 23, windowIdx: 0, forceSkus: ['PAN-01', 'HUEVOS-01'], extras: 0, customerIdx: 0, status: 'PICKED_UP' },
-  { daysAgo: 16, windowIdx: 1, forceSkus: ['PAN-01', 'HUEVOS-01'], extras: 1, customerIdx: 4, status: 'PICKED_UP' },
-  { daysAgo: 9,  windowIdx: 0, forceSkus: ['PAN-01', 'HUEVOS-01'], extras: 0, customerIdx: 7, status: 'PICKED_UP' },
-  { daysAgo: 4,  windowIdx: 1, forceSkus: ['PAN-01', 'HUEVOS-01'], extras: 1, customerIdx: 6, status: 'PICKED_UP' },
+function generateOrders(): SeedOrder[] {
+  const orders: SeedOrder[] = []
+  let counter = 0
 
-  // Random históricas (8 más para llegar a 26)
-  { daysAgo: 27, windowIdx: 0, forceSkus: ['QUESO-01'], extras: 2, customerIdx: 6, status: 'PICKED_UP' },
-  { daysAgo: 20, windowIdx: 1, forceSkus: ['MANGO-01', 'PLATANO-01'], extras: 1, customerIdx: 7, status: 'PICKED_UP' },
-  { daysAgo: 18, windowIdx: 0, forceSkus: ['CERDO-01'], extras: 2, customerIdx: 0, status: 'PICKED_UP' },
-  { daysAgo: 13, windowIdx: 1, forceSkus: ['LECHE-01', 'PAN-01'], extras: 1, customerIdx: 2, status: 'PICKED_UP', notes: 'Para celíaco si es posible' },
-  { daysAgo: 11, windowIdx: 0, forceSkus: ['TOMATE-01', 'CEBOLLA-01'], extras: 1, customerIdx: 5, status: 'CANCELLED' },
-  { daysAgo: 8,  windowIdx: 1, forceSkus: ['RES-01'], extras: 2, customerIdx: 1, status: 'PICKED_UP' },
-  { daysAgo: 5,  windowIdx: 0, forceSkus: ['AGUACATE-01', 'TOMATE-01'], extras: 1, customerIdx: 3, status: 'PICKED_UP' },
-  { daysAgo: 1,  windowIdx: 1, forceSkus: ['AZUCAR-01', 'LECHE-01'], extras: 1, customerIdx: 6, status: 'CANCELLED', notes: 'Cliente no respondió a confirmación' },
+  // Determinístico: usa counter para round-robin pero con jitter de daysAgo
+  const nextCustomer = () => (counter++ % CUSTOMERS.length)
 
-  // Hoy — kanban activo (6 órdenes en distintos estados)
-  { daysAgo: 0, windowIdx: 0, forceSkus: ['ARROZ-01', 'FRIJOL-01', 'POLLO-01'], extras: 0, customerIdx: 0, status: 'CONFIRMED', notes: 'Por favor en bolsa de tela' },
-  { daysAgo: 0, windowIdx: 0, forceSkus: ['CERDO-01', 'CEBOLLA-01'], extras: 1, customerIdx: 1, status: 'PREPARING' },
-  { daysAgo: 0, windowIdx: 0, forceSkus: ['HUEVOS-01', 'PAN-01'], extras: 0, customerIdx: 2, status: 'READY' },
-  { daysAgo: 0, windowIdx: 1, forceSkus: ['MANGO-01', 'PLATANO-01', 'AGUACATE-01'], extras: 0, customerIdx: 3, status: 'CONFIRMED' },
-  { daysAgo: 0, windowIdx: 1, forceSkus: ['ACEITE-01', 'ARROZ-01'], extras: 1, customerIdx: 4, status: 'READY' },
-  { daysAgo: 0, windowIdx: 1, forceSkus: ['QUESO-01', 'PAN-01'], extras: 1, customerIdx: 5, status: 'PREPARING', notes: 'Sin lactosa si tienen' },
-]
+  // Helper: genera una orden con días aleatorios en un rango
+  function add(
+    forceSkus: string[],
+    extras: number,
+    minDay: number,
+    maxDay: number,
+    status: OrderStatus = 'PICKED_UP',
+    notes?: string,
+  ): SeedOrder {
+    const daysAgoVal = randInt(minDay, maxDay)
+    return {
+      daysAgo:    daysAgoVal,
+      windowIdx:  Math.random() < 0.5 ? 0 : 1,
+      forceSkus,
+      extras,
+      customerIdx: nextCustomer(),
+      status,
+      ...(notes ? { notes } : {}),
+    }
+  }
+
+  // ── ABRIL (días 9-39 atrás) — alta densidad ─────────────────────────────
+  // Co-purchase: Arroz + Frijoles negros (25 veces en abril)
+  for (let i = 0; i < 25; i++) {
+    orders.push(add(['ARROZ-01', 'FRIJOL-01'], randInt(0, 2), 9, 39))
+  }
+  // Co-purchase: Pollo + Aceite (20 veces en abril)
+  for (let i = 0; i < 20; i++) {
+    orders.push(add(['POLLO-01', 'ACEITE-01'], randInt(0, 2), 9, 39))
+  }
+  // Co-purchase: Pan + Huevos (15 veces en abril)
+  for (let i = 0; i < 15; i++) {
+    orders.push(add(['PAN-01', 'HUEVOS-01'], randInt(0, 1), 9, 39))
+  }
+  // Co-purchase secundario: Tomate + Cebolla (10 veces en abril)
+  for (let i = 0; i < 10; i++) {
+    orders.push(add(['TOMATE-01', 'CEBOLLA-01'], randInt(0, 1), 9, 39))
+  }
+  // Co-purchase secundario: Mango + Plátano (8 veces en abril)
+  for (let i = 0; i < 8; i++) {
+    orders.push(add(['MANGO-01', 'PLATANO-01'], randInt(0, 1), 9, 39))
+  }
+  // Variedad: órdenes con 1 producto fuerte + extras random (25 en abril)
+  const featuredSingles = ['CERDO-01', 'RES-01', 'QUESO-01', 'LECHE-01', 'AGUACATE-01', 'LENTEJA-01', 'AZUCAR-01', 'AJO-01']
+  for (let i = 0; i < 25; i++) {
+    const sku = featuredSingles[i % featuredSingles.length]!
+    orders.push(add([sku], randInt(1, 3), 9, 39))
+  }
+  // Cancelaciones en abril (5%)
+  for (let i = 0; i < 5; i++) {
+    orders.push(add(
+      [PRODUCTS[randInt(0, PRODUCTS.length - 1)]!.sku],
+      randInt(1, 2),
+      9, 39,
+      'CANCELLED',
+      'Cliente no respondió a confirmación',
+    ))
+  }
+
+  // ── MAYO inicial (días 1-8 atrás) — actividad reciente ──────────────────
+  for (let i = 0; i < 12; i++) {
+    const skuPair = i % 3 === 0 ? ['ARROZ-01', 'FRIJOL-01']
+      : i % 3 === 1 ? ['POLLO-01', 'ACEITE-01']
+      : ['PAN-01', 'HUEVOS-01']
+    orders.push(add(skuPair, randInt(0, 1), 1, 8))
+  }
+  for (let i = 0; i < 6; i++) {
+    const sku = featuredSingles[(i * 2) % featuredSingles.length]!
+    orders.push(add([sku], randInt(1, 2), 1, 8))
+  }
+  // Una cancelación reciente
+  orders.push({
+    daysAgo: 1, windowIdx: 1,
+    forceSkus: ['AZUCAR-01', 'LECHE-01'], extras: 1,
+    customerIdx: nextCustomer(),
+    status: 'CANCELLED',
+    notes: 'Cliente no respondió a confirmación',
+  })
+
+  // ── HOY (kanban activo) — 6 órdenes en distintos estados ────────────────
+  orders.push(
+    { daysAgo: 0, windowIdx: 0, forceSkus: ['ARROZ-01', 'FRIJOL-01', 'POLLO-01'], extras: 0, customerIdx: 0, status: 'CONFIRMED', notes: 'Por favor en bolsa de tela' },
+    { daysAgo: 0, windowIdx: 0, forceSkus: ['CERDO-01', 'CEBOLLA-01'], extras: 1, customerIdx: 1, status: 'PREPARING' },
+    { daysAgo: 0, windowIdx: 0, forceSkus: ['HUEVOS-01', 'PAN-01'], extras: 0, customerIdx: 2, status: 'READY' },
+    { daysAgo: 0, windowIdx: 1, forceSkus: ['MANGO-01', 'PLATANO-01', 'AGUACATE-01'], extras: 0, customerIdx: 3, status: 'CONFIRMED' },
+    { daysAgo: 0, windowIdx: 1, forceSkus: ['ACEITE-01', 'ARROZ-01'], extras: 1, customerIdx: 4, status: 'READY' },
+    { daysAgo: 0, windowIdx: 1, forceSkus: ['QUESO-01', 'PAN-01'], extras: 1, customerIdx: 5, status: 'PREPARING', notes: 'Sin lactosa si tienen' },
+  )
+
+  // Inyectar notas variadas en ~20% de las órdenes (sólo PICKED_UP)
+  for (const o of orders) {
+    if (o.status === 'PICKED_UP' && !o.notes && Math.random() < 0.2) {
+      o.notes = NOTE_POOL[randInt(0, NOTE_POOL.length - 1)]!
+    }
+  }
+
+  return orders
+}
+
+const HISTORIC_ORDERS: SeedOrder[] = generateOrders()
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 
@@ -253,7 +335,7 @@ async function main() {
   console.log('\n🗓  Pickup windows:')
   // Mapa: "daysAgo:windowIdx" → windowId
   const windowMap = new Map<string, string>()
-  for (let d = 30; d >= -1; d--) {
+  for (let d = 45; d >= -1; d--) {
     const date = daysAgo(d)
     for (let wIdx = 0; wIdx < PICKUP_WINDOW_TIMES.length; wIdx++) {
       const w = PICKUP_WINDOW_TIMES[wIdx]!
@@ -270,7 +352,7 @@ async function main() {
       windowMap.set(`${d}:${wIdx}`, created.id)
     }
   }
-  console.log(`  ✓ ${windowMap.size} ventanas creadas (30 días pasados + hoy + mañana)`)
+  console.log(`  ✓ ${windowMap.size} ventanas creadas (45 días pasados + hoy + mañana)`)
 
   // 7. Órdenes históricas y de hoy
   console.log('\n📋 Órdenes:')
@@ -366,7 +448,8 @@ async function main() {
   console.log(`  • Customers:      ${CUSTOMERS.length}`)
   console.log(`  • Ventanas:       ${windowMap.size}`)
   console.log(`  • Órdenes:        ${ordersCreated}`)
-  console.log(`  • Co-purchases:   Arroz+Frijoles (8) · Pollo+Aceite (6) · Pan+Huevos (4)`)
+  console.log(`  • Co-purchases:   Arroz+Frijoles (~25) · Pollo+Aceite (~20) · Pan+Huevos (~15) · Tomate+Cebolla (~10) · Mango+Plátano (~8)`)
+  console.log(`  • Concentración: alta densidad en abril (días 9-39 atrás), cola en mayo, kanban activo hoy`)
   console.log(`  • Stock alert:    Huevos (4 unidades, threshold 30)`)
 }
 
