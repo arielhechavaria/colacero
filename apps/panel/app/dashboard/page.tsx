@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import {
   getStatsSummary,
   getTopProducts,
@@ -26,15 +27,17 @@ function KpiCard({
   value,
   sub,
   gradient,
+  href,
 }: {
   icon:      string
   label:     string
   value:     string
   sub?:      string
   gradient?: boolean
+  href?:     string
 }) {
-  return (
-    <div className="glass rounded-2xl p-5 flex flex-col gap-1">
+  const card = (
+    <div className={`glass rounded-2xl p-5 flex flex-col gap-1 ${href ? 'transition-opacity hover:opacity-80 cursor-pointer' : ''}`}>
       <div className="flex items-center justify-between mb-1">
         <span className="text-xl">{icon}</span>
         <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
@@ -50,6 +53,8 @@ function KpiCard({
       )}
     </div>
   )
+  if (href) return <Link href={href} className="block">{card}</Link>
+  return card
 }
 
 // ── Fulfillment bar ───────────────────────────────────────────────────────────
@@ -244,11 +249,13 @@ function StockAlertsList({ alerts }: { alerts: StockAlert[] }) {
       </div>
       <ul className="flex flex-col gap-2">
         {alerts.map((a) => (
-          <li key={a.productId} className="flex items-center justify-between text-sm">
-            <span style={{ color: 'var(--text)' }}>{a.name}</span>
-            <Badge variant={a.status === 'out' ? 'destructive' : 'warning'} className="ml-3 flex-shrink-0">
-              {a.status === 'out' ? 'Sin stock' : `${a.quantityAvailable} restantes`}
-            </Badge>
+          <li key={a.productId}>
+            <Link href="/products" className="flex items-center justify-between text-sm transition-opacity hover:opacity-70">
+              <span style={{ color: 'var(--text)' }}>{a.name}</span>
+              <Badge variant={a.status === 'out' ? 'destructive' : 'warning'} className="ml-3 flex-shrink-0">
+                {a.status === 'out' ? 'Sin stock' : `${a.quantityAvailable} restantes`}
+              </Badge>
+            </Link>
           </li>
         ))}
       </ul>
@@ -347,12 +354,14 @@ export default function DashboardPage() {
                 label="Pedidos"
                 value={String(summary.ordersCount)}
                 sub={`${summary.cancelledCount} cancelado${summary.cancelledCount !== 1 ? 's' : ''}`}
+                href="/orders"
               />
               <KpiCard
                 icon="✅"
                 label="Entregados"
                 value={String(summary.deliveredCount)}
                 sub={`de ${summary.ordersCount + summary.cancelledCount} totales`}
+                href="/orders"
               />
               <KpiCard
                 icon="🧾"
