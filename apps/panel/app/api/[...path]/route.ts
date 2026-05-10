@@ -20,6 +20,11 @@ async function handler(
     if (ct) headers.set('content-type', ct)
     const auth = req.headers.get('authorization')
     if (auth) headers.set('authorization', auth)
+    // Forward cookies (cc_access, cc_refresh, cc_csrf) and CSRF header upstream
+    const cookie = req.headers.get('cookie')
+    if (cookie) headers.set('cookie', cookie)
+    const csrf = req.headers.get('x-csrf-token')
+    if (csrf) headers.set('x-csrf-token', csrf)
 
     const body: string | null =
       req.method !== 'GET' && req.method !== 'HEAD'
@@ -34,9 +39,16 @@ async function handler(
 
     const resBody = await res.text()
 
+    // Forward Set-Cookie headers back to the browser so auth cookies are stored
+    const responseHeaders = new Headers()
+    responseHeaders.set('content-type', res.headers.get('content-type') ?? 'application/json')
+    for (const cookie of res.headers.getSetCookie()) {
+      responseHeaders.append('set-cookie', cookie)
+    }
+
     return new NextResponse(resBody, {
       status: res.status,
-      headers: { 'content-type': res.headers.get('content-type') ?? 'application/json' },
+      headers: responseHeaders,
     })
   } catch (err) {
     console.error('[proxy] error:', err)
