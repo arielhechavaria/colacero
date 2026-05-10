@@ -17,8 +17,14 @@ const TEST_PASSWORD = 'contraseñaSegura32chars!!'
 
 let businessId:       string
 let otherBusinessId:  string
-let token:            string
+let token:            string   // JWT extraído de la cookie cc_access (Phase 2)
+let csrfToken:        string   // valor de cc_csrf para double-submit CSRF
 let productId:        string
+
+type InjectResponse = Awaited<ReturnType<typeof app.inject>>
+function getCookie(res: InjectResponse, name: string) {
+  return res.cookies.find(c => c.name === name)
+}
 
 beforeAll(async () => {
   await app.ready()
@@ -47,19 +53,22 @@ beforeAll(async () => {
     create: { businessId, email: TEST_EMAIL, passwordHash, role: 'OWNER' },
   })
 
-  // Obtener JWT via login
-  const res = await app.inject({
+  // Phase 2: login devuelve cookies, no body.token
+  // @fastify/jwt acepta tanto cc_access cookie como Authorization: Bearer
+  const loginRes = await app.inject({
     method:  'POST',
     url:     '/api/auth/owner/login',
     payload: { email: TEST_EMAIL, password: TEST_PASSWORD },
   })
-  token = res.json<{ token: string }>().token
+  token     = getCookie(loginRes, 'cc_access')!.value
+  csrfToken = getCookie(loginRes, 'cc_csrf')!.value
 })
 
 afterAll(async () => {
   // Borrar datos de test (inventory cascadea desde product)
   await prisma.product.deleteMany({ where: { businessId } })
   await prisma.product.deleteMany({ where: { businessId: otherBusinessId } })
+  await prisma.refreshToken.deleteMany({ where: { user: { email: TEST_EMAIL } } })
   await prisma.user.deleteMany({ where: { email: TEST_EMAIL } })
   await prisma.business.deleteMany({ where: { slug: { in: [TEST_SLUG, 'products-test-other'] } } })
   await prisma.$disconnect()
@@ -75,9 +84,13 @@ describe('endpoints sin token', () => {
   })
 
   it('unauth-create: POST / sin JWT → 401', async () => {
+    // Phase 2: el hook CSRF dispara antes de auth en POSTs.
+    // Pasamos tokens CSRF válidos (matching) para que sea auth quien falle → 401.
     const res = await app.inject({
       method:  'POST',
       url:     '/api/owner/products',
+      cookies: { cc_csrf: 'test-token' },
+      headers: { 'x-csrf-token': 'test-token' },
       payload: { name: 'Test', unitPrice: 10 },
     })
     expect(res.statusCode).toBe(401)
@@ -106,7 +119,8 @@ describe('POST /api/owner/products', () => {
     const res = await app.inject({
       method:  'POST',
       url:     '/api/owner/products',
-      headers: { authorization: `Bearer ${token}` },
+      cookies: { cc_csrf: csrfToken },
+      headers: { authorization: `Bearer ${token}`, 'x-csrf-token': csrfToken },
       payload: {
         name:             'Arroz blanco',
         sku:              'ARR-001',
@@ -134,7 +148,8 @@ describe('POST /api/owner/products', () => {
     const res = await app.inject({
       method:  'POST',
       url:     '/api/owner/products',
-      headers: { authorization: `Bearer ${token}` },
+      cookies: { cc_csrf: csrfToken },
+      headers: { authorization: `Bearer ${token}`, 'x-csrf-token': csrfToken },
       payload: { name: 'Arroz duplicado', sku: 'ARR-001', unitPrice: 10 },
     })
     expect(res.statusCode).toBe(409)
@@ -145,7 +160,8 @@ describe('POST /api/owner/products', () => {
     const res = await app.inject({
       method:  'POST',
       url:     '/api/owner/products',
-      headers: { authorization: `Bearer ${token}` },
+      cookies: { cc_csrf: csrfToken },
+      headers: { authorization: `Bearer ${token}`, 'x-csrf-token': csrfToken },
       payload: { unitPrice: 5 },
     })
     expect(res.statusCode).toBe(422)
@@ -203,7 +219,8 @@ describe('PATCH /api/owner/products/:productId', () => {
     const res = await app.inject({
       method:  'PATCH',
       url:     `/api/owner/products/${productId}`,
-      headers: { authorization: `Bearer ${token}` },
+      cookies: { cc_csrf: csrfToken },
+      headers: { authorization: `Bearer ${token}`, 'x-csrf-token': csrfToken },
       payload: { name: 'Arroz blanco premium' },
     })
     expect(res.statusCode).toBe(200)
@@ -217,7 +234,8 @@ describe('PATCH /api/owner/products/:productId', () => {
     const res = await app.inject({
       method:  'PATCH',
       url:     `/api/owner/products/${other!.id}`,
-      headers: { authorization: `Bearer ${token}` },
+      cookies: { cc_csrf: csrfToken },
+      headers: { authorization: `Bearer ${token}`, 'x-csrf-token': csrfToken },
       payload: { name: 'Hackeado' },
     })
     expect(res.statusCode).toBe(404)
@@ -232,7 +250,8 @@ describe('DELETE /api/owner/products/:productId', () => {
     const created = await app.inject({
       method:  'POST',
       url:     '/api/owner/products',
-      headers: { authorization: `Bearer ${token}` },
+      cookies: { cc_csrf: csrfToken },
+      headers: { authorization: `Bearer ${token}`, 'x-csrf-token': csrfToken },
       payload: { name: 'Para desactivar', unitPrice: 1 },
     })
     const tempId = created.json<any>().id
@@ -240,7 +259,8 @@ describe('DELETE /api/owner/products/:productId', () => {
     const res = await app.inject({
       method:  'DELETE',
       url:     `/api/owner/products/${tempId}`,
-      headers: { authorization: `Bearer ${token}` },
+      cookies: { cc_csrf: csrfToken },
+      headers: { authorization: `Bearer ${token}`, 'x-csrf-token': csrfToken },
     })
     expect(res.statusCode).toBe(200)
     expect(res.json<{ ok: boolean }>().ok).toBe(true)
@@ -288,7 +308,8 @@ describe('PATCH /api/owner/products/:productId/inventory (optimistic locking)', 
     const res = await app.inject({
       method:  'PATCH',
       url:     `/api/owner/products/${productId}/inventory`,
-      headers: { authorization: `Bearer ${token}` },
+      cookies: { cc_csrf: csrfToken },
+      headers: { authorization: `Bearer ${token}`, 'x-csrf-token': csrfToken },
       payload: { version: currentVersion, quantityAvailable: 99 },
     })
 
@@ -303,7 +324,8 @@ describe('PATCH /api/owner/products/:productId/inventory (optimistic locking)', 
     const res = await app.inject({
       method:  'PATCH',
       url:     `/api/owner/products/${productId}/inventory`,
-      headers: { authorization: `Bearer ${token}` },
+      cookies: { cc_csrf: csrfToken },
+      headers: { authorization: `Bearer ${token}`, 'x-csrf-token': csrfToken },
       payload: { version: 0, quantityAvailable: 50 },
     })
     // version 0 ya fue consumida → debe dar conflict
@@ -318,7 +340,8 @@ describe('PATCH /api/owner/products/:productId/inventory (optimistic locking)', 
     const created = await app.inject({
       method:  'POST',
       url:     '/api/owner/products',
-      headers: { authorization: `Bearer ${token}` },
+      cookies: { cc_csrf: csrfToken },
+      headers: { authorization: `Bearer ${token}`, 'x-csrf-token': csrfToken },
       payload: { name: 'Producto OL', unitPrice: 5 },
     })
     const newId = created.json<any>().id
@@ -327,7 +350,8 @@ describe('PATCH /api/owner/products/:productId/inventory (optimistic locking)', 
     const first = await app.inject({
       method:  'PATCH',
       url:     `/api/owner/products/${newId}/inventory`,
-      headers: { authorization: `Bearer ${token}` },
+      cookies: { cc_csrf: csrfToken },
+      headers: { authorization: `Bearer ${token}`, 'x-csrf-token': csrfToken },
       payload: { version: 0, quantityAvailable: 10 },
     })
     expect(first.statusCode).toBe(200)
@@ -337,7 +361,8 @@ describe('PATCH /api/owner/products/:productId/inventory (optimistic locking)', 
     const second = await app.inject({
       method:  'PATCH',
       url:     `/api/owner/products/${newId}/inventory`,
-      headers: { authorization: `Bearer ${token}` },
+      cookies: { cc_csrf: csrfToken },
+      headers: { authorization: `Bearer ${token}`, 'x-csrf-token': csrfToken },
       payload: { version: 0, quantityAvailable: 20 },
     })
     expect(second.statusCode).toBe(409)

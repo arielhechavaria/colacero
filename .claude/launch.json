@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "api",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@colacero/api", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "catalog",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@colacero/catalog", "dev"],
+      "port": 3001
+    },
+    {
+      "name": "panel",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@colacero/panel", "dev"],
+      "port": 3002
+    }
+  ]
+}

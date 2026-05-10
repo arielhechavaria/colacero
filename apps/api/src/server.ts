@@ -4,10 +4,12 @@ import cors from '@fastify/cors'
 import cookie from '@fastify/cookie'
 import fs from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { env } from '@colacero/env'
 import { prismaPlugin } from './plugins/prisma.js'
 import { authPlugin } from './plugins/auth.js'
 import { csrfPlugin } from './plugins/csrf.js'
+import { rateLimitPlugin } from './plugins/rate-limit.js'
 import { redisPlugin } from './plugins/redis.js'
 import { swaggerPlugin } from './plugins/swagger.js'
 import { authRoutes } from './routes/auth/index.js'
@@ -55,6 +57,7 @@ export function buildServer() {
   app.register(swaggerPlugin)
   app.register(prismaPlugin)
   app.register(redisPlugin)
+  app.register(rateLimitPlugin)
   app.register(authPlugin)
   app.register(csrfPlugin)
   app.register(uploadPlugin)
@@ -85,12 +88,8 @@ export function buildServer() {
   }))
 
   // ── Landing HTML para la raíz de la API ─────────────────────
-    const landingHtmlPath = path.join(
-        new URL('.', import.meta.url).pathname,
-        '..',
-        'public',
-        'api-landing.html',
-    )
+    const __dirname = path.dirname(fileURLToPath(import.meta.url))
+    const landingHtmlPath = path.join(__dirname, '..', 'public', 'api-landing.html')
     const landingHtml = fs.readFileSync(landingHtmlPath, 'utf8')
 
     app.get('/', async (req, reply) => {

@@ -12,6 +12,11 @@ const redis  = new Redis(process.env['REDIS_URL'] ?? 'redis://localhost:6379')
 const prisma = new PrismaClient()
 const app    = buildServer()
 
+type InjectResponse = Awaited<ReturnType<typeof app.inject>>
+function getCookie(res: InjectResponse, name: string) {
+  return res.cookies.find(c => c.name === name)
+}
+
 const TEST_PHONE = '+5355500099'
 
 beforeAll(async () => {
@@ -22,6 +27,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await redis.del(`otp:${TEST_PHONE}`)
+  await prisma.refreshToken.deleteMany({ where: { customer: { phone: TEST_PHONE } } })
   await prisma.customer.deleteMany({ where: { phone: TEST_PHONE } })
   await prisma.$disconnect()
   await redis.quit()
@@ -75,9 +81,15 @@ describe('POST /api/auth/customer/verify-otp', () => {
     })
 
     expect(res.statusCode).toBe(200)
-    const body = res.json<{ token: string; customer: { id: string; phone: string } }>()
-    expect(body.token).toBeDefined()
+    const body = res.json<{ customer: { id: string; phone: string } }>()
+    expect((body as Record<string, unknown>).token).toBeUndefined()
     expect(body.customer.phone).toBe(TEST_PHONE)
+    const access = getCookie(res, 'cc_access')
+    expect(access).toBeDefined()
+    expect(access?.httpOnly).toBe(true)
+    const csrf = getCookie(res, 'cc_csrf')
+    expect(csrf).toBeDefined()
+    expect(csrf?.httpOnly).not.toBe(true)   // light-my-request omite httpOnly cuando es false
   })
 
   it('verify-otp-creates-customer: primer login crea Customer en DB', async () => {

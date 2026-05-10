@@ -7,6 +7,10 @@ const app    = buildServer()
 
 const TEST_SLUG = 'checkout-integration-test-biz'
 
+// Phase 2: /api/cart/checkout requires CSRF. Inject matching cc_csrf + x-csrf-token.
+// @fastify/jwt accepts Bearer token for customer auth (no cookie needed for auth).
+const CSRF_TEST_TOKEN = 'test-csrf-checkout'
+
 let businessId:     string
 let productId:      string
 let pickupWindowId: string
@@ -108,7 +112,7 @@ describe('GET /api/catalog/:slug/pickup-windows', () => {
 
 describe('POST /api/cart/checkout', () => {
   it('checkout-201: flujo completo reserve → checkout → Order CONFIRMED', async () => {
-    // Crear reserva
+    // Crear reserva (public, SKIP_PREFIXES en csrf.ts la exime)
     const resReserve = await app.inject({
       method:  'POST',
       url:     '/api/cart/reserve',
@@ -117,11 +121,12 @@ describe('POST /api/cart/checkout', () => {
     expect(resReserve.statusCode).toBe(201)
     const { reservationId } = resReserve.json<any>()
 
-    // Checkout
+    // Checkout: auth vía Bearer + CSRF vía cookie+header
     const resCheckout = await app.inject({
       method:  'POST',
       url:     '/api/cart/checkout',
-      headers: { authorization: `Bearer ${customerToken}` },
+      cookies: { cc_csrf: CSRF_TEST_TOKEN },
+      headers: { authorization: `Bearer ${customerToken}`, 'x-csrf-token': CSRF_TEST_TOKEN },
       payload: {
         pickupWindowId,
         reservationIds: [reservationId],
@@ -152,9 +157,12 @@ describe('POST /api/cart/checkout', () => {
   })
 
   it('checkout-401: sin JWT → 401', async () => {
+    // CSRF se satisface con tokens matching para que auth sea quien falle → 401
     const res = await app.inject({
       method:  'POST',
       url:     '/api/cart/checkout',
+      cookies: { cc_csrf: CSRF_TEST_TOKEN },
+      headers: { 'x-csrf-token': CSRF_TEST_TOKEN },
       payload: { pickupWindowId, reservationIds: ['fake'] },
     })
     expect(res.statusCode).toBe(401)
@@ -164,7 +172,8 @@ describe('POST /api/cart/checkout', () => {
     const res = await app.inject({
       method:  'POST',
       url:     '/api/cart/checkout',
-      headers: { authorization: `Bearer ${customerToken}` },
+      cookies: { cc_csrf: CSRF_TEST_TOKEN },
+      headers: { authorization: `Bearer ${customerToken}`, 'x-csrf-token': CSRF_TEST_TOKEN },
       payload: {
         pickupWindowId,
         reservationIds: ['reserva-que-no-existe'],
