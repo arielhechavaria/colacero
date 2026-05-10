@@ -2,15 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  getProducts,
+import { getProducts,
   createProduct,
   updateProduct,
   deleteProduct,
   adjustInventory,
   type Product,
-  type CreateProductInput,
-} from '../../lib/api'
+  type CreateProductInput, isAuthenticatedClient, } from '../../lib/api'
 import { toast } from 'sonner'
 import { Button }   from '@/components/ui/button'
 import { Input }    from '@/components/ui/input'
@@ -622,7 +620,7 @@ export default function ProductsPage() {
   }, [])
 
   useEffect(() => {
-    const token = sessionStorage.getItem('panel_token')
+    const token = (isAuthenticatedClient() ? '' : null)
     if (!token) { router.replace('/login'); return }
     tokenRef.current = token
     void load(token)

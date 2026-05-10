@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getOrder, type OrderDetail } from '../../../../lib/client-api'
+import { getOrder, isAuthenticatedClient, type OrderDetail } from '../../../../lib/client-api'
 import { Button } from '@/components/ui/button'
 
 function formatDate(iso: string): string {
@@ -54,13 +54,12 @@ export default function ConfirmationPage() {
   const [error, setError]     = useState<string | null>(null)
 
   const fetchOrder = useCallback(async () => {
-    const token = sessionStorage.getItem('colacero_token')
-    if (!token) {
+    if (!isAuthenticatedClient()) {
       router.replace(`/${slug}`)
       return
     }
     try {
-      const data = await getOrder(orderId, token)
+      const data = await getOrder(orderId)
       setOrder(data)
     } catch {
       setError('No pudimos cargar los detalles del pedido.')

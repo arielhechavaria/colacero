@@ -3,8 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import {
-  getStatsSummary,
+import { getStatsSummary,
   getTopProducts,
   getCoPurchases,
   getWeeklyTrends,
@@ -14,8 +13,7 @@ import {
   type TopProduct,
   type CoPurchasePair,
   type WeeklyDay,
-  type StockAlert,
-} from '../../lib/api'
+  type StockAlert, isAuthenticatedClient, } from '../../lib/api'
 import { toast } from 'sonner'
 import { motion, type Variants } from 'framer-motion'
 import { Badge } from '@/components/ui/badge'
@@ -320,7 +318,7 @@ export default function DashboardPage() {
   }, [])
 
   useEffect(() => {
-    const token = sessionStorage.getItem('panel_token')
+    const token = (isAuthenticatedClient() ? '' : null)
     if (!token) { router.replace('/login'); return }
     tokenRef.current = token
     void load(token, range)

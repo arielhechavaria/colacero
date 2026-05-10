@@ -20,8 +20,7 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
     try {
-      const { token } = await loginOwner(email, password)
-      sessionStorage.setItem('panel_token', token)
+      await loginOwner(email, password)   // cookies httpOnly seteadas por el server
       router.push('/orders')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión')

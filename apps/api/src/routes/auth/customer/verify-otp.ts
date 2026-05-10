@@ -1,5 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { verifyAndConsumeOtp } from '../../../services/otp.service.js'
+import { issueRefreshToken } from '../../../services/token.service.js'
+import { setAuthCookies } from '../../../utils/cookies.js'
 
 interface VerifyOtpBody {
   phone: string
@@ -10,7 +12,7 @@ export async function verifyOtpRoute(app: FastifyInstance) {
   app.post<{ Body: VerifyOtpBody }>('/verify-otp', {
     schema: {
       tags:    ['customer-auth'],
-      summary: 'Verificar OTP y obtener token de acceso',
+      summary: 'Verificar OTP y obtener cookies de sesión (cc_access, cc_refresh, cc_csrf)',
       body: {
         type:       'object',
         required:   ['phone', 'otp'],
@@ -23,7 +25,6 @@ export async function verifyOtpRoute(app: FastifyInstance) {
         200: {
           type: 'object',
           properties: {
-            token:    { type: 'string' },
             customer: {
               type:       'object',
               properties: {
@@ -58,13 +59,24 @@ export async function verifyOtpRoute(app: FastifyInstance) {
       create: { phone, lastLoginAt: new Date() },
     })
 
-    const token = app.jwt.sign({
+    const accessToken = app.jwt.sign({
       sub: customer.id,
       ...(customer.phone ? { phone: customer.phone } : {}),
     })
 
+    const pair = await issueRefreshToken(app.prisma, {
+      customerId: customer.id,
+      userAgent:  req.headers['user-agent'] ?? undefined,
+      ipAddress:  req.ip,
+    })
+
+    setAuthCookies(reply, {
+      accessToken,
+      refreshToken: pair.refreshTokenRaw,
+      csrfToken:    pair.csrfToken,
+    })
+
     return reply.send({
-      token,
       customer: { id: customer.id, phone: customer.phone },
     })
   })

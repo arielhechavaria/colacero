@@ -6,7 +6,7 @@ import { format, parseISO, addDays } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
-import { getOrders, patchOrderStatus } from '../../lib/api'
+import { getOrders, patchOrderStatus, isAuthenticatedClient } from '../../lib/api'
 import type { DayOrders, OrderStatus } from '../../lib/api'
 import { WindowGroup } from '../../components/window-group'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -65,7 +65,7 @@ export default function OrdersPage() {
   }, [])
 
   useEffect(() => {
-    const token = sessionStorage.getItem('panel_token')
+    const token = (isAuthenticatedClient() ? '' : null)
     if (!token) { router.replace('/login'); return }
     tokenRef.current = token
     void fetchOrders(true)

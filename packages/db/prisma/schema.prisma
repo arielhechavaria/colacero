@@ -36,7 +36,8 @@ model User {
   role         UserRole @default(STAFF)
   createdAt    DateTime @default(now())
 
-  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  refreshTokens RefreshToken[]
 
   @@unique([businessId, email])
   @@index([businessId])
@@ -52,7 +53,29 @@ model Customer {
   lastLoginAt DateTime?
   createdAt   DateTime  @default(now())
 
-  orders Order[]
+  orders        Order[]
+  refreshTokens RefreshToken[]
+}
+
+// ─── RefreshToken (auth: rotation + theft detection) ─────────────────────────
+
+model RefreshToken {
+  id         String    @id @default(cuid())
+  userId     String?            // owner refresh token (User)
+  customerId String?            // customer refresh token (Telegram or OTP)
+  tokenHash  String    @unique  // sha256 of opaque token (NEVER store raw)
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  userAgent  String?
+  ipAddress  String?
+
+  user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([customerId])
+  @@index([expiresAt])
 }
 
 // ─── Product ─────────────────────────────────────────────────────────────────

@@ -1,13 +1,19 @@
 import Fastify from 'fastify'
 import sensible from '@fastify/sensible'
 import cors from '@fastify/cors'
+import cookie from '@fastify/cookie'
 import fs from 'node:fs'
 import path from 'node:path'
+import { env } from '@colacero/env'
 import { prismaPlugin } from './plugins/prisma.js'
 import { authPlugin } from './plugins/auth.js'
+import { csrfPlugin } from './plugins/csrf.js'
 import { redisPlugin } from './plugins/redis.js'
 import { swaggerPlugin } from './plugins/swagger.js'
 import { authRoutes } from './routes/auth/index.js'
+import { refreshRoute }   from './routes/auth/refresh.js'
+import { logoutRoute }    from './routes/auth/logout.js'
+import { logoutAllRoute } from './routes/auth/logout-all.js'
 import { customerAuthRoutes } from './routes/auth/customer/index.js'
 import { productRoutes } from './routes/owner/products/index.js'
 import { ownerOrderRoutes }        from './routes/owner/orders/index.js'
@@ -41,18 +47,26 @@ export function buildServer() {
         cb(new Error('Not allowed by CORS'), false)
       }
     },
-    credentials: true,
+    credentials:    true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
   })
+  app.register(cookie, { secret: env.COOKIE_SECRET, parseOptions: {} })
   app.register(sensible)
   app.register(swaggerPlugin)
   app.register(prismaPlugin)
   app.register(redisPlugin)
   app.register(authPlugin)
+  app.register(csrfPlugin)
   app.register(uploadPlugin)
   app.register(bullmqPlugin)
 
   // ── Routes ───────────────────────────────────────────────────────────────
   app.register(authRoutes, { prefix: '/api/auth/owner' })
+  app.register(async (group) => {
+    group.register(refreshRoute)
+    group.register(logoutRoute)
+    group.register(logoutAllRoute)
+  }, { prefix: '/api/auth' })
   app.register(customerAuthRoutes, { prefix: '/api/auth/customer' })
   app.register(productRoutes,    { prefix: '/api/owner/products' })
   app.register(ownerOrderRoutes,        { prefix: '/api/owner/orders' })

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { getOrders, patchOrderStatus } from '../../lib/api'
+import { getOrders, patchOrderStatus, isAuthenticatedClient } from '../../lib/api'
 import type { Order, OrderStatus } from '../../lib/api'
 import { Button } from '@/components/ui/button'
 import { Badge }  from '@/components/ui/badge'
@@ -53,7 +53,7 @@ export default function QueuePage() {
   }, [])
 
   useEffect(() => {
-    const token = sessionStorage.getItem('panel_token')
+    const token = (isAuthenticatedClient() ? '' : null)
     if (!token) { router.replace('/login'); return }
     tokenRef.current = token
     void fetchQueue(true)

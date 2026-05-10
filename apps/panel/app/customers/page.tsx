@@ -3,11 +3,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import {
-  getCustomers,
+import { getCustomers,
   type CustomerSegment,
-  type CustomerSummary,
-} from '../../lib/api'
+  type CustomerSummary, isAuthenticatedClient, } from '../../lib/api'
 import { Button } from '@/components/ui/button'
 import { Badge }  from '@/components/ui/badge'
 import { Input }  from '@/components/ui/input'
@@ -96,7 +94,7 @@ export default function CustomersPage() {
   }, [])
 
   useEffect(() => {
-    const token = sessionStorage.getItem('panel_token')
+    const token = (isAuthenticatedClient() ? '' : null)
     if (!token) { router.replace('/login'); return }
     tokenRef.current = token
     void load(token, segment, search)

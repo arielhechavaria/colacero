@@ -2,10 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  getWindows, createWindow, patchWindow, deleteWindow, generateTomorrow,
-  type PickupWindow, type CreateWindowInput,
-} from '../../lib/api'
+import { getWindows, createWindow, patchWindow, deleteWindow, generateTomorrow,
+  type PickupWindow, type CreateWindowInput, isAuthenticatedClient, } from '../../lib/api'
 import { Button } from '@/components/ui/button'
 import { Input }  from '@/components/ui/input'
 import { Label }  from '@/components/ui/label'
@@ -66,7 +64,7 @@ export default function WindowsPage() {
   }, [])
 
   useEffect(() => {
-    const token = sessionStorage.getItem('panel_token')
+    const token = (isAuthenticatedClient() ? '' : null)
     if (!token) { router.replace('/login'); return }
     tokenRef.current = token
     void fetchWindows()

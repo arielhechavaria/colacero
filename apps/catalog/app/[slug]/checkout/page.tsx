@@ -12,6 +12,7 @@ import {
   verifyOtp,
   getPickupWindows,
   checkout,
+  isAuthenticatedClient,
   type PickupWindow,
 } from '../../../lib/client-api'
 
@@ -27,7 +28,7 @@ export default function CheckoutPage() {
   const [error, setError]                 = useState<string | null>(null)
   const [phone, setPhone]                 = useState('')
   const [name, setName]                   = useState('')
-  const [token, setToken]                 = useState<string | null>(null)
+  const [authed, setAuthed]               = useState<boolean>(false)
   const [windows, setWindows]             = useState<PickupWindow[]>([])
   const [selectedWindow, setSelectedWindow] = useState<string | null>(null)
   const [reservationIds, setReservationIds] = useState<string[]>([])
@@ -42,13 +43,12 @@ export default function CheckoutPage() {
     }
   }, [])
 
-  // Si ya hay token (Telegram Mini App auth automático), saltar form + OTP
+  // Si ya hay sesión (Telegram Mini App auth automático), saltar form + OTP
   useEffect(() => {
-    const savedToken = sessionStorage.getItem('colacero_token')
-    const savedName  = sessionStorage.getItem('colacero_display_name')
-    if (!savedToken) return
+    if (!isAuthenticatedClient()) return
+    const savedName = sessionStorage.getItem('colacero_display_name')
 
-    setToken(savedToken)
+    setAuthed(true)
     if (savedName) setName(savedName)
 
     void (async () => {
@@ -93,9 +93,8 @@ export default function CheckoutPage() {
     setLoading(true)
     setError(null)
     try {
-      const result = await verifyOtp(phone, otp)
-      sessionStorage.setItem('colacero_token', result.token)
-      setToken(result.token)
+      await verifyOtp(phone, otp)   // server setea cookies httpOnly de sesión
+      setAuthed(true)
 
       // Cargar ventanas de recogida
       const ws = await getPickupWindows(slug)
@@ -126,19 +125,16 @@ export default function CheckoutPage() {
   // ── Paso 3: confirmar pedido ──────────────────────────────────────────────
 
   async function handleConfirm() {
-    if (!selectedWindow || !token) return
+    if (!selectedWindow || !authed) return
     setLoading(true)
     setError(null)
     try {
-      const result = await checkout(
-        {
-          pickupWindowId: selectedWindow,
-          reservationIds,
-          ...(name        ? { customerName: name }        : {}),
-          ...(notes.trim() ? { notes: notes.trim() }      : {}),
-        },
-        token,
-      )
+      const result = await checkout({
+        pickupWindowId: selectedWindow,
+        reservationIds,
+        ...(name        ? { customerName: name }   : {}),
+        ...(notes.trim() ? { notes: notes.trim() } : {}),
+      })
 
       // Limpiar estado
       clear()

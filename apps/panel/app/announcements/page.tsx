@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { publishAnnouncement, getProducts, type Product } from '../../lib/api'
+import { publishAnnouncement, getProducts, type Product, isAuthenticatedClient } from '../../lib/api'
 import { Button }   from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 
@@ -50,7 +50,7 @@ export default function AnnouncementsPage() {
   const [loadingP,  setLoadingP]  = useState(true)
 
   useEffect(() => {
-    const token = sessionStorage.getItem('panel_token')
+    const token = (isAuthenticatedClient() ? '' : null)
     if (!token) { router.replace('/login'); return }
     tokenRef.current = token
     getProducts(token)

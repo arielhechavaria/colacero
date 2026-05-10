@@ -1,5 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { verifyPassword } from '../../services/auth.service.js'
+import { issueRefreshToken } from '../../services/token.service.js'
+import { setAuthCookies } from '../../utils/cookies.js'
 
 interface LoginBody {
   email:    string
@@ -10,7 +12,7 @@ export async function loginRoute(app: FastifyInstance) {
   app.post<{ Body: LoginBody }>('/login', {
     schema: {
       tags:    ['auth'],
-      summary: 'Login del dueño — retorna JWT de acceso',
+      summary: 'Login del dueño — setea cookies httpOnly (cc_access, cc_refresh, cc_csrf)',
       body: {
         type:       'object',
         required:   ['email', 'password'],
@@ -23,7 +25,6 @@ export async function loginRoute(app: FastifyInstance) {
         200: {
           type: 'object',
           properties: {
-            token: { type: 'string' },
             user: {
               type: 'object',
               properties: {
@@ -62,14 +63,25 @@ export async function loginRoute(app: FastifyInstance) {
       return reply.status(401).send({ error: 'invalid_credentials' })
     }
 
-    const token = app.jwt.sign({
+    const accessToken = app.jwt.sign({
       sub:        user.id,
       businessId: user.businessId,
       role:       user.role,
     })
 
+    const pair = await issueRefreshToken(app.prisma, {
+      userId:    user.id,
+      userAgent: req.headers['user-agent'] ?? undefined,
+      ipAddress: req.ip,
+    })
+
+    setAuthCookies(reply, {
+      accessToken,
+      refreshToken: pair.refreshTokenRaw,
+      csrfToken:    pair.csrfToken,
+    })
+
     return reply.send({
-      token,
       user: {
         id:         user.id,
         email:      user.email,

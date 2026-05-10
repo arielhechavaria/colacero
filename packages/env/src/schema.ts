@@ -17,7 +17,13 @@ export const envSchema = z.object({
 
   // ── JWT (auth panel dueño) ─────────────────────────────────────────
   JWT_SECRET:     z.string().min(32),
-  JWT_EXPIRES_IN: z.string().default('7d'),
+  JWT_EXPIRES_IN: z.string().default('7d'), // legacy — usar ACCESS_TOKEN_EXPIRES_IN
+
+  // ── Cookies + Refresh tokens ───────────────────────────────────────
+  COOKIE_SECRET:            z.string().min(32),
+  ACCESS_TOKEN_EXPIRES_IN:  z.string().default('15m'),
+  REFRESH_TOKEN_EXPIRES_IN: z.string().default('30d'),
+  REFRESH_TOKEN_TTL_DAYS:   z.coerce.number().int().default(30),
 
   // ── OTP cliente ────────────────────────────────────────────────────
   OTP_TTL_SECONDS: z.coerce.number().int().default(600),

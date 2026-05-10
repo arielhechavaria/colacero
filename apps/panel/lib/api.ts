@@ -3,6 +3,30 @@
 // URLs relativas — Next.js reescribe /api/* hacia el servicio API via rewrites()
 const API_BASE = ''
 
+// ── Auth helpers (cookies + CSRF) ─────────────────────────────────────────────
+// Las cookies httpOnly (cc_access, cc_refresh) las pone el server; el browser las
+// envía automáticamente con `credentials: 'include'`. cc_csrf NO es httpOnly y la
+// leemos desde document.cookie para mandarla en X-CSRF-Token (double-submit).
+
+function readCsrf(): string | null {
+  if (typeof document === 'undefined') return null
+  const m = document.cookie.match(/(?:^|;\s*)cc_csrf=([^;]+)/)
+  return m ? decodeURIComponent(m[1]!) : null
+}
+
+function csrfHeader(): Record<string, string> {
+  const t = readCsrf()
+  return t ? { 'X-CSRF-Token': t } : {}
+}
+
+/**
+ * Heurística client-side: cc_csrf NO es httpOnly y se setea junto con cc_access en login.
+ * Si existe, asumimos que tenemos sesión. La verificación dura ocurre en el server (401).
+ */
+export function isAuthenticatedClient(): boolean {
+  return readCsrf() !== null
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export type OrderStatus =
@@ -56,20 +80,44 @@ export interface DayOrders {
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
+export interface LoginUser {
+  id:         string
+  email:      string
+  role:       string
+  businessId: string
+}
+
 export async function loginOwner(
   email: string,
   password: string,
-): Promise<{ token: string }> {
+): Promise<{ user: LoginUser }> {
   const res = await fetch(`${API_BASE}/api/auth/owner/login`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ email, password }),
+    method:      'POST',
+    headers:     { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body:        JSON.stringify({ email, password }),
   })
   if (!res.ok) {
     const body = await res.json() as { error?: string }
     throw new Error(body.error ?? 'login_failed')
   }
-  return res.json() as Promise<{ token: string }>
+  return res.json() as Promise<{ user: LoginUser }>
+}
+
+export async function refreshSession(): Promise<boolean> {
+  const res = await fetch(`${API_BASE}/api/auth/refresh`, {
+    method:      'POST',
+    credentials: 'include',
+  })
+  return res.ok
+}
+
+export async function logout(): Promise<void> {
+  await fetch(`${API_BASE}/api/auth/logout`, {
+    method:      'POST',
+    headers:     { ...csrfHeader() },
+    credentials: 'include',
+  })
 }
 
 // ── Orders ────────────────────────────────────────────────────────────────────
@@ -80,8 +128,8 @@ export async function getOrders(token: string, date?: string): Promise<DayOrders
     : `${API_BASE}/api/owner/orders`
 
   const res = await fetch(url, {
-    headers: { 'Authorization': `Bearer ${token}` },
-    cache:   'no-store',
+    credentials: 'include',
+    cache:       'no-store',
   })
   if (!res.ok) {
     const body = await res.json() as { error?: string }
@@ -113,8 +161,8 @@ export interface CreateWindowInput {
 
 export async function getWindows(token: string): Promise<PickupWindow[]> {
   const res = await fetch(`${API_BASE}/api/owner/pickup-windows`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-    cache:   'no-store',
+    credentials: 'include',
+    cache:       'no-store',
   })
   if (!res.ok) throw new Error('fetch_windows_failed')
   return res.json() as Promise<PickupWindow[]>
@@ -126,7 +174,8 @@ export async function createWindow(
 ): Promise<PickupWindow> {
   const res = await fetch(`${API_BASE}/api/owner/pickup-windows`, {
     method:  'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
+    credentials: 'include',
     body:    JSON.stringify(input),
   })
   if (!res.ok) {
@@ -143,7 +192,8 @@ export async function patchWindow(
 ): Promise<PickupWindow> {
   const res = await fetch(`${API_BASE}/api/owner/pickup-windows/${windowId}`, {
     method:  'PATCH',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
+    credentials: 'include',
     body:    JSON.stringify(data),
   })
   if (!res.ok) {
@@ -156,7 +206,8 @@ export async function patchWindow(
 export async function deleteWindow(token: string, windowId: string): Promise<void> {
   const res = await fetch(`${API_BASE}/api/owner/pickup-windows/${windowId}`, {
     method:  'DELETE',
-    headers: { 'Authorization': `Bearer ${token}` },
+    headers:     { ...csrfHeader() },
+    credentials: 'include',
   })
   if (!res.ok) {
     const body = await res.json() as { error?: string }
@@ -169,7 +220,8 @@ export async function generateTomorrow(
 ): Promise<{ date: string; created: PickupWindow[] }> {
   const res = await fetch(`${API_BASE}/api/owner/pickup-windows/generate-tomorrow`, {
     method:  'POST',
-    headers: { 'Authorization': `Bearer ${token}` },
+    headers:     { ...csrfHeader() },
+    credentials: 'include',
   })
   if (!res.ok) {
     const body = await res.json() as { error?: string }
@@ -219,8 +271,8 @@ export type UpdateProductInput = Partial<Omit<CreateProductInput, 'initialQuanti
 
 export async function getProducts(token: string): Promise<Product[]> {
   const res = await fetch(`${API_BASE}/api/owner/products`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-    cache:   'no-store',
+    credentials: 'include',
+    cache:       'no-store',
   })
   if (!res.ok) throw new Error('fetch_products_failed')
   const data = await res.json() as { products: Product[] } | Product[]
@@ -233,7 +285,8 @@ export async function createProduct(
 ): Promise<Product> {
   const res = await fetch(`${API_BASE}/api/owner/products`, {
     method:  'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
+    credentials: 'include',
     body:    JSON.stringify(input),
   })
   if (!res.ok) {
@@ -250,7 +303,8 @@ export async function updateProduct(
 ): Promise<Product> {
   const res = await fetch(`${API_BASE}/api/owner/products/${productId}`, {
     method:  'PATCH',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
+    credentials: 'include',
     body:    JSON.stringify(input),
   })
   if (!res.ok) {
@@ -263,7 +317,8 @@ export async function updateProduct(
 export async function deleteProduct(token: string, productId: string): Promise<void> {
   const res = await fetch(`${API_BASE}/api/owner/products/${productId}`, {
     method:  'DELETE',
-    headers: { 'Authorization': `Bearer ${token}` },
+    headers:     { ...csrfHeader() },
+    credentials: 'include',
   })
   if (!res.ok) {
     const body = await res.json() as { error?: string }
@@ -273,8 +328,8 @@ export async function deleteProduct(token: string, productId: string): Promise<v
 
 export async function getInventory(token: string, productId: string): Promise<Inventory> {
   const res = await fetch(`${API_BASE}/api/owner/products/${productId}/inventory`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-    cache:   'no-store',
+    credentials: 'include',
+    cache:       'no-store',
   })
   if (!res.ok) throw new Error('fetch_inventory_failed')
   return res.json() as Promise<Inventory>
@@ -289,7 +344,8 @@ export async function adjustInventory(
 ): Promise<Inventory> {
   const res = await fetch(`${API_BASE}/api/owner/products/${productId}/inventory`, {
     method:  'PATCH',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
+    credentials: 'include',
     body:    JSON.stringify({
       version,
       quantityAvailable,
@@ -358,8 +414,8 @@ export async function getStatsSummary(
 ): Promise<StatsSummary> {
   const qs = buildStatsQuery(range)
   const res = await fetch(`${API_BASE}/api/owner/stats/summary?${qs}`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-    cache:   'no-store',
+    credentials: 'include',
+    cache:       'no-store',
   })
   if (!res.ok) throw new Error('fetch_stats_failed')
   return res.json() as Promise<StatsSummary>
@@ -372,8 +428,8 @@ export async function getTopProducts(
 ): Promise<TopProduct[]> {
   const qs = buildStatsQuery(range)
   const res = await fetch(`${API_BASE}/api/owner/stats/top-products?${qs}&limit=${limit}`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-    cache:   'no-store',
+    credentials: 'include',
+    cache:       'no-store',
   })
   if (!res.ok) throw new Error('fetch_top_products_failed')
   return res.json() as Promise<TopProduct[]>
@@ -402,8 +458,8 @@ export interface StockAlert {
 
 export async function getCoPurchases(token: string): Promise<CoPurchasePair[]> {
   const res = await fetch(`${API_BASE}/api/owner/stats/copurchases`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-    cache:   'no-store',
+    credentials: 'include',
+    cache:       'no-store',
   })
   if (!res.ok) throw new Error('fetch_copurchases_failed')
   return res.json() as Promise<CoPurchasePair[]>
@@ -411,8 +467,8 @@ export async function getCoPurchases(token: string): Promise<CoPurchasePair[]> {
 
 export async function getWeeklyTrends(token: string): Promise<WeeklyDay[]> {
   const res = await fetch(`${API_BASE}/api/owner/stats/weekly`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-    cache:   'no-store',
+    credentials: 'include',
+    cache:       'no-store',
   })
   if (!res.ok) throw new Error('fetch_weekly_failed')
   return res.json() as Promise<WeeklyDay[]>
@@ -420,8 +476,8 @@ export async function getWeeklyTrends(token: string): Promise<WeeklyDay[]> {
 
 export async function getStockAlerts(token: string): Promise<StockAlert[]> {
   const res = await fetch(`${API_BASE}/api/owner/stats/stock-alerts`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-    cache:   'no-store',
+    credentials: 'include',
+    cache:       'no-store',
   })
   if (!res.ok) throw new Error('fetch_stock_alerts_failed')
   return res.json() as Promise<StockAlert[]>
@@ -471,8 +527,8 @@ export const TIMEZONES = [
 
 export async function getMe(token: string): Promise<CurrentUser> {
   const res = await fetch(`${API_BASE}/api/auth/owner/me`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-    cache:   'no-store',
+    credentials: 'include',
+    cache:       'no-store',
   })
   if (!res.ok) throw new Error('fetch_me_failed')
   return res.json() as Promise<CurrentUser>
@@ -480,8 +536,8 @@ export async function getMe(token: string): Promise<CurrentUser> {
 
 export async function getBusinessProfile(token: string): Promise<BusinessProfile> {
   const res = await fetch(`${API_BASE}/api/owner/settings/business`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-    cache:   'no-store',
+    credentials: 'include',
+    cache:       'no-store',
   })
   if (!res.ok) throw new Error('fetch_business_failed')
   return res.json() as Promise<BusinessProfile>
@@ -493,7 +549,8 @@ export async function updateBusinessProfile(
 ): Promise<BusinessProfile> {
   const res = await fetch(`${API_BASE}/api/owner/settings/business`, {
     method:  'PATCH',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
+    credentials: 'include',
     body:    JSON.stringify(data),
   })
   if (!res.ok) {
@@ -505,8 +562,8 @@ export async function updateBusinessProfile(
 
 export async function getStaff(token: string): Promise<StaffMember[]> {
   const res = await fetch(`${API_BASE}/api/owner/settings/staff`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-    cache:   'no-store',
+    credentials: 'include',
+    cache:       'no-store',
   })
   if (!res.ok) throw new Error('fetch_staff_failed')
   return res.json() as Promise<StaffMember[]>
@@ -518,7 +575,8 @@ export async function createStaff(
 ): Promise<StaffMember> {
   const res = await fetch(`${API_BASE}/api/owner/settings/staff`, {
     method:  'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
+    credentials: 'include',
     body:    JSON.stringify(data),
   })
   if (!res.ok) {
@@ -531,7 +589,8 @@ export async function createStaff(
 export async function deleteStaff(token: string, userId: string): Promise<void> {
   const res = await fetch(`${API_BASE}/api/owner/settings/staff/${userId}`, {
     method:  'DELETE',
-    headers: { 'Authorization': `Bearer ${token}` },
+    headers:     { ...csrfHeader() },
+    credentials: 'include',
   })
   if (!res.ok) {
     const body = await res.json() as { error?: string }
@@ -546,7 +605,8 @@ export async function changePassword(
 ): Promise<void> {
   const res = await fetch(`${API_BASE}/api/owner/settings/password`, {
     method:  'PATCH',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
+    credentials: 'include',
     body:    JSON.stringify({ currentPassword, newPassword }),
   })
   if (!res.ok) {
@@ -625,8 +685,8 @@ export async function getCustomers(
   const params = new URLSearchParams({ segment, page: String(page), limit: String(limit) })
   if (search) params.set('search', search)
   const res = await fetch(`${API_BASE}/api/owner/customers?${params}`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-    cache:   'no-store',
+    credentials: 'include',
+    cache:       'no-store',
   })
   if (!res.ok) throw new Error('fetch_customers_failed')
   return res.json() as Promise<CustomerListResponse>
@@ -637,8 +697,8 @@ export async function getCustomerDetail(
   customerId: string,
 ): Promise<CustomerDetail> {
   const res = await fetch(`${API_BASE}/api/owner/customers/${customerId}`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-    cache:   'no-store',
+    credentials: 'include',
+    cache:       'no-store',
   })
   if (!res.ok) throw new Error('fetch_customer_detail_failed')
   return res.json() as Promise<CustomerDetail>
@@ -652,7 +712,8 @@ export async function publishAnnouncement(
 ): Promise<{ jobId: string; queue: string }> {
   const res = await fetch(`${API_BASE}/api/owner/announcements`, {
     method:  'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
+    credentials: 'include',
     body:    JSON.stringify({ text }),
   })
   if (!res.ok) {

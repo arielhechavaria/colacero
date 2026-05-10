@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  getMe,
+import { getMe,
   getBusinessProfile,
   updateBusinessProfile,
   getStaff,
@@ -13,8 +12,7 @@ import {
   TIMEZONES,
   type BusinessProfile,
   type StaffMember,
-  type CurrentUser,
-} from '../../lib/api'
+  type CurrentUser, isAuthenticatedClient, } from '../../lib/api'
 import { Button }   from '@/components/ui/button'
 import { Input }    from '@/components/ui/input'
 import { Label }    from '@/components/ui/label'
@@ -449,7 +447,7 @@ export default function SettingsPage() {
   const [loading,     setLoading]     = useState(true)
 
   useEffect(() => {
-    const tok = sessionStorage.getItem('panel_token')
+    const tok = (isAuthenticatedClient() ? '' : null)
     if (!tok) { router.replace('/login'); return }
     setToken(tok)
     getMe(tok)

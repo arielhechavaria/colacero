@@ -1,6 +1,8 @@
 import { createHmac } from 'crypto'
 import type { FastifyInstance } from 'fastify'
 import { env } from '@colacero/env'
+import { issueRefreshToken } from '../../../services/token.service.js'
+import { setAuthCookies } from '../../../utils/cookies.js'
 
 // ── Tipos de Telegram ─────────────────────────────────────────────────────────
 
@@ -75,7 +77,6 @@ export async function telegramAuthRoute(app: FastifyInstance) {
         200: {
           type: 'object',
           properties: {
-            token:    { type: 'string' },
             customer: {
               type: 'object',
               properties: {
@@ -119,13 +120,24 @@ export async function telegramAuthRoute(app: FastifyInstance) {
       create: { telegramId, displayName, lastLoginAt: new Date() },
     })
 
-    const token = app.jwt.sign({
+    const accessToken = app.jwt.sign({
       sub: customer.id,
       ...(customer.telegramId ? { telegramId: customer.telegramId } : {}),
     })
 
+    const pair = await issueRefreshToken(app.prisma, {
+      customerId: customer.id,
+      userAgent:  req.headers['user-agent'] ?? undefined,
+      ipAddress:  req.ip,
+    })
+
+    setAuthCookies(reply, {
+      accessToken,
+      refreshToken: pair.refreshTokenRaw,
+      csrfToken:    pair.csrfToken,
+    })
+
     return reply.send({
-      token,
       customer: {
         id:          customer.id,
         telegramId:  customer.telegramId,

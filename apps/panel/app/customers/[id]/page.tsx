@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getCustomerDetail, type CustomerDetail, type CustomerOrder } from '../../../lib/api'
+import { getCustomerDetail, type CustomerDetail, type CustomerOrder, isAuthenticatedClient } from '../../../lib/api'
 import { Badge } from '@/components/ui/badge'
 
 // ── Status badge ──────────────────────────────────────────────────────────────
@@ -106,7 +106,7 @@ export default function CustomerDetailPage() {
   const [error,   setError]   = useState<string | null>(null)
 
   useEffect(() => {
-    const token = sessionStorage.getItem('panel_token')
+    const token = (isAuthenticatedClient() ? '' : null)
     if (!token) { router.replace('/login'); return }
 
     setLoading(true)
