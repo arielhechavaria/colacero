@@ -20,6 +20,12 @@ const TEST_PASSWORD = 'contraseñaSegura32chars!!'
 let businessId: string
 let productId:  string
 let token:      string
+let csrfToken:  string
+
+type InjectResponse = Awaited<ReturnType<typeof app.inject>>
+function getCookie(res: InjectResponse, name: string) {
+  return res.cookies.find(c => c.name === name)
+}
 
 // Multipart body helper
 function makeMultipart(
@@ -58,12 +64,13 @@ beforeAll(async () => {
     create: { businessId, email: TEST_EMAIL, passwordHash, role: 'OWNER' },
   })
 
-  const res = await app.inject({
+  const loginRes = await app.inject({
     method:  'POST',
     url:     '/api/auth/owner/login',
     payload: { email: TEST_EMAIL, password: TEST_PASSWORD },
   })
-  token = res.json<{ token: string }>().token
+  token     = getCookie(loginRes, 'cc_access')!.value
+  csrfToken = getCookie(loginRes, 'cc_csrf')!.value
 
   const product = await prisma.product.create({
     data: {
@@ -82,6 +89,7 @@ afterAll(async () => {
     await rm(resolve(env.UPLOAD_DIR, 'products', productId), { recursive: true, force: true })
   } catch { /* ignorar si no existe */ }
 
+  await prisma.refreshToken.deleteMany({ where: { user: { email: TEST_EMAIL } } })
   await prisma.product.deleteMany({ where: { businessId } })
   await prisma.user.deleteMany({ where: { email: TEST_EMAIL } })
   await prisma.business.deleteMany({ where: { slug: TEST_SLUG } })
@@ -96,9 +104,11 @@ describe('POST /api/owner/products/:id/image', () => {
     const res = await app.inject({
       method:  'POST',
       url:     `/api/owner/products/${productId}/image`,
+      cookies: { cc_csrf: csrfToken },
       headers: {
-        authorization:  `Bearer ${token}`,
-        'content-type': `multipart/form-data; boundary=${boundary}`,
+        authorization:   `Bearer ${token}`,
+        'content-type':  `multipart/form-data; boundary=${boundary}`,
+        'x-csrf-token':  csrfToken,
       },
       body,
     })
@@ -119,9 +129,11 @@ describe('POST /api/owner/products/:id/image', () => {
     const res = await app.inject({
       method:  'POST',
       url:     `/api/owner/products/${productId}/image`,
+      cookies: { cc_csrf: csrfToken },
       headers: {
-        authorization:  `Bearer ${token}`,
-        'content-type': `multipart/form-data; boundary=${boundary}`,
+        authorization:   `Bearer ${token}`,
+        'content-type':  `multipart/form-data; boundary=${boundary}`,
+        'x-csrf-token':  csrfToken,
       },
       body,
     })
@@ -137,9 +149,11 @@ describe('POST /api/owner/products/:id/image', () => {
     const res = await app.inject({
       method:  'POST',
       url:     `/api/owner/products/${productId}/image`,
+      cookies: { cc_csrf: csrfToken },
       headers: {
-        authorization:  `Bearer ${token}`,
-        'content-type': `multipart/form-data; boundary=${boundary}`,
+        authorization:   `Bearer ${token}`,
+        'content-type':  `multipart/form-data; boundary=${boundary}`,
+        'x-csrf-token':  csrfToken,
       },
       body: emptyBody,
     })
@@ -150,10 +164,15 @@ describe('POST /api/owner/products/:id/image', () => {
   it('upload-unauth: sin JWT → 401', async () => {
     const { boundary, body } = makeMultipart('image', 'foto.jpg', 'image/jpeg', FAKE_JPEG)
 
+    // CSRF válido pero sin Bearer — CSRF pasa, auth falla → 401
     const res = await app.inject({
       method:  'POST',
       url:     `/api/owner/products/${productId}/image`,
-      headers: { 'content-type': `multipart/form-data; boundary=${boundary}` },
+      cookies: { cc_csrf: csrfToken },
+      headers: {
+        'content-type': `multipart/form-data; boundary=${boundary}`,
+        'x-csrf-token': csrfToken,
+      },
       body,
     })
 
@@ -174,9 +193,11 @@ describe('POST /api/owner/products/:id/image', () => {
     const res = await app.inject({
       method:  'POST',
       url:     `/api/owner/products/${otherProduct.id}/image`,
+      cookies: { cc_csrf: csrfToken },
       headers: {
-        authorization:  `Bearer ${token}`,
-        'content-type': `multipart/form-data; boundary=${boundary}`,
+        authorization:   `Bearer ${token}`,
+        'content-type':  `multipart/form-data; boundary=${boundary}`,
+        'x-csrf-token':  csrfToken,
       },
       body,
     })

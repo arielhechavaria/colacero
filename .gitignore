@@ -7,3 +7,5 @@ dist/
 _tmp_*
 .vs
 apps/panel/.next
+.idea/
+.atl/
