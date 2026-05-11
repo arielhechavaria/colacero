@@ -61,6 +61,7 @@ jobs:
           JWT_EXPIRES_IN=7d
           OTP_TTL_SECONDS=600
           WHATSAPP_PROVIDER=mock
+          COOKIE_SECRET=ci-cookie-secret-minimum-32-characters!
           API_PORT=3000
           API_HOST=0.0.0.0
           UPLOAD_DIR=/tmp/colacero-uploads
@@ -143,6 +144,7 @@ jobs:
           OTP_TTL_SECONDS=600
           WHATSAPP_PROVIDER=mock
           TELEGRAM_PROVIDER=mock
+          COOKIE_SECRET=lhci-cookie-secret-minimum-32-characters!
           API_PORT=3000
           API_HOST=0.0.0.0
           UPLOAD_DIR=/tmp/colacero-uploads
