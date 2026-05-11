@@ -447,7 +447,7 @@ export default function SettingsPage() {
   const [loading,     setLoading]     = useState(true)
 
   useEffect(() => {
-    const tok = (isAuthenticatedClient() ? '' : null)
+    const tok = (isAuthenticatedClient() ? '1' : null)
     if (!tok) { router.replace('/login'); return }
     setToken(tok)
     getMe(tok)

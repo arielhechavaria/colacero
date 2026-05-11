@@ -65,7 +65,7 @@ export default function OrdersPage() {
   }, [])
 
   useEffect(() => {
-    const token = (isAuthenticatedClient() ? '' : null)
+    const token = (isAuthenticatedClient() ? '1' : null)
     if (!token) { router.replace('/login'); return }
     tokenRef.current = token
     void fetchOrders(true)

@@ -94,7 +94,7 @@ export default function CustomersPage() {
   }, [])
 
   useEffect(() => {
-    const token = (isAuthenticatedClient() ? '' : null)
+    const token = (isAuthenticatedClient() ? '1' : null)
     if (!token) { router.replace('/login'); return }
     tokenRef.current = token
     void load(token, segment, search)

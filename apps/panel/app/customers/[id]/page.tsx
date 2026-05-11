@@ -106,7 +106,7 @@ export default function CustomerDetailPage() {
   const [error,   setError]   = useState<string | null>(null)
 
   useEffect(() => {
-    const token = (isAuthenticatedClient() ? '' : null)
+    const token = (isAuthenticatedClient() ? '1' : null)
     if (!token) { router.replace('/login'); return }
 
     setLoading(true)

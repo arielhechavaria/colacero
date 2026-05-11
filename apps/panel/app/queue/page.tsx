@@ -53,7 +53,7 @@ export default function QueuePage() {
   }, [])
 
   useEffect(() => {
-    const token = (isAuthenticatedClient() ? '' : null)
+    const token = (isAuthenticatedClient() ? '1' : null)
     if (!token) { router.replace('/login'); return }
     tokenRef.current = token
     void fetchQueue(true)
