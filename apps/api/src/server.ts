@@ -88,9 +88,12 @@ export function buildServer() {
   }))
 
   // ── Landing HTML para la raíz de la API ─────────────────────
-    const __dirname = path.dirname(fileURLToPath(import.meta.url))
-    const landingHtmlPath = path.join(__dirname, '..', 'public', 'api-landing.html')
-    const landingHtml = fs.readFileSync(landingHtmlPath, 'utf8')
+  // fileURLToPath convierte correctamente file:/// URLs a rutas nativas en
+  // Windows (evita el bug C:\C:\ que produce new URL().pathname + path.join)
+  const landingHtmlPath = fileURLToPath(new URL('../public/api-landing.html', import.meta.url))
+  const landingHtml = fs.existsSync(landingHtmlPath)
+    ? fs.readFileSync(landingHtmlPath, 'utf8')
+    : '<h1>ColaCero API</h1>'
 
     app.get('/', async (req, reply) => {
         return reply

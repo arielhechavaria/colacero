@@ -17,8 +17,8 @@ const TEST_PASSWORD = 'contraseñaSegura32chars!!'
 
 let businessId:       string
 let otherBusinessId:  string
-let token:            string   // JWT extraído de la cookie cc_access (Phase 2)
-let csrfToken:        string   // valor de cc_csrf para double-submit CSRF
+let token:            string   // JWT extraído de la cookie cc_access
+let csrfToken:        string   // valor de cc_csrf (para double-submit CSRF)
 let productId:        string
 
 type InjectResponse = Awaited<ReturnType<typeof app.inject>>
@@ -53,8 +53,7 @@ beforeAll(async () => {
     create: { businessId, email: TEST_EMAIL, passwordHash, role: 'OWNER' },
   })
 
-  // Phase 2: login devuelve cookies, no body.token
-  // @fastify/jwt acepta tanto cc_access cookie como Authorization: Bearer
+  // Obtener tokens via login (Phase 2: devuelve cookies, no body.token)
   const loginRes = await app.inject({
     method:  'POST',
     url:     '/api/auth/owner/login',
@@ -84,8 +83,8 @@ describe('endpoints sin token', () => {
   })
 
   it('unauth-create: POST / sin JWT → 401', async () => {
-    // Phase 2: el hook CSRF dispara antes de auth en POSTs.
-    // Pasamos tokens CSRF válidos (matching) para que sea auth quien falle → 401.
+    // Phase 2: CSRF hook dispara antes de auth para POSTs.
+    // Pasamos tokens CSRF válidos (matching) para que auth sea el que falle → 401.
     const res = await app.inject({
       method:  'POST',
       url:     '/api/owner/products',

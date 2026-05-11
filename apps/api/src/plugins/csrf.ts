@@ -14,17 +14,17 @@ const SKIP_PATHS = [
   '/api/auth/refresh',
 ]
 
-// Prefix-based skip: covers POST /api/cart/reserve AND DELETE /api/cart/reserve/:id
-// These are public endpoints (no session) — CSRF is irrelevant for them
+// Prefix-based skip: covers both POST /api/cart/reserve and DELETE /api/cart/reserve/:id
+// Cart reserve/release are public (no session) — no CSRF needed
 const SKIP_PREFIXES = [
   '/api/cart/reserve',
 ]
 
 export const csrfPlugin = fp(async (app: FastifyInstance) => {
   app.addHook('onRequest', async (req: FastifyRequest, reply: FastifyReply) => {
-    if (SAFE_METHODS.has(req.method))                              return
-    if (SKIP_PATHS.includes(req.url))                              return
-    if (SKIP_PREFIXES.some(p => req.url.startsWith(p)))           return
+    if (SAFE_METHODS.has(req.method))                                  return
+    if (SKIP_PATHS.includes(req.url))                                  return
+    if (SKIP_PREFIXES.some(p => req.url.startsWith(p)))               return
     // Public catalog routes don't carry a session cookie — let them through
     if (req.url.startsWith('/api/catalog/') && !req.cookies[ACCESS_COOKIE]) return
 

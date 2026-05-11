@@ -67,7 +67,7 @@ export async function registerRoute(app: FastifyInstance) {
     // Verificar unicidad de slug y email en paralelo
     const [slugExists, emailExists] = await Promise.all([
       app.prisma.business.findUnique({ where: { slug } }),
-      app.prisma.user.findUnique({ where: { email } }),
+      app.prisma.user.findFirst({ where: { email } }),
     ])
 
     if (slugExists)  return reply.status(409).send({ error: 'slug_taken' })

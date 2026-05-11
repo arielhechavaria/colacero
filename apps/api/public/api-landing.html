@@ -1,123 +1,18 @@
 <!doctype html>
 <html lang="es">
-<head>
+  <head>
     <meta charset="utf-8" />
     <title>ColaCero API</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="API de gestión de pedidos y recogidas para MiPymes cubanas" />
-    <!-- Tailwind vía CDN (para algo simple va bien; si quieres optimizar, compílalo en tu build) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="min-h-screen bg-slate-950 text-slate-100">
-    <div class="relative isolate overflow-hidden">
-        <!-- Gradiente de fondo -->
-        <div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-emerald-500/10 via-slate-950 to-slate-950"></div>
-
-        <!-- Contenido principal -->
-        <main class="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col justify-center px-6 py-16">
-            <!-- Cabecera pequeña -->
-            <header class="mb-8 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 ring-1 ring-emerald-400/40">
-                        <span class="text-lg font-semibold text-emerald-400">CC</span>
-                    </div>
-                    <div>
-                        <p class="text-xs uppercase tracking-[0.2em] text-emerald-300/80">ColaCero</p>
-                        <p class="text-sm text-slate-400">Infraestructura para colas inteligentes</p>
-                    </div>
-                </div>
-                <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300 ring-1 ring-emerald-500/40">
-                    API v1.0
-                </span>
-            </header>
-
-            <!-- Hero -->
-            <section class="grid gap-10 md:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)] md:items-center">
-                <div class="space-y-6">
-                    <h1 class="text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl lg:text-5xl">
-                        ColaCero API
-                    </h1>
-                    <p class="max-w-xl text-sm sm:text-base text-slate-300">
-                        API REST para gestionar pedidos, recogidas y catálogos de productos para MiPymes cubanas.
-                        Pensada para integrarse con paneles de administración, kioscos y aplicaciones móviles.
-                    </p>
-
-                    <!-- CTA -->
-                    <div class="flex flex-wrap gap-3 pt-2">
-                        <a href="/docs"
-                           class="inline-flex items-center justify-center rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-medium text-slate-950 shadow-sm transition hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
-                            Ver documentación Swagger
-                            <span class="ml-2 text-xs text-emerald-900/80">/docs</span>
-                        </a>
-
-                        <a href="https://panel.colacero.com"
-                           class="inline-flex items-center justify-center rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-100 hover:border-emerald-400/70 hover:text-emerald-200">
-                            Ir al panel de negocio
-                        </a>
-                    </div>
-
-                    <!-- Info rápida -->
-                    <div class="mt-6 grid gap-4 text-xs text-slate-300 sm:grid-cols-3">
-                        <div class="space-y-1 rounded-xl border border-slate-800 bg-slate-900/40 p-3">
-                            <p class="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Base URL</p>
-                            <p class="truncate font-mono text-[0.78rem] text-emerald-300">
-                                https://api.colacero.com
-                            </p>
-                        </div>
-                        <div class="space-y-1 rounded-xl border border-slate-800 bg-slate-900/40 p-3">
-                            <p class="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Auth</p>
-                            <p class="text-[0.78rem] text-slate-200">
-                                JWT vía <span class="font-mono text-emerald-300">/api/auth/owner/login</span>
-                            </p>
-                        </div>
-                        <div class="space-y-1 rounded-xl border border-slate-800 bg-slate-900/40 p-3">
-                            <p class="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Entornos</p>
-                            <p class="text-[0.78rem] text-slate-200">
-                                <span class="font-mono text-emerald-300">production</span> · <span class="font-mono">staging</span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Bloque “tarjeta” de endpoints -->
-                <aside class="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-xl shadow-emerald-500/5">
-                    <h2 class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                        Endpoints principales
-                    </h2>
-                    <div class="space-y-2 text-[0.78rem] font-mono">
-                        <div class="flex items-center justify-between rounded-lg bg-slate-900/80 px-3 py-2">
-                            <span class="rounded bg-emerald-500/10 px-2 py-0.5 text-[0.7rem] font-semibold text-emerald-300">POST</span>
-                            <span class="ml-2 truncate text-slate-100">/api/auth/owner/login</span>
-                        </div>
-                        <div class="flex items-center justify-between rounded-lg bg-slate-900/80 px-3 py-2">
-                            <span class="rounded bg-emerald-500/10 px-2 py-0.5 text-[0.7rem] font-semibold text-emerald-300">GET</span>
-                            <span class="ml-2 truncate text-slate-100">/api/owner/orders</span>
-                        </div>
-                        <div class="flex items-center justify-between rounded-lg bg-slate-900/80 px-3 py-2">
-                            <span class="rounded bg-emerald-500/10 px-2 py-0.5 text-[0.7rem] font-semibold text-emerald-300">GET</span>
-                            <span class="ml-2 truncate text-slate-100">/api/catalog</span>
-                        </div>
-                        <div class="flex items-center justify-between rounded-lg bg-slate-900/80 px-3 py-2">
-                            <span class="rounded bg-slate-700 px-2 py-0.5 text-[0.7rem] font-semibold text-slate-200">GET</span>
-                            <span class="ml-2 truncate text-slate-300">/health</span>
-                        </div>
-                    </div>
-
-                    <p class="pt-2 text-[0.72rem] text-slate-400">
-                        Para el contrato completo de la API, revisa la especificación OpenAPI disponible en Swagger UI.
-                    </p>
-                </aside>
-            </section>
-
-            <!-- Footer pequeño -->
-            <footer class="mt-12 border-t border-slate-800 pt-4 text-xs text-slate-500">
-                <p>© <span id="year"></span> ColaCero. API desplegada en Hetzner, protegida por Cloudflare.</p>
-            </footer>
-        </main>
-    </div>
-
-    <script>
-    document.getElementById('year').textContent = new Date().getFullYear()
-    </script>
-</body>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 480px; margin: 4rem auto; padding: 0 1rem; color: #0f172a; }
+      h1 { font-size: 1.5rem; font-weight: 700; }
+      p  { color: #475569; }
+      a  { color: #4f46e5; }
+    </style>
+  </head>
+  <body>
+    <h1>ColaCero API</h1>
+    <p>API REST para el sistema de pedidos ColaCero.</p>
+    <p>Documentación: <a href="/docs">/docs</a></p>
+  </body>
 </html>

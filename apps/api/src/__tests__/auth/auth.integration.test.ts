@@ -89,7 +89,7 @@ describe('POST /api/auth/owner/login', () => {
     // cc_access y cc_refresh son httpOnly; cc_csrf NO (el frontend la lee con document.cookie)
     expect(access?.httpOnly).toBe(true)
     expect(refresh?.httpOnly).toBe(true)
-    expect(csrf?.httpOnly).not.toBe(true)   // light-my-request omite httpOnly cuando es false
+    expect(csrf?.httpOnly).toBe(false)
   })
 
   it('login-wrong-pass: contraseña incorrecta → 401 invalid_credentials', async () => {
