@@ -58,7 +58,7 @@ function KpiCard({
           {label}
         </span>
       </div>
-      <p className={`text-3xl font-black font-mono ${gradient ? 'text-gradient' : ''}`}
+        <p className={`text-2xl sm:text-3xl font-black font-mono ${gradient ? 'text-gradient' : ''}`}
         style={gradient ? undefined : { color: 'var(--text)' }}>
         {value}
       </p>
@@ -333,7 +333,7 @@ export default function DashboardPage() {
         className="sticky top-0 z-10 glass px-6 py-4"
         style={{ borderBottom: '1px solid var(--glass-border)' }}
       >
-        <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-lg font-bold text-gradient">Dashboard</h1>
 
           {/* Period selector */}

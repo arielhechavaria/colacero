@@ -8,8 +8,7 @@
  *   api.colacero.com      → { kind: 'reserved', name: 'api' }
  *   localhost:3001        → { kind: 'local' }
  */
-
-import { SLUG_RE, isSlugBlocked } from '@colacero/shared'
+import {isSlugBlocked, SLUG_RE} from "@colacero/shared";
 
 const BASE_DOMAIN = 'colacero.com'
 

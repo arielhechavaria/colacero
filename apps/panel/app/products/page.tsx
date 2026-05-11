@@ -734,14 +734,18 @@ export default function ProductsPage() {
       >
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-lg font-bold text-gradient">Catálogo de productos</h1>
+              <h1 className="text-lg font-bold text-gradient">
+              <span className="sm:hidden">Productos</span>
+             <span className="hidden sm:inline">Catálogo de productos</span>
+              </h1>
             <p className="text-sm" style={{ color: 'var(--muted)' }}>
               {products.filter((p) => p.isActive).length} activos · {products.filter((p) => !p.isActive).length} inactivos
             </p>
           </div>
-          <Button onClick={openCreate}>
-            + Nuevo producto
-          </Button>
+           <Button onClick={openCreate}>
+            <span className="sm:hidden">+ Nuevo</span>
+             <span className="hidden sm:inline">+ Nuevo producto</span>
+            </Button>
         </div>
 
         {/* Toolbar */}

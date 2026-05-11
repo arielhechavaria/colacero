@@ -11,6 +11,7 @@
     "test": "dotenv -e ../../.env -- vitest run"
   },
   "dependencies": {
+    "@colacero/shared": "workspace:*",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "@twa-dev/sdk": "^8.0.2",

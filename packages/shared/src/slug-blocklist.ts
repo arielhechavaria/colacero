@@ -78,6 +78,7 @@ export function validateSlug(slug: string): SlugValidation {
   return { valid: true }
 }
 
+
 /** Devuelve true si el slug está bloqueado (reservado o marca protegida). */
 export function isSlugBlocked(slug: string): boolean {
   return RESERVED_SLUGS.has(slug) || BRAND_SLUGS.has(slug)

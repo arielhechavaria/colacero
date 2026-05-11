@@ -96,6 +96,9 @@ importers:
 
   apps/catalog:
     dependencies:
+      '@colacero/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@radix-ui/react-label':
         specifier: ^2.1.8
         version: 2.1.8(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
