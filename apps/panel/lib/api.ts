@@ -104,6 +104,27 @@ export async function loginOwner(
   return res.json() as Promise<{ user: LoginUser }>
 }
 
+export async function forgotPassword(email: string): Promise<void> {
+  await fetch(`${API_BASE}/api/auth/owner/forgot-password`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ email }),
+  })
+  // Silencioso — el server siempre devuelve 200 (anti-enumeration)
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/auth/owner/reset-password`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ token, newPassword }),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'reset_failed')
+  }
+}
+
 export async function refreshSession(): Promise<boolean> {
   const res = await fetch(`${API_BASE}/api/auth/refresh`, {
     method:      'POST',

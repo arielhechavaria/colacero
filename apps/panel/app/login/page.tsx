@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { loginOwner } from '../../lib/api'
 import { Button } from '@/components/ui/button'
@@ -74,7 +75,16 @@ export default function LoginPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password">Contraseña</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Contraseña</Label>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs"
+                  style={{ color: 'var(--muted)' }}
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
               <Input
                 id="password"
                 type="password"

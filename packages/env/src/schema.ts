@@ -43,6 +43,12 @@ export const envSchema = z.object({
   // ── Upload de archivos ────────────────────────────────────────────
   UPLOAD_DIR:      z.string().default('./uploads'),
   API_PUBLIC_URL:  z.string().url().default('http://localhost:3000'),
+
+  // ── Email / Password reset ────────────────────────────────────────
+  RESEND_API_KEY:             z.string().optional(),
+  FROM_EMAIL:                 z.string().email().optional(),
+  PASSWORD_RESET_TTL_MINUTES: z.coerce.number().int().default(60),
+  PANEL_URL:                  z.string().url().default('http://localhost:3002'),
 })
 
 export type EnvSchema = z.infer<typeof envSchema>

@@ -36,8 +36,9 @@ model User {
   role         UserRole @default(STAFF)
   createdAt    DateTime @default(now())
 
-  business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  refreshTokens RefreshToken[]
+  business            Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
 
   @@unique([businessId, email])
   @@index([businessId])
@@ -192,6 +193,22 @@ model Notification {
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
+}
+
+// ─── PasswordResetToken ───────────────────────────────────────────────────────
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
