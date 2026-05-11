@@ -9,15 +9,9 @@
  *   localhost:3001        → { kind: 'local' }
  */
 
+import { SLUG_RE, isSlugBlocked } from '@colacero/shared'
+
 const BASE_DOMAIN = 'colacero.com'
-
-const RESERVED = new Set([
-  'api', 'panel', 'admin', 'www', 'mail', 'static',
-  'auth', 'signup', 'catalog', 'assets', 'cdn',
-])
-
-// Mismo regex que el plan: 3-32 chars, solo a-z0-9 y guiones internos
-const SLUG_RE = /^[a-z0-9]([a-z0-9-]{1,30}[a-z0-9])?$/
 
 export type TenantResult =
   | { kind: 'tenant';   slug: string }
@@ -47,7 +41,7 @@ export function parseTenantFromHost(host: string | null | undefined): TenantResu
 
   if (!sub) return { kind: 'root' }
   if (sub === 'www') return { kind: 'root' }
-  if (RESERVED.has(sub)) return { kind: 'reserved', name: sub }
+  if (isSlugBlocked(sub)) return { kind: 'reserved', name: sub }
   if (!SLUG_RE.test(sub)) return { kind: 'root' }
 
   return { kind: 'tenant', slug: sub }
