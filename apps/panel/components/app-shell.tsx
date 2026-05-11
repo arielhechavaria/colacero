@@ -64,7 +64,7 @@ function NavItem({
         <Link
             href={href}
             title={label}
-            onClick={onClick}
+            {...(onClick ? { onClick } : {})}
             className={cn(
                 'flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 transition-all min-w-0 flex-1',
             )}
