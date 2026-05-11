@@ -2,9 +2,20 @@
 
 on:
   push:
-    branches: [master]
+    branches: [master, develop]
   pull_request:
-    branches: [master]
+    branches: [develop]
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# GITFLOW WORKFLOW:
+#   feature/*  → PR a develop  (CI corre en cada push a la rama)
+#   develop    → PR a master   (release candidate, pasa todos los checks)
+#   master     → producción    (taggeado en cada release)
+#
+# PROTEGER en GitHub Settings:
+#   - master: require PR + 1 approval, no force push
+#   - develop: require PR + 1 approval, no force push
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 jobs:
   ci:
