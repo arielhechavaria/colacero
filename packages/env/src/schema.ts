@@ -47,8 +47,9 @@ export const envSchema = z.object({
   // ── Email / Password reset ────────────────────────────────────────
   RESEND_API_KEY:             z.string().optional(),
   FROM_EMAIL:                 z.string().email().optional(),
-  PASSWORD_RESET_TTL_MINUTES: z.coerce.number().int().default(60),
-  PANEL_URL:                  z.string().url().default('http://localhost:3002'),
+  PASSWORD_RESET_TTL_MINUTES:    z.coerce.number().int().default(60),
+  EMAIL_VERIFICATION_TTL_HOURS:  z.coerce.number().int().default(24),
+  PANEL_URL:                     z.string().url().default('http://localhost:3002'),
 })
 
 export type EnvSchema = z.infer<typeof envSchema>

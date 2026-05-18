@@ -25,6 +25,7 @@ import {
     SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet'
+import { EmailVerificationBanner } from './email-verification-banner'
 
 // ── Navigation config ─────────────────────────────────────────────────────────
 
@@ -210,6 +211,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
             {/* ── Main content ──────────────────────────────────────────── */}
             <main className="flex-1 min-h-screen lg:ml-[240px] pb-16 lg:pb-0">
+                <EmailVerificationBanner />
                 <motion.div
                     key={pathname}
                     initial={{ opacity: 0, y: 6 }}

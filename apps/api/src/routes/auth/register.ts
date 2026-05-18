@@ -1,7 +1,10 @@
+import crypto from 'node:crypto'
 import type { FastifyInstance } from 'fastify'
 import { validateSlug } from '@colacero/shared'
+import { env } from '@colacero/env'
 import { hashPassword } from '../../services/auth.service.js'
-import { issueRefreshToken } from '../../services/token.service.js'
+import { issueRefreshToken, hashToken } from '../../services/token.service.js'
+import { sendVerificationEmail } from '../../services/email.service.js'
 import { setAuthCookies } from '../../utils/cookies.js'
 
 interface RegisterBody {
@@ -111,6 +114,22 @@ export async function registerRoute(app: FastifyInstance) {
       refreshToken: pair.refreshTokenRaw,
       csrfToken:    pair.csrfToken,
     })
+
+    // Enviar email de verificación auto (best-effort, no bloquea el signup)
+    try {
+      const rawToken  = crypto.randomBytes(32).toString('base64url')
+      const expiresAt = new Date(Date.now() + env.EMAIL_VERIFICATION_TTL_HOURS * 60 * 60 * 1000)
+      await app.prisma.emailVerificationToken.create({
+        data: { userId: user.id, tokenHash: hashToken(rawToken), expiresAt },
+      })
+      await sendVerificationEmail({
+        to:             user.email,
+        verifyLink:     `${env.PANEL_URL}/verify-email?token=${rawToken}`,
+        expiresInHours: env.EMAIL_VERIFICATION_TTL_HOURS,
+      })
+    } catch (err) {
+      app.log.error({ err, userId: user.id }, 'failed to send verification email on register')
+    }
 
     return reply.status(201).send({
       user: {

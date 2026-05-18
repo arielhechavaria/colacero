@@ -113,6 +113,32 @@ export async function forgotPassword(email: string): Promise<void> {
   // Silencioso — el server siempre devuelve 200 (anti-enumeration)
 }
 
+export async function sendVerificationEmail(): Promise<{ ok: boolean; alreadyVerified: boolean }> {
+  const res = await fetch(`${API_BASE}/api/auth/owner/send-verification`, {
+    method:      'POST',
+    headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
+    credentials: 'include',
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'send_verification_failed')
+  }
+  return res.json() as Promise<{ ok: boolean; alreadyVerified: boolean }>
+}
+
+export async function verifyEmail(token: string): Promise<{ ok: boolean; email: string }> {
+  const res = await fetch(`${API_BASE}/api/auth/owner/verify-email`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ token }),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'verify_email_failed')
+  }
+  return res.json() as Promise<{ ok: boolean; email: string }>
+}
+
 export async function resetPassword(token: string, newPassword: string): Promise<void> {
   const res = await fetch(`${API_BASE}/api/auth/owner/reset-password`, {
     method:  'POST',
@@ -523,10 +549,11 @@ export interface StaffMember {
 }
 
 export interface CurrentUser {
-  id:         string
-  email:      string
-  role:       string
-  businessId: string
+  id:              string
+  email:           string
+  role:            string
+  businessId:      string
+  emailVerifiedAt: string | null
 }
 
 export const TIMEZONES = [

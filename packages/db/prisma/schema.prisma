@@ -31,16 +31,18 @@ model Business {
 // ─── User (staff del negocio) ────────────────────────────────────────────────
 
 model User {
-  id           String   @id @default(cuid())
-  businessId   String
-  email        String
-  passwordHash String
-  role         UserRole @default(STAFF)
-  createdAt    DateTime @default(now())
+  id              String    @id @default(cuid())
+  businessId      String
+  email           String
+  passwordHash    String
+  role            UserRole  @default(STAFF)
+  emailVerifiedAt DateTime?
+  createdAt       DateTime  @default(now())
 
-  business            Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  refreshTokens       RefreshToken[]
-  passwordResetTokens PasswordResetToken[]
+  business                Business                 @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  refreshTokens           RefreshToken[]
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
 
   @@unique([email])
   @@index([businessId])
@@ -195,6 +197,22 @@ model Notification {
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
+}
+
+// ─── EmailVerificationToken ───────────────────────────────────────────────────
+
+model EmailVerificationToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 // ─── PasswordResetToken ───────────────────────────────────────────────────────

@@ -11,11 +11,12 @@ export async function meRoute(app: FastifyInstance) {
         200: {
           type: 'object',
           properties: {
-            id:           { type: 'string' },
-            email:        { type: 'string' },
-            role:         { type: 'string' },
-            businessId:   { type: 'string' },
-            businessSlug: { type: 'string' },
+            id:              { type: 'string' },
+            email:           { type: 'string' },
+            role:            { type: 'string' },
+            businessId:      { type: 'string' },
+            businessSlug:    { type: 'string' },
+            emailVerifiedAt: { type: ['string', 'null'] },
           },
         },
         401: {
@@ -37,11 +38,12 @@ export async function meRoute(app: FastifyInstance) {
     }
 
     return reply.send({
-      id:           user.id,
-      email:        user.email,
-      role:         user.role,
-      businessId:   user.businessId,
-      businessSlug: user.business.slug,
+      id:              user.id,
+      email:           user.email,
+      role:            user.role,
+      businessId:      user.businessId,
+      businessSlug:    user.business.slug,
+      emailVerifiedAt: user.emailVerifiedAt?.toISOString() ?? null,
     })
   })
 }

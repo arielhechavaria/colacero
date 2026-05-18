@@ -6,8 +6,10 @@ const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 
 const SKIP_PATHS = [
   '/api/auth/owner/login',
+  '/api/auth/owner/register',
   '/api/auth/owner/forgot-password',
   '/api/auth/owner/reset-password',
+  '/api/auth/owner/verify-email',
   '/api/auth/customer/telegram',
   '/api/auth/customer/request-otp',
   '/api/auth/customer/verify-otp',
