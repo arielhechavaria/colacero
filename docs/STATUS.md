@@ -207,3 +207,28 @@ TELEGRAM_CHANNEL_ID=
 - Tests CI siguen rojos por pre-existing issues con env vars en runner (no bloquea deploy)
 - WhatsApp y Telegram en mode mock (decisión correcta para MVP)
 - 11 customers incluye 3 de testing histórico (no es bug, no estorba)
+
+**⚠️ Acción pendiente — DNS apex (solo necesita 1 click en Cloudflare):**
+
+`colacero.com` (sin subdominio) NO resuelve a IP — solo los subdominios `*.colacero.com` están configurados. Esto significa que la landing pública en `https://colacero.com/` no es accesible desde el browser hasta que se agregue el A record del apex.
+
+**El nginx YA está configurado** para servir `colacero.com` → catalog (puerto 3001). Lo verifiqué con:
+```bash
+curl -H 'Host: colacero.com' http://localhost:3001/ # → HTTP 200, landing renderiza
+```
+
+Solo falta el A record DNS, no requiere otro cambio en el VPS.
+
+**Fix en Cloudflare:**
+1. Entrar al panel de Cloudflare → DNS → Records
+2. Agregar un A record:
+   - Type: A
+   - Name: `@` (o `colacero.com`)
+   - IPv4 address: la IP del VPS (`178.104.183.249`)
+   - Proxy status: Proxied (anaranjado)
+3. Esperar ~30 seg para propagar
+4. Verificar: `dig +short colacero.com A @8.8.8.8` debe devolver IPs Cloudflare (188.114.96.x)
+
+Alternativa: Cloudflare permite "CNAME flattening" — un CNAME en `@` apuntando a algún subdomain. Pero un A directo es más simple.
+
+Si el apex se va a usar solo para redirect a una sub, otra opción es configurar Page Rules / Bulk Redirect en Cloudflare en lugar de servir contenido propio en el apex.
