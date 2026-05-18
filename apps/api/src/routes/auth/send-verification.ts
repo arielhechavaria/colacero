@@ -18,6 +18,8 @@ export async function sendVerificationRoute(app: FastifyInstance) {
             alreadyVerified: { type: 'boolean' },
           },
         },
+        401: { type: 'object', properties: { error: { type: 'string' } } },
+        404: { type: 'object', properties: { error: { type: 'string' } } },
       },
     },
   }, async (req, reply) => {
