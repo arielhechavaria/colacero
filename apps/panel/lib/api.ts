@@ -826,6 +826,45 @@ export async function getAdminBusinesses(): Promise<AdminBusiness[]> {
   return res.json() as Promise<AdminBusiness[]>
 }
 
+export type LeadStatus = 'NEW' | 'CONTACTED' | 'TRIAL' | 'CONVERTED' | 'LOST'
+
+export interface Lead {
+  id:           string
+  email:        string
+  phone:        string | null
+  telegram:     string | null
+  businessKind: string | null
+  message:      string | null
+  source:       string
+  status:       LeadStatus
+  notes:        string | null
+  createdAt:    string
+  updatedAt:    string
+}
+
+export async function getAdminLeads(): Promise<Lead[]> {
+  const res = await fetch(`${API_BASE}/api/leads/admin-list`, {
+    credentials: 'include',
+    cache:       'no-store',
+  })
+  if (!res.ok) throw new Error('fetch_leads_failed')
+  return res.json() as Promise<Lead[]>
+}
+
+export async function updateLead(
+  id:    string,
+  data:  { status?: LeadStatus; notes?: string },
+): Promise<Lead> {
+  const res = await fetch(`${API_BASE}/api/leads/admin-update/${id}`, {
+    method:      'PATCH',
+    headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
+    credentials: 'include',
+    body:        JSON.stringify(data),
+  })
+  if (!res.ok) throw new Error('update_lead_failed')
+  return res.json() as Promise<Lead>
+}
+
 export async function setBusinessStatus(
   businessId: string,
   status:     BusinessStatus,

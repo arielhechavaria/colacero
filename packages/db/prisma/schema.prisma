@@ -199,6 +199,25 @@ model Notification {
   @@index([orderId])
 }
 
+// ─── Lead (captura de interesados) ───────────────────────────────────────────
+
+model Lead {
+  id           String     @id @default(cuid())
+  email        String
+  phone        String?
+  telegram     String?
+  businessKind String?
+  message      String?
+  source       String     @default("landing")
+  status       LeadStatus @default(NEW)
+  notes        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([status, createdAt])
+  @@index([email])
+}
+
 // ─── EmailVerificationToken ───────────────────────────────────────────────────
 
 model EmailVerificationToken {
@@ -253,6 +272,14 @@ enum BusinessStatus {
   ACTIVE
   PENDING_VERIFICATION
   SUSPENDED
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  TRIAL
+  CONVERTED
+  LOST
 }
 
 enum SubscriptionStatus {

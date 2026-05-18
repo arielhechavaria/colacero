@@ -42,6 +42,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link href="/admin/businesses" className="hover:underline" style={{ color: 'var(--muted)' }}>
                 Negocios
               </Link>
+              <Link href="/admin/leads" className="hover:underline" style={{ color: 'var(--muted)' }}>
+                Leads
+              </Link>
             </nav>
           </div>
           <Link href="/orders" className="text-sm" style={{ color: 'var(--muted)' }}>

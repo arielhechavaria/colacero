@@ -1,12 +1,11 @@
-import Link from 'next/link'
-import { Logo } from '../components/logo'
+import { LeadForm } from '../components/lead-form'
+import { MarketingHeader, MarketingFooter } from '../components/marketing-shell'
 
 export const metadata = {
   title:       'ColaCero — Recibí pedidos por Telegram',
   description: 'Plataforma para negocios cubanos: catálogo, panel y pedidos por Telegram. Sin comisiones.',
 }
 
-const PANEL_URL    = process.env['NEXT_PUBLIC_PANEL_URL']    ?? 'https://panel.colacero.com'
 const CONTACT_URL  = process.env['NEXT_PUBLIC_CONTACT_URL']  ?? 'https://t.me/Arielhechavarria'
 const DEMO_BIZ_URL = 'https://el-fogon.colacero.com'
 
@@ -25,26 +24,8 @@ export default function LandingPage() {
         style={{ background: 'radial-gradient(circle, #14B8A6, transparent)' }}
       />
 
-      {/* Header */}
-      <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <Logo size="md" />
-        <div className="flex items-center gap-4 text-sm">
-          <a
-            href={DEMO_BIZ_URL}
-            className="hidden sm:inline hover:opacity-80"
-            style={{ color: 'var(--muted)' }}
-          >
-            Ver demo ↗
-          </a>
-          <Link
-            href={`${PANEL_URL}/login`}
-            className="rounded-xl px-4 py-2 font-medium glass hover:opacity-90"
-            style={{ color: 'var(--text)' }}
-          >
-            Iniciar sesión
-          </Link>
-        </div>
-      </header>
+      {/* Header (shared) */}
+      <MarketingHeader />
 
       {/* Hero */}
       <section className="relative z-10 mx-auto max-w-5xl px-6 pt-12 pb-20 text-center sm:pt-20 sm:pb-32">
@@ -162,40 +143,32 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="relative z-10 mx-auto max-w-4xl px-6 pb-24 text-center">
-        <h2 className="mb-4 text-3xl font-bold sm:text-4xl" style={{ color: 'var(--text)' }}>
-          ¿Tenés un negocio en Cuba?
-        </h2>
-        <p className="mx-auto mb-8 max-w-2xl text-lg" style={{ color: 'var(--muted)' }}>
-          Estamos buscando 5 negocios para acompañar en el alta. Escribinos por Telegram y te ayudamos a montar el catálogo en una llamada.
-        </p>
-        <a
-          href={CONTACT_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-gradient-teal-violet shadow-glow inline-block rounded-xl px-8 py-4 text-lg font-semibold text-white hover:opacity-90"
-        >
-          Escribir por Telegram →
-        </a>
+      {/* Lead capture + Final CTA */}
+      <section className="relative z-10 mx-auto max-w-5xl px-6 pb-24">
+        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+          <div>
+            <h2 className="mb-4 text-3xl font-bold sm:text-4xl" style={{ color: 'var(--text)' }}>
+              ¿Tenés un negocio en Cuba?
+            </h2>
+            <p className="mb-6 text-lg" style={{ color: 'var(--muted)' }}>
+              Estamos buscando 5 negocios para acompañar en el alta. Dejá tus datos y te escribimos.
+              O si querés algo rápido, escribinos directo por Telegram.
+            </p>
+            <a
+              href={CONTACT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-gradient-teal-violet shadow-glow inline-block rounded-xl px-6 py-3 font-semibold text-white hover:opacity-90"
+            >
+              Escribir por Telegram →
+            </a>
+          </div>
+          <LeadForm source="landing" />
+        </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t" style={{ borderColor: 'var(--glass-border)' }}>
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row">
-          <div className="flex items-center gap-3">
-            <Logo size="sm" />
-            <span className="text-xs" style={{ color: 'var(--muted)' }}>
-              © 2026 ColaCero
-            </span>
-          </div>
-          <div className="flex items-center gap-6 text-xs" style={{ color: 'var(--muted)' }}>
-            <a href={DEMO_BIZ_URL} className="hover:opacity-80">Demo</a>
-            <Link href={`${PANEL_URL}/login`} className="hover:opacity-80">Iniciar sesión</Link>
-            <a href={CONTACT_URL} target="_blank" rel="noopener noreferrer" className="hover:opacity-80">Contacto</a>
-          </div>
-        </div>
-      </footer>
+      {/* Footer (shared) */}
+      <MarketingFooter />
     </main>
   )
 }
