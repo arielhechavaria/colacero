@@ -26,6 +26,7 @@ import { ownerCustomerRoutes }      from './routes/owner/customers/index.js'
 import { ownerSettingsRoutes }      from './routes/owner/settings/index.js'
 import { catalogRoutes } from './routes/catalog/index.js'
 import { cartRoutes } from './routes/cart/index.js'
+import { adminBusinessRoutes } from './routes/admin/businesses.js'
 import { uploadPlugin } from './plugins/upload.js'
 import { bullmqPlugin } from './plugins/bullmq.js'
 
@@ -80,6 +81,7 @@ export function buildServer() {
   app.register(ownerSettingsRoutes,     { prefix: '/api/owner/settings' })
   app.register(catalogRoutes, { prefix: '/api/catalog' })
   app.register(cartRoutes,    { prefix: '/api/cart' })
+  app.register(adminBusinessRoutes, { prefix: '/api/admin/businesses' })
 
   // ── Health check — sin auth, sin DB ──────────────────────────────────────
   app.get('/health', async () => ({

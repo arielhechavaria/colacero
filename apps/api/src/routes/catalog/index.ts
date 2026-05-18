@@ -37,6 +37,7 @@ export async function catalogRoutes(app: FastifyInstance) {
       where: { slug },
     })
     if (!business) return reply.status(404).send({ error: 'not_found' })
+    if (business.status === 'SUSPENDED') return reply.status(404).send({ error: 'suspended' })
 
     const products = await app.prisma.product.findMany({
       where: {

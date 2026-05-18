@@ -1,9 +1,11 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Logo } from './logo'
 import { ThemeToggle } from './theme-toggle'
+import { getMe, isAuthenticatedClient } from '../lib/api'
 
 const NAV_ITEMS = [
   { href: '/orders',        icon: '📋', label: 'Pedidos' },
@@ -14,9 +16,15 @@ const NAV_ITEMS = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const [isAdmin, setIsAdmin] = useState(false)
 
-  // Don't render sidebar on login page
-  if (pathname === '/login') return null
+  useEffect(() => {
+    if (!isAuthenticatedClient()) return
+    void getMe('').then((u) => setIsAdmin(u.role === 'SUPER_ADMIN')).catch(() => { /* noop */ })
+  }, [pathname])
+
+  // Don't render sidebar on login page or forgot/reset
+  if (pathname === '/login' || pathname === '/forgot-password' || pathname?.startsWith('/reset-password')) return null
 
   return (
     <aside
@@ -50,6 +58,25 @@ export function Sidebar() {
             </Link>
           )
         })}
+
+        {isAdmin && (
+          <>
+            <div className="pt-3 mt-3 border-t border-white/10" />
+            <Link
+              href="/admin/businesses"
+              className={`
+                flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all
+                ${pathname?.startsWith('/admin')
+                  ? 'bg-[var(--primary-dim)] border border-[var(--border-glow)] text-[var(--primary)]'
+                  : 'text-white/50 hover:text-white/80 hover:bg-white/5'
+                }
+              `}
+            >
+              <span className="text-base">👑</span>
+              <span className="font-[var(--font-body)]">Admin</span>
+            </Link>
+          </>
+        )}
       </nav>
 
       {/* Footer */}

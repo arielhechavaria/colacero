@@ -763,3 +763,55 @@ export async function patchOrderStatus(
   }
   return res.json() as Promise<{ id: string; status: OrderStatus }>
 }
+
+// ── Admin (super-admin) ────────────────────────────────────────────────────────
+
+export type BusinessStatus = 'ACTIVE' | 'PENDING_VERIFICATION' | 'SUSPENDED'
+
+export interface AdminBusiness {
+  id:                 string
+  slug:               string
+  name:               string
+  description:        string | null
+  timezone:           string
+  subscriptionStatus: string
+  status:             BusinessStatus
+  onboardedAt:        string | null
+  createdAt:          string
+  stats: {
+    usersCount:    number
+    productsCount: number
+    ordersCount:   number
+    lastOrderAt:   string | null
+    totalRevenue:  number
+  }
+}
+
+export async function getAdminBusinesses(): Promise<AdminBusiness[]> {
+  const res = await fetch(`${API_BASE}/api/admin/businesses`, {
+    credentials: 'include',
+    cache:       'no-store',
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'fetch_admin_businesses_failed')
+  }
+  return res.json() as Promise<AdminBusiness[]>
+}
+
+export async function setBusinessStatus(
+  businessId: string,
+  status:     BusinessStatus,
+): Promise<{ id: string; slug: string; status: BusinessStatus }> {
+  const res = await fetch(`${API_BASE}/api/admin/businesses/${businessId}/status`, {
+    method:      'PATCH',
+    headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
+    credentials: 'include',
+    body:        JSON.stringify({ status }),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'set_status_failed')
+  }
+  return res.json() as Promise<{ id: string; slug: string; status: BusinessStatus }>
+}
