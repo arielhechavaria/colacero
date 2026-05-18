@@ -31,7 +31,7 @@ beforeAll(async () => {
   testBusinessId = business.id
 
   const user = await prisma.user.upsert({
-    where:  { businessId_email: { businessId: testBusinessId, email: TEST_EMAIL } },
+    where:  { email: TEST_EMAIL },
     update: {},
     create: {
       businessId:   testBusinessId,

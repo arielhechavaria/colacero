@@ -48,7 +48,7 @@ beforeAll(async () => {
   // Usuario OWNER del negocio principal
   const passwordHash = await hash(TEST_PASSWORD)
   await prisma.user.upsert({
-    where:  { businessId_email: { businessId, email: TEST_EMAIL } },
+    where:  { email: TEST_EMAIL },
     update: { passwordHash },
     create: { businessId, email: TEST_EMAIL, passwordHash, role: 'OWNER' },
   })

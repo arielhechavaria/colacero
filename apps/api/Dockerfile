@@ -23,6 +23,7 @@ COPY apps/api/public apps/api/public
 # Generar Prisma client y compilar paquetes internos + API
 RUN pnpm --filter @colacero/db run generate
 RUN pnpm --filter @colacero/env run build
+RUN pnpm --filter @colacero/shared run build
 RUN pnpm --filter @colacero/db run build
 RUN pnpm --filter @colacero/api run build
 
