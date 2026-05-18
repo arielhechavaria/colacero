@@ -39,21 +39,36 @@ export async function catalogRoutes(app: FastifyInstance) {
     if (!business) return reply.status(404).send({ error: 'not_found' })
     if (business.status === 'SUSPENDED') return reply.status(404).send({ error: 'suspended' })
 
-    const products = await app.prisma.product.findMany({
-      where: {
-        businessId: business.id,
-        isActive:   true,
-      },
-      include: {
-        inventory: {
-          select: {
-            quantityAvailable: true,
-            lowStockThreshold: true,
+    const [products, nextWindow] = await Promise.all([
+      app.prisma.product.findMany({
+        where: {
+          businessId: business.id,
+          isActive:   true,
+        },
+        include: {
+          inventory: {
+            select: {
+              quantityAvailable: true,
+              lowStockThreshold: true,
+            },
           },
         },
-      },
-      orderBy: { name: 'asc' },
-    })
+        orderBy: { name: 'asc' },
+      }),
+      // Próxima ventana abierta (hoy o futuro)
+      app.prisma.pickupWindow.findFirst({
+        where: {
+          businessId: business.id,
+          isOpen:     true,
+          date:       { gte: new Date(new Date().toISOString().slice(0, 10)) },
+        },
+        orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
+        select:  {
+          id: true, date: true, startTime: true, endTime: true,
+          capacity: true, ordersCount: true,
+        },
+      }),
+    ])
 
     return reply.send({
       business: {
@@ -61,7 +76,18 @@ export async function catalogRoutes(app: FastifyInstance) {
         name:        business.name,
         slug:        business.slug,
         description: business.description ?? null,
+        timezone:    business.timezone,
       },
+      nextPickupWindow: nextWindow
+        ? {
+            id:          nextWindow.id,
+            date:        nextWindow.date.toISOString().slice(0, 10),
+            startTime:   nextWindow.startTime,
+            endTime:     nextWindow.endTime,
+            spotsLeft:   Math.max(0, nextWindow.capacity - nextWindow.ordersCount),
+            capacity:    nextWindow.capacity,
+          }
+        : null,
       products,
     })
   })

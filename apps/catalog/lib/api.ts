@@ -15,13 +15,24 @@ export interface CatalogProduct {
   } | null
 }
 
+export interface NextPickupWindow {
+  id:        string
+  date:      string   // YYYY-MM-DD
+  startTime: string
+  endTime:   string
+  spotsLeft: number
+  capacity:  number
+}
+
 export interface CatalogData {
   business: {
     id: string
     name: string
     slug: string
     description?: string | null
+    timezone?: string
   }
+  nextPickupWindow: NextPickupWindow | null
   products: CatalogProduct[]
 }
 

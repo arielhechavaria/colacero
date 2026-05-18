@@ -22,7 +22,7 @@ export default function LoginPage() {
     setError(null)
     try {
       await loginOwner(email, password)   // cookies httpOnly seteadas por el server
-      router.push('/orders')
+      router.push('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión')
     } finally {

@@ -6,9 +6,11 @@ import Link from 'next/link'
 import { getCustomers,
   type CustomerSegment,
   type CustomerSummary, isAuthenticatedClient, } from '../../lib/api'
-import { Button } from '@/components/ui/button'
-import { Badge }  from '@/components/ui/badge'
-import { Input }  from '@/components/ui/input'
+import { Button }    from '@/components/ui/button'
+import { Badge }     from '@/components/ui/badge'
+import { Input }     from '@/components/ui/input'
+import { Skeleton }  from '@/components/ui/skeleton'
+import { EmptyState } from '@/components/empty-state'
 
 // ── Segment tabs ──────────────────────────────────────────────────────────────
 
@@ -167,16 +169,28 @@ export default function CustomersPage() {
         )}
 
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <p style={{ color: 'var(--muted)' }}>Cargando clientes…</p>
+          <div className="space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="glass rounded-2xl p-4 flex items-center gap-4">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+                <Skeleton className="h-4 w-16" />
+              </div>
+            ))}
           </div>
         ) : customers.length === 0 ? (
-          <div className="glass rounded-2xl p-10 text-center">
-            <p className="text-2xl mb-2">👥</p>
-            <p style={{ color: 'var(--muted)' }}>
-              {search ? 'Sin resultados para esa búsqueda' : 'Sin clientes en este segmento'}
-            </p>
-          </div>
+          <EmptyState
+            icon={search ? '🔍' : '👥'}
+            title={search ? 'Sin resultados' : 'Sin clientes en este segmento'}
+            description={
+              search
+                ? `No encontramos clientes que coincidan con "${search}".`
+                : 'Cuando alguien haga su primer pedido va a aparecer acá.'
+            }
+          />
         ) : (
           <div className="flex flex-col gap-3">
             {customers.map((c) => <CustomerCard key={c.id} c={c} />)}

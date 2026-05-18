@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { getOrders, patchOrderStatus, isAuthenticatedClient } from '../../lib/api'
 import type { Order, OrderStatus } from '../../lib/api'
-import { Button } from '@/components/ui/button'
-import { Badge }  from '@/components/ui/badge'
+import { Button }   from '@/components/ui/button'
+import { Badge }    from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const POLL_INTERVAL_MS = 15_000
 
@@ -81,8 +82,14 @@ export default function QueuePage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p style={{ color: 'var(--muted)' }}>Cargando cola…</p>
+      <main className="min-h-screen px-6 py-8 max-w-4xl mx-auto space-y-3">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="glass rounded-2xl p-4">
+            <Skeleton className="h-5 w-40 mb-3" />
+            <Skeleton className="h-4 w-full mb-2" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        ))}
       </main>
     )
   }

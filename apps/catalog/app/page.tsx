@@ -7,7 +7,7 @@ export const metadata = {
 }
 
 const PANEL_URL    = process.env['NEXT_PUBLIC_PANEL_URL']    ?? 'https://panel.colacero.com'
-const CONTACT_URL  = process.env['NEXT_PUBLIC_CONTACT_URL']  ?? 'https://t.me/leiraStudio'
+const CONTACT_URL  = process.env['NEXT_PUBLIC_CONTACT_URL']  ?? 'https://t.me/Arielhechavarria'
 const DEMO_BIZ_URL = 'https://el-fogon.colacero.com'
 
 export default function LandingPage() {

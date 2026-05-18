@@ -8,12 +8,15 @@ import { getStatsSummary,
   getCoPurchases,
   getWeeklyTrends,
   getStockAlerts,
+  getMe,
   type StatsRange,
   type StatsSummary,
   type TopProduct,
   type CoPurchasePair,
   type WeeklyDay,
-  type StockAlert, isAuthenticatedClient, } from '../../lib/api'
+  type StockAlert,
+  type CurrentUser,
+  isAuthenticatedClient, } from '../../lib/api'
 import { toast } from 'sonner'
 import { motion, type Variants } from 'framer-motion'
 import { Badge } from '@/components/ui/badge'
@@ -290,6 +293,7 @@ export default function DashboardPage() {
   const [stockAlerts, setStockAlerts] = useState<StockAlert[]>([])
   const [loading,     setLoading]     = useState(true)
   const [error,       setError]       = useState<string | null>(null)
+  const [me,          setMe]          = useState<CurrentUser | null>(null)
 
   const tokenRef = useRef<string | null>(null)
 
@@ -322,7 +326,24 @@ export default function DashboardPage() {
     if (!token) { router.replace('/login'); return }
     tokenRef.current = token
     void load(token, range)
+    void getMe('').then(setMe).catch(() => { /* noop */ })
   }, [load, router, range])
+
+  // ── Greeting ──────────────────────────────────────────────────────────────
+  const greeting = (() => {
+    const h = new Date().getHours()
+    if (h < 12) return 'Buenos días'
+    if (h < 19) return 'Buenas tardes'
+    return 'Buenas noches'
+  })()
+  const userLabel = me ? (me.email.split('@')[0] ?? me.email) : ''
+  const pendingMsg = summary
+    ? `${summary.ordersCount - summary.deliveredCount - summary.cancelledCount} ${
+        summary.ordersCount - summary.deliveredCount - summary.cancelledCount === 1
+          ? 'pedido en curso'
+          : 'pedidos en curso'
+      }`
+    : null
 
   // ── render ────────────────────────────────────────────────────────────────
 
@@ -334,7 +355,16 @@ export default function DashboardPage() {
         style={{ borderBottom: '1px solid var(--glass-border)' }}
       >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-lg font-bold text-gradient">Dashboard</h1>
+          <div>
+            <h1 className="text-lg font-bold" style={{ color: 'var(--text)' }}>
+              {greeting}{userLabel ? <>, <span className="text-gradient">{userLabel}</span></> : null}
+            </h1>
+            {pendingMsg && (
+              <p className="text-xs" style={{ color: 'var(--muted)' }}>
+                Hoy tenés {pendingMsg}
+              </p>
+            )}
+          </div>
 
           {/* Period selector */}
           <PeriodSelector range={range} onChange={setRange} />

@@ -19,8 +19,21 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'ColaCero — Panel',
-  description: 'Panel de gestión para el negocio',
+  metadataBase: new URL(process.env['NEXT_PUBLIC_PANEL_URL'] ?? 'https://panel.colacero.com'),
+  title: {
+    default:  'Panel · ColaCero',
+    template: '%s · Panel ColaCero',
+  },
+  description: 'Panel de gestión para tu negocio en ColaCero',
+  icons: {
+    icon:     [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+    apple:    '/favicon.svg',
+    shortcut: '/favicon.svg',
+  },
+  robots: {
+    index:   false,  // Panel privado — no indexar
+    follow:  false,
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

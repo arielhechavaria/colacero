@@ -1,14 +1,31 @@
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import { getCatalog } from '../../lib/api'
 import { Logo } from '../../components/logo'
 import { ThemeToggle } from '../../components/theme-toggle'
 import { CatalogView } from '../../components/catalog-view'
 import { CartSidebar } from '../../components/cart-sidebar'
+import { BusinessHero } from '../../components/business-hero'
 
 export const revalidate = 60
 
 interface Props {
   params: Promise<{ slug: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
+  const data = await getCatalog(slug)
+  if (!data) return { title: 'Negocio no encontrado' }
+  return {
+    title:       data.business.name,
+    description: data.business.description ?? `Catálogo de ${data.business.name} en ColaCero`,
+    openGraph: {
+      title:       data.business.name,
+      description: data.business.description ?? `Catálogo de ${data.business.name}`,
+      type:        'website',
+    },
+  }
 }
 
 export default async function CatalogPage({ params }: Props) {
@@ -52,40 +69,22 @@ export default async function CatalogPage({ params }: Props) {
         {/* Left — hero + catalog */}
         <div className="flex-1 min-w-0 flex flex-col">
 
-          {/* Hero — desktop only */}
-          <section
-            className="hidden lg:block px-8 py-10 border-b"
-            style={{ borderColor: 'var(--border)' }}
+          {/* Hero — responsive (mobile + desktop) */}
+          <BusinessHero
+            name={data.business.name}
+            description={data.business.description}
+            nextWindow={data.nextPickupWindow}
+          />
+
+          {/* Quick stats strip — desktop only */}
+          <div
+            className="hidden lg:flex items-center gap-5 px-8 py-3 border-b text-xs font-medium"
+            style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}
           >
-            <div className="max-w-2xl">
-              <span
-                className="inline-flex items-center gap-1.5 mb-3 rounded-full px-3 py-1 text-xs font-semibold"
-                style={{
-                  backgroundColor: 'var(--primary-dim)',
-                  color:           'var(--primary)',
-                  border:          '1px solid var(--border-glow)',
-                }}
-              >
-                🟢 Pedidos abiertos
-              </span>
-              <h1 className="text-3xl font-black tracking-tight" style={{ color: 'var(--text)' }}>
-                {data.business.name}
-              </h1>
-              {data.business.description && (
-                <p className="mt-2 text-base" style={{ color: 'var(--muted)' }}>
-                  {data.business.description}
-                </p>
-              )}
-              <div
-                className="mt-5 flex items-center gap-5 text-xs font-medium"
-                style={{ color: 'var(--muted)' }}
-              >
-                <span>📦 {activeCount} {activeCount === 1 ? 'producto' : 'productos'} disponibles</span>
-                <span>⏰ Reservá antes de las 20:00 hs</span>
-                <span>🏠 Retiro sin cola</span>
-              </div>
-            </div>
-          </section>
+            <span>📦 {activeCount} {activeCount === 1 ? 'producto disponible' : 'productos disponibles'}</span>
+            <span>🏠 Retiro sin cola</span>
+            <span>💬 Auth con Telegram</span>
+          </div>
 
           {/* Catalog */}
           <div

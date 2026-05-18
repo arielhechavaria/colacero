@@ -4,9 +4,10 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { getWindows, createWindow, patchWindow, deleteWindow, generateTomorrow,
   type PickupWindow, type CreateWindowInput, isAuthenticatedClient, } from '../../lib/api'
-import { Button } from '@/components/ui/button'
-import { Input }  from '@/components/ui/input'
-import { Label }  from '@/components/ui/label'
+import { Button }   from '@/components/ui/button'
+import { Input }    from '@/components/ui/input'
+import { Label }    from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 
 function groupByDate(windows: PickupWindow[]): Record<string, PickupWindow[]> {
   return windows.reduce<Record<string, PickupWindow[]>>((acc, w) => {
@@ -134,8 +135,19 @@ export default function WindowsPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p style={{ color: 'var(--muted)' }}>Cargando ventanas…</p>
+      <main className="min-h-screen px-6 py-8 max-w-5xl mx-auto">
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="glass rounded-2xl p-5 flex items-center gap-4">
+              <Skeleton className="h-12 w-12 rounded-xl" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-48" />
+              </div>
+              <Skeleton className="h-9 w-24 rounded-lg" />
+            </div>
+          ))}
+        </div>
       </main>
     )
   }
