@@ -17,6 +17,8 @@ model Business {
   description        String?
   timezone           String             @default("America/Havana")
   subscriptionStatus SubscriptionStatus @default(TRIAL)
+  status             BusinessStatus     @default(ACTIVE)
+  onboardedAt        DateTime?
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
@@ -40,7 +42,7 @@ model User {
   refreshTokens       RefreshToken[]
   passwordResetTokens PasswordResetToken[]
 
-  @@unique([businessId, email])
+  @@unique([email])
   @@index([businessId])
 }
 
@@ -226,6 +228,13 @@ enum OrderStatus {
 enum UserRole {
   OWNER
   STAFF
+  SUPER_ADMIN
+}
+
+enum BusinessStatus {
+  ACTIVE
+  PENDING_VERIFICATION
+  SUSPENDED
 }
 
 enum SubscriptionStatus {

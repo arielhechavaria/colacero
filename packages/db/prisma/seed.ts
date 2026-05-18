@@ -247,7 +247,7 @@ async function main() {
   // 2. Owner
   const ownerHash = await hash('test1234')
   const owner = await prisma.user.upsert({
-    where:  { businessId_email: { businessId: business.id, email: 'ariel@elfogon.cu' } },
+    where:  { email: 'ariel@elfogon.cu' },
     update: { passwordHash: ownerHash },
     create: {
       businessId:   business.id,
