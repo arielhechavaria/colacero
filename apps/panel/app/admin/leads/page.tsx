@@ -28,6 +28,34 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString('es-CU', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
 
+function csvEscape(value: unknown): string {
+  if (value === null || value === undefined) return ''
+  const s = String(value)
+  // Si contiene coma, comilla doble o newline → wrap en comillas y escape comillas
+  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`
+  return s
+}
+
+function downloadCsv(leads: Lead[]) {
+  const headers = [
+    'id', 'email', 'phone', 'telegram', 'businessKind',
+    'message', 'source', 'status', 'notes', 'createdAt', 'updatedAt',
+  ]
+  const rows = leads.map((l) => headers.map((h) => csvEscape((l as Record<string, unknown>)[h])))
+  const csv  = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n')
+
+  // BOM para que Excel reconozca UTF-8 (acentos OK)
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href     = url
+  a.download = `leads-${new Date().toISOString().slice(0, 10)}.csv`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
 export default function AdminLeadsPage() {
   const [leads,   setLeads]   = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
@@ -65,13 +93,24 @@ export default function AdminLeadsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h2 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>
-          Leads ({leads.length})
-        </h2>
-        <p className="text-sm" style={{ color: 'var(--muted)' }}>
-          Interesados que dejaron sus datos en la landing o página de contacto.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>
+            Leads ({leads.length})
+          </h2>
+          <p className="text-sm" style={{ color: 'var(--muted)' }}>
+            Interesados que dejaron sus datos en la landing o página de contacto.
+          </p>
+        </div>
+        {leads.length > 0 && (
+          <button
+            onClick={() => downloadCsv(filtered)}
+            className="rounded-xl px-4 py-2 text-sm font-medium glass hover:opacity-90"
+            style={{ color: 'var(--text)' }}
+          >
+            ↓ Exportar CSV{filter !== 'ALL' ? ` (${filter})` : ''}
+          </button>
+        )}
       </div>
 
       {/* Status filter chips */}

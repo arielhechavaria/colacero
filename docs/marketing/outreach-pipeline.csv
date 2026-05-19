@@ -1,0 +1,31 @@
+#,Negocio,Categoria,Ubicacion,Telegram,Telefono,Fuente,Notas previas,DM enviado fecha,Respuesta,Demo agendado fecha,Demo realizada,Estado,Proxima accion,Notas
+1,Ejemplo: Carniceria Don Juan,Carniceria,La Habana / Vedado,@donjuancarne,+53 5xxx xxxx,Grupo TG "Emprendedores Cuba",Vende a diario por chat dispersa pedidos,2026-05-20,Si,2026-05-22,No,DEMO_SCHEDULED,Confirmar 30 min antes y mandar link de Meet,Cliente tipo: alto volumen
+2,Ejemplo: Viandas El Campo,Viandas,Pinar del Rio,@viandaselcampo,,Recomendacion de cliente Juan,Vende 3x semana en feria,2026-05-21,Pendiente,,,DM_SENT,Esperar 48h y mandar follow-up suave,Prioridad media
+3,Ejemplo: Panaderia La Espiga,Panaderia,La Habana / 10 de Octubre,@laespigapan,,Instagram (perfil cubano),Postea pedidos diarios en stories,,,,,NEW,Enviar DM con script estandar,Visto en IG
+4,Ejemplo: Lacteos Yusi,Lacteos,Santa Clara,@lacteosyusi,+53 5xxx xxxx,Grupo TG "Negocios Cuba",Dice "no quiero apps gringas",2026-05-18,Si,2026-05-21,Si,DEMO_DONE,Cargar productos juntos manana 10:00,Acepto trial gratis
+5,Ejemplo: Bodegon Maria,Almacen / Surtido,Camaguey,,+53 5xxx xxxx,Referral del primer cliente,Cliente recurrente del cliente#4,2026-05-23,No,,,LOST,Reintentar en 3 meses,No le interesa todavia
+6,,,,,,,,,,,,NEW,,
+7,,,,,,,,,,,,NEW,,
+8,,,,,,,,,,,,NEW,,
+9,,,,,,,,,,,,NEW,,
+10,,,,,,,,,,,,NEW,,
+11,,,,,,,,,,,,NEW,,
+12,,,,,,,,,,,,NEW,,
+13,,,,,,,,,,,,NEW,,
+14,,,,,,,,,,,,NEW,,
+15,,,,,,,,,,,,NEW,,
+16,,,,,,,,,,,,NEW,,
+17,,,,,,,,,,,,NEW,,
+18,,,,,,,,,,,,NEW,,
+19,,,,,,,,,,,,NEW,,
+20,,,,,,,,,,,,NEW,,
+21,,,,,,,,,,,,NEW,,
+22,,,,,,,,,,,,NEW,,
+23,,,,,,,,,,,,NEW,,
+24,,,,,,,,,,,,NEW,,
+25,,,,,,,,,,,,NEW,,
+26,,,,,,,,,,,,NEW,,
+27,,,,,,,,,,,,NEW,,
+28,,,,,,,,,,,,NEW,,
+29,,,,,,,,,,,,NEW,,
+30,,,,,,,,,,,,NEW,,
