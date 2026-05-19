@@ -14,6 +14,8 @@ const SKIP_PATHS = [
   '/api/auth/customer/request-otp',
   '/api/auth/customer/verify-otp',
   '/api/auth/refresh',
+  '/api/leads',   // captura pública de leads desde landing
+  '/api/leads/',
 ]
 
 // Prefix-based skip: covers both POST /api/cart/reserve and DELETE /api/cart/reserve/:id

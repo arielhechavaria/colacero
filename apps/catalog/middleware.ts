@@ -31,15 +31,32 @@ export function middleware(req: NextRequest) {
 
   // ── Dominio raíz con path de negocio: redirect 301 a subdominio ───────────
   // colacero.com/elfogon → elfogon.colacero.com
+  // EXCEPCIONES: rutas reservadas de marketing/manual que viven en el apex
+  const RESERVED_APEX_PATHS = [
+    '/manual',
+    '/precios',
+    '/faq',
+    '/about',
+    '/contacto',
+    '/opengraph-image',
+    '/api',
+    '/_next',
+  ]
+
   if (result.kind === 'root') {
-    const match = pathname.match(/^\/([a-z0-9][a-z0-9-]{1,30}[a-z0-9])(\/.*)?$/)
-    if (match) {
-      const slug    = match[1]!
-      const rest    = match[2] ?? ''
-      const url     = req.nextUrl.clone()
-      url.hostname  = `${slug}.colacero.com`
-      url.pathname  = rest || '/'
-      return NextResponse.redirect(url, 301)
+    const isReserved = RESERVED_APEX_PATHS.some(
+      (p) => pathname === p || pathname.startsWith(`${p}/`),
+    )
+    if (!isReserved) {
+      const match = pathname.match(/^\/([a-z0-9][a-z0-9-]{1,30}[a-z0-9])(\/.*)?$/)
+      if (match) {
+        const slug    = match[1]!
+        const rest    = match[2] ?? ''
+        const url     = req.nextUrl.clone()
+        url.hostname  = `${slug}.colacero.com`
+        url.pathname  = rest || '/'
+        return NextResponse.redirect(url, 301)
+      }
     }
   }
 
