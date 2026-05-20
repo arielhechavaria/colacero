@@ -142,43 +142,6 @@ function Header({ businessName }: { businessName: string }): SatoriNode {
   } as SatoriNode
 }
 
-function Footer({ slug }: { slug: string }): SatoriNode {
-  return {
-    type: 'div',
-    props: {
-      style: {
-        display:         'flex',
-        alignItems:      'center',
-        justifyContent:  'space-between',
-        marginTop:       '24px',
-      },
-      children: [
-        {
-          type: 'div',
-          props: {
-            style: {
-              padding:         '12px 24px',
-              borderRadius:    '14px',
-              background:      GRADIENT_BRAND,
-              color:           'white',
-              fontSize:        '24px',
-              fontWeight:      700,
-              display:         'flex',
-            },
-            children: '🛒 Pedí ahora',
-          },
-        },
-        {
-          type: 'div',
-          props: {
-            style: { color: '#94a3b8', fontSize: '20px', fontWeight: 500, display: 'flex' },
-            children: `${slug}.colacero.com`,
-          },
-        },
-      ],
-    },
-  } as SatoriNode
-}
 
 function buildJsx(d: AnnouncementImageData): SatoriNode {
   // Background con orbs
@@ -226,17 +189,15 @@ function buildJsx(d: AnnouncementImageData): SatoriNode {
         padding:         '60px',
         display:         'flex',
         flexDirection:   'column',
-        justifyContent:  'space-between',
+        gap:             '40px',
         position:        'relative',
       },
       children: [
         ...orbs,
         // Top
         Header({ businessName: d.businessName }),
-        // Middle (body)
+        // Body
         bodyContent,
-        // Footer
-        Footer({ slug: d.businessSlug }),
       ],
     },
   } as SatoriNode
