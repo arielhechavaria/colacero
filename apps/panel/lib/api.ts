@@ -19,6 +19,37 @@ function csrfHeader(): Record<string, string> {
   return t ? { 'X-CSRF-Token': t } : {}
 }
 
+// ── Auto-refresh interceptor ──────────────────────────────────────────────────
+// Si la request falla con 401 (cc_access expirado), intenta renovar la sesión
+// una sola vez (singleton para deduplicar concurrent 401s) y reintenta.
+// Si el refresh también falla, redirige a /login.
+
+let _pendingRefresh: Promise<boolean> | null = null
+
+async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const res = await fetch(input, init)
+  if (res.status !== 401) return res
+
+  // Deduplicar: si ya hay un refresh en vuelo, reusar esa promesa
+  if (!_pendingRefresh) {
+    _pendingRefresh = fetch(`${API_BASE}/api/auth/refresh`, {
+      method:      'POST',
+      credentials: 'include',
+    })
+      .then((r) => r.ok)
+      .finally(() => { _pendingRefresh = null })
+  }
+
+  const refreshed = await _pendingRefresh
+  if (!refreshed) {
+    if (typeof window !== 'undefined') window.location.replace('/login')
+    return res // inalcanzable si el redirect funciona
+  }
+
+  // El nuevo cc_access está en la cookie — reintentar la request original
+  return fetch(input, init)  // fetch directo: ya renovamos, no loop
+}
+
 /**
  * Heurística client-side: cc_csrf NO es httpOnly y se setea junto con cc_access en login.
  * Si existe, asumimos que tenemos sesión. La verificación dura ocurre en el server (401).
@@ -114,7 +145,7 @@ export async function forgotPassword(email: string): Promise<void> {
 }
 
 export async function sendVerificationEmail(): Promise<{ ok: boolean; alreadyVerified: boolean }> {
-  const res = await fetch(`${API_BASE}/api/auth/owner/send-verification`, {
+  const res = await apiFetch(`${API_BASE}/api/auth/owner/send-verification`, {
     method:      'POST',
     headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
@@ -174,7 +205,7 @@ export async function getOrders(token: string, date?: string): Promise<DayOrders
     ? `${API_BASE}/api/owner/orders?date=${date}`
     : `${API_BASE}/api/owner/orders`
 
-  const res = await fetch(url, {
+  const res = await apiFetch(url, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -207,7 +238,7 @@ export interface CreateWindowInput {
 }
 
 export async function getWindows(token: string): Promise<PickupWindow[]> {
-  const res = await fetch(`${API_BASE}/api/owner/pickup-windows`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/pickup-windows`, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -219,7 +250,7 @@ export async function createWindow(
   token: string,
   input: CreateWindowInput,
 ): Promise<PickupWindow> {
-  const res = await fetch(`${API_BASE}/api/owner/pickup-windows`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/pickup-windows`, {
     method:  'POST',
     headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
@@ -237,7 +268,7 @@ export async function patchWindow(
   windowId: string,
   data: Partial<Pick<PickupWindow, 'startTime' | 'endTime' | 'capacity' | 'isOpen'>>,
 ): Promise<PickupWindow> {
-  const res = await fetch(`${API_BASE}/api/owner/pickup-windows/${windowId}`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/pickup-windows/${windowId}`, {
     method:  'PATCH',
     headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
@@ -251,7 +282,7 @@ export async function patchWindow(
 }
 
 export async function deleteWindow(token: string, windowId: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/owner/pickup-windows/${windowId}`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/pickup-windows/${windowId}`, {
     method:  'DELETE',
     headers:     { ...csrfHeader() },
     credentials: 'include',
@@ -265,7 +296,7 @@ export async function deleteWindow(token: string, windowId: string): Promise<voi
 export async function generateTomorrow(
   token: string,
 ): Promise<{ date: string; created: PickupWindow[] }> {
-  const res = await fetch(`${API_BASE}/api/owner/pickup-windows/generate-tomorrow`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/pickup-windows/generate-tomorrow`, {
     method:  'POST',
     headers:     { ...csrfHeader() },
     credentials: 'include',
@@ -317,7 +348,7 @@ export interface CreateProductInput {
 export type UpdateProductInput = Partial<Omit<CreateProductInput, 'initialQuantity'> & { isActive: boolean }>
 
 export async function getProducts(token: string): Promise<Product[]> {
-  const res = await fetch(`${API_BASE}/api/owner/products`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/products`, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -330,7 +361,7 @@ export async function createProduct(
   token: string,
   input: CreateProductInput,
 ): Promise<Product> {
-  const res = await fetch(`${API_BASE}/api/owner/products`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/products`, {
     method:  'POST',
     headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
@@ -348,7 +379,7 @@ export async function updateProduct(
   productId: string,
   input: UpdateProductInput,
 ): Promise<Product> {
-  const res = await fetch(`${API_BASE}/api/owner/products/${productId}`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/products/${productId}`, {
     method:  'PATCH',
     headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
@@ -362,7 +393,7 @@ export async function updateProduct(
 }
 
 export async function deleteProduct(token: string, productId: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/owner/products/${productId}`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/products/${productId}`, {
     method:  'DELETE',
     headers:     { ...csrfHeader() },
     credentials: 'include',
@@ -374,7 +405,7 @@ export async function deleteProduct(token: string, productId: string): Promise<v
 }
 
 export async function getInventory(token: string, productId: string): Promise<Inventory> {
-  const res = await fetch(`${API_BASE}/api/owner/products/${productId}/inventory`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/products/${productId}/inventory`, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -389,7 +420,7 @@ export async function adjustInventory(
   quantityAvailable: number,
   lowStockThreshold?: number,
 ): Promise<Inventory> {
-  const res = await fetch(`${API_BASE}/api/owner/products/${productId}/inventory`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/products/${productId}/inventory`, {
     method:  'PATCH',
     headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
@@ -460,7 +491,7 @@ export async function getStatsSummary(
   range: StatsRange = { period: 'today' },
 ): Promise<StatsSummary> {
   const qs = buildStatsQuery(range)
-  const res = await fetch(`${API_BASE}/api/owner/stats/summary?${qs}`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/stats/summary?${qs}`, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -474,7 +505,7 @@ export async function getTopProducts(
   limit = 5,
 ): Promise<TopProduct[]> {
   const qs = buildStatsQuery(range)
-  const res = await fetch(`${API_BASE}/api/owner/stats/top-products?${qs}&limit=${limit}`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/stats/top-products?${qs}&limit=${limit}`, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -504,7 +535,7 @@ export interface StockAlert {
 }
 
 export async function getCoPurchases(token: string): Promise<CoPurchasePair[]> {
-  const res = await fetch(`${API_BASE}/api/owner/stats/copurchases`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/stats/copurchases`, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -513,7 +544,7 @@ export async function getCoPurchases(token: string): Promise<CoPurchasePair[]> {
 }
 
 export async function getWeeklyTrends(token: string): Promise<WeeklyDay[]> {
-  const res = await fetch(`${API_BASE}/api/owner/stats/weekly`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/stats/weekly`, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -522,7 +553,7 @@ export async function getWeeklyTrends(token: string): Promise<WeeklyDay[]> {
 }
 
 export async function getStockAlerts(token: string): Promise<StockAlert[]> {
-  const res = await fetch(`${API_BASE}/api/owner/stats/stock-alerts`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/stats/stock-alerts`, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -578,7 +609,7 @@ export const TIMEZONES = [
 ]
 
 export async function getMe(token: string): Promise<CurrentUser> {
-  const res = await fetch(`${API_BASE}/api/auth/owner/me`, {
+  const res = await apiFetch(`${API_BASE}/api/auth/owner/me`, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -587,7 +618,7 @@ export async function getMe(token: string): Promise<CurrentUser> {
 }
 
 export async function getBusinessProfile(token: string): Promise<BusinessProfile> {
-  const res = await fetch(`${API_BASE}/api/owner/settings/business`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/settings/business`, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -599,7 +630,7 @@ export async function updateBusinessProfile(
   token: string,
   data:  { name?: string; description?: string | null; timezone?: string; address?: string | null; latitude?: number | null; longitude?: number | null },
 ): Promise<BusinessProfile> {
-  const res = await fetch(`${API_BASE}/api/owner/settings/business`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/settings/business`, {
     method:  'PATCH',
     headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
@@ -613,7 +644,7 @@ export async function updateBusinessProfile(
 }
 
 export async function getStaff(token: string): Promise<StaffMember[]> {
-  const res = await fetch(`${API_BASE}/api/owner/settings/staff`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/settings/staff`, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -625,7 +656,7 @@ export async function createStaff(
   token: string,
   data:  { email: string; password: string; role?: 'OWNER' | 'STAFF' },
 ): Promise<StaffMember> {
-  const res = await fetch(`${API_BASE}/api/owner/settings/staff`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/settings/staff`, {
     method:  'POST',
     headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
@@ -639,7 +670,7 @@ export async function createStaff(
 }
 
 export async function deleteStaff(token: string, userId: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/owner/settings/staff/${userId}`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/settings/staff/${userId}`, {
     method:  'DELETE',
     headers:     { ...csrfHeader() },
     credentials: 'include',
@@ -655,7 +686,7 @@ export async function changePassword(
   currentPassword: string,
   newPassword: string,
 ): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/owner/settings/password`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/settings/password`, {
     method:  'PATCH',
     headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
@@ -736,7 +767,7 @@ export async function getCustomers(
 ): Promise<CustomerListResponse> {
   const params = new URLSearchParams({ segment, page: String(page), limit: String(limit) })
   if (search) params.set('search', search)
-  const res = await fetch(`${API_BASE}/api/owner/customers?${params}`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/customers?${params}`, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -748,7 +779,7 @@ export async function getCustomerDetail(
   token:      string,
   customerId: string,
 ): Promise<CustomerDetail> {
-  const res = await fetch(`${API_BASE}/api/owner/customers/${customerId}`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/customers/${customerId}`, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -762,7 +793,7 @@ export async function publishAnnouncement(
   token: string,
   text:  string,
 ): Promise<{ jobId: string; queue: string }> {
-  const res = await fetch(`${API_BASE}/api/owner/announcements/publish`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/announcements/publish`, {
     method:  'POST',
     headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
@@ -810,7 +841,7 @@ export async function getAnnouncements(
 ): Promise<Announcement[]> {
   const params = new URLSearchParams({ limit: String(limit) })
   if (status) params.set('status', status)
-  const res = await fetch(`${API_BASE}/api/owner/announcements?${params}`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/announcements?${params}`, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -819,7 +850,7 @@ export async function getAnnouncements(
 }
 
 export async function createAnnouncement(input: CreateAnnouncementInput): Promise<Announcement> {
-  const res = await fetch(`${API_BASE}/api/owner/announcements`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/announcements`, {
     method:      'POST',
     headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
@@ -836,7 +867,7 @@ export async function updateAnnouncement(
   id:    string,
   data:  Partial<Pick<CreateAnnouncementInput, 'text' | 'template' | 'productIds' | 'imageUrl' | 'scheduledAt'>>,
 ): Promise<Announcement> {
-  const res = await fetch(`${API_BASE}/api/owner/announcements/${id}`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/announcements/${id}`, {
     method:      'PATCH',
     headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
@@ -850,7 +881,7 @@ export async function updateAnnouncement(
 }
 
 export async function deleteAnnouncement(id: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/owner/announcements/${id}`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/announcements/${id}`, {
     method:      'DELETE',
     headers:     { ...csrfHeader() },
     credentials: 'include',
@@ -866,7 +897,7 @@ export async function previewAnnouncementImage(input: {
   template?:   string | undefined
   productIds?: string[] | undefined
 }): Promise<{ url: string }> {
-  const res = await fetch(`${API_BASE}/api/owner/announcements/preview-image`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/announcements/preview-image`, {
     method:      'POST',
     headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
@@ -880,7 +911,7 @@ export async function previewAnnouncementImage(input: {
 }
 
 export async function regenerateAnnouncementImage(id: string): Promise<Announcement> {
-  const res = await fetch(`${API_BASE}/api/owner/announcements/${id}/regenerate-image`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/announcements/${id}/regenerate-image`, {
     method:      'POST',
     headers:     { ...csrfHeader() },
     credentials: 'include',
@@ -893,7 +924,7 @@ export async function regenerateAnnouncementImage(id: string): Promise<Announcem
 }
 
 export async function sendAnnouncement(id: string): Promise<{ ok: boolean; jobId?: string }> {
-  const res = await fetch(`${API_BASE}/api/owner/announcements/${id}/send`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/announcements/${id}/send`, {
     method:      'POST',
     headers:     { ...csrfHeader() },
     credentials: 'include',
@@ -910,7 +941,7 @@ export async function patchOrderStatus(
   orderId: string,
   status: OrderStatus,
 ): Promise<{ id: string; status: OrderStatus }> {
-  const res = await fetch(`${API_BASE}/api/owner/orders/${orderId}/status`, {
+  const res = await apiFetch(`${API_BASE}/api/owner/orders/${orderId}/status`, {
     method:  'PATCH',
     headers: {
       'Content-Type':  'application/json',
@@ -949,7 +980,7 @@ export interface AdminBusiness {
 }
 
 export async function getAdminBusinesses(): Promise<AdminBusiness[]> {
-  const res = await fetch(`${API_BASE}/api/admin/businesses`, {
+  const res = await apiFetch(`${API_BASE}/api/admin/businesses`, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -977,7 +1008,7 @@ export interface Lead {
 }
 
 export async function getAdminLeads(): Promise<Lead[]> {
-  const res = await fetch(`${API_BASE}/api/leads/admin-list`, {
+  const res = await apiFetch(`${API_BASE}/api/leads/admin-list`, {
     credentials: 'include',
     cache:       'no-store',
   })
@@ -989,7 +1020,7 @@ export async function updateLead(
   id:    string,
   data:  { status?: LeadStatus; notes?: string },
 ): Promise<Lead> {
-  const res = await fetch(`${API_BASE}/api/leads/admin-update/${id}`, {
+  const res = await apiFetch(`${API_BASE}/api/leads/admin-update/${id}`, {
     method:      'PATCH',
     headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
@@ -1003,7 +1034,7 @@ export async function setBusinessStatus(
   businessId: string,
   status:     BusinessStatus,
 ): Promise<{ id: string; slug: string; status: BusinessStatus }> {
-  const res = await fetch(`${API_BASE}/api/admin/businesses/${businessId}/status`, {
+  const res = await apiFetch(`${API_BASE}/api/admin/businesses/${businessId}/status`, {
     method:      'PATCH',
     headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
