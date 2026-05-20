@@ -110,13 +110,11 @@ export function CartDrawer() {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.8, opacity: 0, y: 20 }}
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-            className="fixed z-30 flex items-center gap-2.5 rounded-2xl px-4 py-3.5 bg-gradient-teal-violet shadow-glow text-white"
+            className="fixed z-30 flex items-center justify-center gap-2.5 rounded-2xl px-4 py-3.5 bg-gradient-teal-violet shadow-glow text-white"
             style={{
-              bottom:    'calc(1.5rem + env(safe-area-inset-bottom))',
-              left:      '50%',
-              transform: 'translateX(-50%)',
-              maxWidth:  'calc(100vw - 32px)',
-              whiteSpace:'nowrap',
+              bottom: 'calc(1.5rem + env(safe-area-inset-bottom))',
+              left:   '16px',
+              right:  '16px',
             }}
             aria-label="Ver carrito"
           >
