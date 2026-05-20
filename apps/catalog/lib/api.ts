@@ -31,6 +31,9 @@ export interface CatalogData {
     slug: string
     description?: string | null
     timezone?: string
+    address?:   string | null
+    latitude?:  number | null
+    longitude?: number | null
   }
   nextPickupWindow: NextPickupWindow | null
   products: CatalogProduct[]

@@ -3,6 +3,7 @@ import { getCatalog, type CatalogData } from '../lib/api'
 
 const mockCatalog: CatalogData = {
   business: { id: 'biz-1', name: 'El Fogón', slug: 'el-fogon' },
+  nextPickupWindow: null,
   products: [
     {
       id: 'prod-1',
