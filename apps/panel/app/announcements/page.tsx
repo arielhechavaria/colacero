@@ -77,6 +77,8 @@ export default function AnnouncementsPage() {
   const [pngUrl,      setPngUrl]      = useState<string | null>(null)
   const [pngLoading,  setPngLoading]  = useState(false)
   const [businessSlug, setBusinessSlug] = useState<string>('')
+  const [prodExpanded,    setProdExpanded]    = useState(true)
+  const [historyExpanded, setHistoryExpanded] = useState(false)
 
   useEffect(() => {
     const token = (isAuthenticatedClient() ? '1' : null)
@@ -110,7 +112,19 @@ export default function AnnouncementsPage() {
 
   function applyTemplate(tpl: TemplateDef) {
     setSelectedTpl(tpl)
-    const selProds = products.filter((p) => selectedProd.has(p.id))
+
+    // Para plantillas que muestran productos en la imagen, auto-seleccionar
+    // los mismos que usa la plantilla para el texto — así texto e imagen quedan sync.
+    let effectiveSelected = selectedProd
+    if ((tpl.pngLayout === 'list' || tpl.pngLayout === 'hero-product') && selectedProd.size === 0) {
+      const limit   = tpl.pngLayout === 'hero-product' ? 1 : 6
+      const actives = products.filter((p) => p.isActive)
+      const autoIds = new Set(actives.slice(0, limit).map((p) => p.id))
+      setSelectedProd(autoIds)
+      effectiveSelected = autoIds
+    }
+
+    const selProds = products.filter((p) => effectiveSelected.has(p.id))
     const generated = tpl.build({
       products,
       selectedProducts: selProds,
@@ -315,45 +329,54 @@ export default function AnnouncementsPage() {
 
           {/* Productos */}
           <section className="glass rounded-2xl p-5">
-            <p className="text-sm font-semibold mb-3" style={{ color: 'var(--text)' }}>
-              🛒 Productos a destacar
-              {selectedProd.size > 0 && (
-                <Badge className="ml-2 bg-[var(--primary-dim)] text-[var(--primary)] border-[var(--border-glow)]">
-                  {selectedProd.size}
-                </Badge>
-              )}
-            </p>
-            {loadingP ? (
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
-              </div>
-            ) : activeProducts.length === 0 ? (
-              <p className="text-xs" style={{ color: 'var(--muted)' }}>No hay productos activos.</p>
-            ) : (
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {activeProducts.map((p) => {
-                  const on = selectedProd.has(p.id)
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => toggleProduct(p)}
-                      className="flex flex-col items-start rounded-xl border p-3 text-left transition-colors"
-                      style={
-                        on
-                          ? { backgroundColor: 'var(--primary-dim)', borderColor: 'var(--primary)' }
-                          : { backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }
-                      }
-                    >
-                      <span className="text-xs font-semibold" style={{ color: on ? 'var(--primary)' : 'var(--text)' }}>
-                        {on ? '✓ ' : ''}{p.name}
-                      </span>
-                      <span className="mt-0.5 text-[10px]" style={{ color: 'var(--muted)' }}>
-                        ${p.unitPrice}/{p.unitLabel}
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
+            <button
+              type="button"
+              onClick={() => setProdExpanded((v) => !v)}
+              className="flex w-full items-center justify-between mb-3"
+            >
+              <p className="text-sm font-semibold flex items-center gap-1.5" style={{ color: 'var(--text)' }}>
+                🛒 Productos a destacar
+                {selectedProd.size > 0 && (
+                  <Badge className="bg-[var(--primary-dim)] text-[var(--primary)] border-[var(--border-glow)]">
+                    {selectedProd.size}
+                  </Badge>
+                )}
+              </p>
+              <span className="text-xs transition-transform duration-200" style={{ color: 'var(--muted)', display: 'inline-block', transform: prodExpanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}>▾</span>
+            </button>
+            {prodExpanded && (
+              loadingP ? (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
+                </div>
+              ) : activeProducts.length === 0 ? (
+                <p className="text-xs" style={{ color: 'var(--muted)' }}>No hay productos activos.</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {activeProducts.map((p) => {
+                    const on = selectedProd.has(p.id)
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => toggleProduct(p)}
+                        className="flex flex-col items-start rounded-xl border p-3 text-left transition-colors"
+                        style={
+                          on
+                            ? { backgroundColor: 'var(--primary-dim)', borderColor: 'var(--primary)' }
+                            : { backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }
+                        }
+                      >
+                        <span className="text-xs font-semibold" style={{ color: on ? 'var(--primary)' : 'var(--text)' }}>
+                          {on ? '✓ ' : ''}{p.name}
+                        </span>
+                        <span className="mt-0.5 text-[10px]" style={{ color: 'var(--muted)' }}>
+                          ${p.unitPrice}/{p.unitLabel}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )
             )}
           </section>
 
@@ -495,10 +518,24 @@ export default function AnnouncementsPage() {
 
           {/* Historial */}
           <section className="glass rounded-2xl p-5">
-            <p className="text-sm font-semibold mb-3" style={{ color: 'var(--text)' }}>
-              📜 Historial
-            </p>
+            <button
+              type="button"
+              onClick={() => setHistoryExpanded((v) => !v)}
+              className="flex w-full items-center justify-between mb-3"
+            >
+              <p className="text-sm font-semibold flex items-center gap-1.5" style={{ color: 'var(--text)' }}>
+                📜 Historial
+                {announcements.length > 0 && (
+                  <Badge className="bg-[var(--primary-dim)] text-[var(--primary)] border-[var(--border-glow)]">
+                    {announcements.length}
+                  </Badge>
+                )}
+              </p>
+              <span className="text-xs transition-transform duration-200" style={{ color: 'var(--muted)', display: 'inline-block', transform: historyExpanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}>▾</span>
+            </button>
 
+            {historyExpanded && (
+            <>
             {/* Filter chips */}
             <div className="mb-3 flex flex-wrap gap-1.5">
               <button
@@ -609,6 +646,8 @@ export default function AnnouncementsPage() {
                   </div>
                 ))}
               </div>
+            )}
+            </>
             )}
           </section>
         </div>
