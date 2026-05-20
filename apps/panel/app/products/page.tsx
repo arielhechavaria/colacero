@@ -25,6 +25,7 @@ import {
   DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog'
+import { LayoutGrid, Table2 } from 'lucide-react'
 
 // ── Unit options ──────────────────────────────────────────────────────────────
 
@@ -55,10 +56,12 @@ function InventoryAdjuster({
   product,
   token,
   onUpdated,
+  compact = false,
 }: {
   product:   Product
   token:     string
   onUpdated: (p: Product) => void
+  compact?:  boolean
 }) {
   const inv = product.inventory
   const [value, setValue]     = useState(String(inv?.quantityAvailable ?? 0))
@@ -100,14 +103,19 @@ function InventoryAdjuster({
     void saveTo(next)
   }
 
+  const btnSz   = compact ? 'h-6 w-6 rounded' : 'h-7 w-7 rounded-lg'
+  const inputSz = compact ? 'w-14 h-6'        : 'w-16 h-7 rounded-md'
+
   return (
-    <div className="flex items-center gap-1 mt-2">
-      <span className="text-[10px] font-medium mr-1" style={{ color: 'var(--muted)' }}>Stock</span>
+    <div className={`flex items-center gap-1 ${compact ? '' : 'mt-2'}`}>
+      {!compact && (
+        <span className="text-[10px] font-medium mr-1" style={{ color: 'var(--muted)' }}>Stock</span>
+      )}
 
       <button
         onClick={() => step(-1)}
         disabled={loading || parseInt(value, 10) <= 0}
-        className="h-7 w-7 rounded-lg text-sm font-bold disabled:opacity-30 transition-all"
+        className={`${btnSz} text-sm font-bold disabled:opacity-30 transition-all`}
         style={{ background: 'rgba(248,113,113,0.12)', color: 'var(--error)' }}
         title="Quitar 1"
       >−</button>
@@ -120,14 +128,14 @@ function InventoryAdjuster({
         onBlur={handleBlur}
         onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
         disabled={loading}
-        className="w-16 text-xs text-center font-mono h-7 rounded-md border bg-transparent disabled:opacity-50"
+        className={`${inputSz} text-xs text-center font-mono rounded border bg-transparent disabled:opacity-50`}
         style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
       />
 
       <button
         onClick={() => step(1)}
         disabled={loading}
-        className="h-7 w-7 rounded-lg text-sm font-bold disabled:opacity-30 transition-all"
+        className={`${btnSz} text-sm font-bold disabled:opacity-30 transition-all`}
         style={{ background: 'rgba(52,211,153,0.12)', color: 'var(--success)' }}
         title="Agregar 1"
       >+</button>
@@ -222,6 +230,179 @@ function ProductCard({
           Eliminar
         </Button>
       </div>
+    </div>
+  )
+}
+
+// ── Product table row ─────────────────────────────────────────────────────────
+
+function ProductTableRow({
+  product,
+  token,
+  onEdit,
+  onToggle,
+  onDelete,
+  onUpdated,
+}: {
+  product:   Product
+  token:     string
+  onEdit:    (p: Product) => void
+  onToggle:  (p: Product) => void
+  onDelete:  (p: Product) => void
+  onUpdated: (p: Product) => void
+}) {
+  return (
+    <tr
+      className={`border-b transition-colors hover:bg-white/[0.03] ${!product.isActive ? 'opacity-50' : ''}`}
+      style={{ borderColor: 'var(--glass-border)' }}
+    >
+      {/* Nombre + SKU */}
+      <td className="px-4 py-3">
+        <p className="font-medium text-sm leading-snug" style={{ color: 'var(--text)' }}>
+          {product.name}
+        </p>
+        {product.sku && (
+          <p className="text-[11px] font-mono" style={{ color: 'var(--muted)' }}>
+            {product.sku}
+          </p>
+        )}
+        {product.description && (
+          <p className="text-xs line-clamp-1 hidden lg:block" style={{ color: 'var(--muted)' }}>
+            {product.description}
+          </p>
+        )}
+      </td>
+
+      {/* Categoría — oculto en mobile */}
+      <td className="px-4 py-3 hidden md:table-cell">
+        {product.category ? (
+          <span
+            className="text-xs px-2 py-0.5 rounded-full"
+            style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: 'var(--muted)' }}
+          >
+            {product.category}
+          </span>
+        ) : (
+          <span style={{ color: 'var(--muted)', fontSize: 12 }}>—</span>
+        )}
+      </td>
+
+      {/* Precio */}
+      <td className="px-4 py-3 whitespace-nowrap">
+        <span className="font-mono font-semibold text-sm text-gradient">
+          ${Number(product.unitPrice).toFixed(2)}
+        </span>
+        <span className="text-xs ml-1" style={{ color: 'var(--muted)' }}>
+          / {product.unitLabel}
+        </span>
+      </td>
+
+      {/* Stock con ajustador compacto */}
+      <td className="px-4 py-3">
+        <InventoryAdjuster product={product} token={token} onUpdated={onUpdated} compact />
+      </td>
+
+      {/* Estado — oculto en mobile */}
+      <td className="px-4 py-3 hidden sm:table-cell">
+        <button
+          onClick={() => onToggle(product)}
+          className="rounded-full px-2 py-0.5 text-[11px] font-semibold transition-all"
+          style={
+            product.isActive
+              ? { background: 'rgba(52,211,153,0.12)', color: 'var(--success)' }
+              : { background: 'rgba(107,114,128,0.12)', color: 'var(--muted)' }
+          }
+        >
+          {product.isActive ? 'Activo' : 'Inactivo'}
+        </button>
+      </td>
+
+      {/* Acciones */}
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-1.5 justify-end">
+          <Button variant="outline" size="sm" onClick={() => onEdit(product)}>
+            Editar
+          </Button>
+          <Button variant="destructive" size="sm" onClick={() => onDelete(product)}>
+            Eliminar
+          </Button>
+        </div>
+      </td>
+    </tr>
+  )
+}
+
+// ── Products table ────────────────────────────────────────────────────────────
+
+function ProductsTable({
+  active,
+  inactive,
+  token,
+  onEdit,
+  onToggle,
+  onDelete,
+  onUpdated,
+}: {
+  active:    Product[]
+  inactive:  Product[]
+  token:     string
+  onEdit:    (p: Product) => void
+  onToggle:  (p: Product) => void
+  onDelete:  (p: Product) => void
+  onUpdated: (p: Product) => void
+}) {
+  const rowProps = { token, onEdit, onToggle, onDelete, onUpdated }
+  return (
+    <div className="glass rounded-2xl overflow-x-auto">
+      <table className="w-full text-sm border-collapse">
+        <thead>
+          <tr style={{ borderBottom: '1px solid var(--glass-border)' }}>
+            {(['Producto', 'Categoría', 'Precio', 'Stock', 'Estado', 'Acciones'] as const).map((h, i) => (
+              <th
+                key={h}
+                className={`px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide ${
+                  h === 'Categoría' ? 'hidden md:table-cell' :
+                  h === 'Estado'    ? 'hidden sm:table-cell' :
+                  h === 'Acciones'  ? 'text-right' : ''
+                }`}
+                style={{ color: 'var(--muted)' }}
+              >
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {active.length > 0 && (
+            <>
+              <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <td colSpan={6} className="px-4 py-2">
+                  <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
+                    Activos ({active.length})
+                  </span>
+                </td>
+              </tr>
+              {active.map((p) => (
+                <ProductTableRow key={p.id} product={p} {...rowProps} />
+              ))}
+            </>
+          )}
+          {inactive.length > 0 && (
+            <>
+              <tr style={{ borderTop: '2px solid var(--glass-border)', background: 'rgba(255,255,255,0.02)' }}>
+                <td colSpan={6} className="px-4 py-2">
+                  <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
+                    Inactivos ({inactive.length})
+                  </span>
+                </td>
+              </tr>
+              {inactive.map((p) => (
+                <ProductTableRow key={p.id} product={p} {...rowProps} />
+              ))}
+            </>
+          )}
+        </tbody>
+      </table>
     </div>
   )
 }
@@ -600,6 +781,10 @@ export default function ProductsPage() {
   const [search,   setSearch]   = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
   const [sortBy,   setSortBy]   = useState('name-asc')
+  const [view,     setView]     = useState<'grid' | 'table'>(() => {
+    if (typeof window === 'undefined') return 'grid'
+    return (localStorage.getItem('panel.products.view') as 'grid' | 'table') ?? 'grid'
+  })
 
   const [modal,  setModal]  = useState<'create' | 'edit' | 'delete' | null>(null)
   const [target, setTarget] = useState<Product | null>(null)
@@ -734,18 +919,42 @@ export default function ProductsPage() {
       >
         <div className="flex items-center justify-between gap-4">
           <div>
-              <h1 className="text-lg font-bold text-gradient">
+            <h1 className="text-lg font-bold text-gradient">
               <span className="sm:hidden">Productos</span>
-             <span className="hidden sm:inline">Catálogo de productos</span>
-              </h1>
+              <span className="hidden sm:inline">Catálogo de productos</span>
+            </h1>
             <p className="text-sm" style={{ color: 'var(--muted)' }}>
               {products.filter((p) => p.isActive).length} activos · {products.filter((p) => !p.isActive).length} inactivos
             </p>
           </div>
-           <Button onClick={openCreate}>
-            <span className="sm:hidden">+ Nuevo</span>
-             <span className="hidden sm:inline">+ Nuevo producto</span>
+          <div className="flex items-center gap-2">
+            {/* View toggle */}
+            <div
+              className="flex items-center gap-0.5 rounded-lg p-1"
+              style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}
+            >
+              <button
+                onClick={() => { setView('grid'); localStorage.setItem('panel.products.view', 'grid') }}
+                className="rounded-md p-1.5 transition-all"
+                style={view === 'grid' ? { background: 'var(--primary)', color: '#fff' } : { color: 'var(--muted)' }}
+                title="Vista de tarjetas"
+              >
+                <LayoutGrid size={15} />
+              </button>
+              <button
+                onClick={() => { setView('table'); localStorage.setItem('panel.products.view', 'table') }}
+                className="rounded-md p-1.5 transition-all"
+                style={view === 'table' ? { background: 'var(--primary)', color: '#fff' } : { color: 'var(--muted)' }}
+                title="Vista de tabla"
+              >
+                <Table2 size={15} />
+              </button>
+            </div>
+            <Button onClick={openCreate}>
+              <span className="sm:hidden">+ Nuevo</span>
+              <span className="hidden sm:inline">+ Nuevo producto</span>
             </Button>
+          </div>
         </div>
 
         {/* Toolbar */}
@@ -812,48 +1021,62 @@ export default function ProductsPage() {
           />
         )}
 
-        {/* Activos */}
-        {active.length > 0 && (
-          <section>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
-              Activos ({active.length})
-            </p>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {active.map((p) => (
-                <ProductCard
-                  key={p.id}
-                  product={p}
-                  token={token}
-                  onEdit={openEdit}
-                  onToggle={handleToggle}
-                  onDelete={openDelete}
-                  onUpdated={handleUpdated}
-                />
-              ))}
-            </div>
-          </section>
-        )}
+        {view === 'table' ? (
+          <ProductsTable
+            active={active}
+            inactive={inactive}
+            token={token}
+            onEdit={openEdit}
+            onToggle={handleToggle}
+            onDelete={openDelete}
+            onUpdated={handleUpdated}
+          />
+        ) : (
+          <>
+            {/* Activos */}
+            {active.length > 0 && (
+              <section>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
+                  Activos ({active.length})
+                </p>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {active.map((p) => (
+                    <ProductCard
+                      key={p.id}
+                      product={p}
+                      token={token}
+                      onEdit={openEdit}
+                      onToggle={handleToggle}
+                      onDelete={openDelete}
+                      onUpdated={handleUpdated}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
 
-        {/* Inactivos */}
-        {inactive.length > 0 && (
-          <section>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
-              Inactivos ({inactive.length})
-            </p>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {inactive.map((p) => (
-                <ProductCard
-                  key={p.id}
-                  product={p}
-                  token={token}
-                  onEdit={openEdit}
-                  onToggle={handleToggle}
-                  onDelete={openDelete}
-                  onUpdated={handleUpdated}
-                />
-              ))}
-            </div>
-          </section>
+            {/* Inactivos */}
+            {inactive.length > 0 && (
+              <section>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
+                  Inactivos ({inactive.length})
+                </p>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {inactive.map((p) => (
+                    <ProductCard
+                      key={p.id}
+                      product={p}
+                      token={token}
+                      onEdit={openEdit}
+                      onToggle={handleToggle}
+                      onDelete={openDelete}
+                      onUpdated={handleUpdated}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
         )}
       </div>
 
