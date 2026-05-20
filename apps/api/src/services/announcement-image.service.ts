@@ -24,11 +24,13 @@ type SatoriNode = {
 // Font loader (lazy + cached)
 // ──────────────────────────────────────────────────────────────────────────────
 
+// Inter desde @fontsource/inter via jsDelivr CDN — woff estable.
+// Satori soporta woff nativo (no necesita TTF).
 const FONT_URLS = {
-  regular: 'https://github.com/rsms/inter/raw/v4.0/docs/font-files/Inter-Regular.otf',
-  semibold: 'https://github.com/rsms/inter/raw/v4.0/docs/font-files/Inter-SemiBold.otf',
-  bold:    'https://github.com/rsms/inter/raw/v4.0/docs/font-files/Inter-Bold.otf',
-  black:   'https://github.com/rsms/inter/raw/v4.0/docs/font-files/Inter-Black.otf',
+  regular:  'https://cdn.jsdelivr.net/npm/@fontsource/inter@5/files/inter-latin-400-normal.woff',
+  semibold: 'https://cdn.jsdelivr.net/npm/@fontsource/inter@5/files/inter-latin-600-normal.woff',
+  bold:     'https://cdn.jsdelivr.net/npm/@fontsource/inter@5/files/inter-latin-700-normal.woff',
+  black:    'https://cdn.jsdelivr.net/npm/@fontsource/inter@5/files/inter-latin-900-normal.woff',
 }
 
 interface FontCache {
