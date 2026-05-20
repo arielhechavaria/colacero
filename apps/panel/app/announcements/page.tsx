@@ -10,6 +10,8 @@ import {
   updateAnnouncement,
   deleteAnnouncement,
   sendAnnouncement,
+  previewAnnouncementImage,
+  regenerateAnnouncementImage,
   type Product,
   type Announcement,
   type AnnouncementStatus,
@@ -71,6 +73,8 @@ export default function AnnouncementsPage() {
   const [previewMode, setPreviewMode] = useState<'text' | 'png'>('text')
   const [historyFilter, setHistoryFilter] = useState<AnnouncementStatus | 'ALL'>('ALL')
   const [aiModalOpen, setAiModalOpen] = useState(false)
+  const [pngUrl,      setPngUrl]      = useState<string | null>(null)
+  const [pngLoading,  setPngLoading]  = useState(false)
 
   useEffect(() => {
     const token = (isAuthenticatedClient() ? '1' : null)
@@ -151,6 +155,7 @@ export default function AnnouncementsPage() {
       setSelectedTpl(null)
       setSelectedProd(new Set())
       setScheduledAt('')
+      setPngUrl(null)
       await reloadAnnouncements()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Error al publicar')
@@ -177,6 +182,36 @@ export default function AnnouncementsPage() {
       await reloadAnnouncements()
     } catch {
       toast.error('Error al cancelar')
+    }
+  }
+
+  async function handleGeneratePreview() {
+    if (!text.trim()) return
+    setPngLoading(true)
+    try {
+      const { url } = await previewAnnouncementImage({
+        text:       text.trim(),
+        template:   selectedTpl?.id,
+        productIds: Array.from(selectedProd),
+      })
+      // Bust cache con timestamp
+      setPngUrl(`${url}?t=${Date.now()}`)
+      setPreviewMode('png')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error al generar imagen')
+    } finally {
+      setPngLoading(false)
+    }
+  }
+
+  async function handleRegenImage(id: string) {
+    try {
+      toast.info('Generando imagen…')
+      await regenerateAnnouncementImage(id)
+      toast.success('Imagen generada')
+      await reloadAnnouncements()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error al generar imagen')
     }
   }
 
@@ -326,7 +361,7 @@ export default function AnnouncementsPage() {
 
             <Textarea
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={(e) => { setText(e.target.value); if (pngUrl) setPngUrl(null) }}
               placeholder="Escribí tu anuncio o usá una plantilla ↑"
               rows={8}
               maxLength={MAX_CHARS}
@@ -416,11 +451,22 @@ export default function AnnouncementsPage() {
                     color:           previewMode === 'png' ? 'var(--primary)' : 'var(--muted)',
                   }}
                 >
-                  Imagen (próx.)
+                  🎨 Imagen
                 </button>
               </div>
             </div>
-            <AnnouncementPreview text={text} mode={previewMode} />
+            <AnnouncementPreview text={text} mode={previewMode} pngUrl={pngUrl} />
+            {previewMode === 'png' && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void handleGeneratePreview()}
+                disabled={pngLoading || !text.trim()}
+                className="mt-3 w-full text-xs"
+              >
+                {pngLoading ? 'Generando…' : pngUrl ? '🔄 Regenerar imagen' : '🎨 Generar imagen ahora'}
+              </Button>
+            )}
           </section>
 
           {/* Historial */}
@@ -501,11 +547,19 @@ export default function AnnouncementsPage() {
                         {a.errorMessage}
                       </p>
                     )}
-                    <div className="mt-2 flex gap-1.5">
+                    {a.generatedPng && (
+                      <a href={a.generatedPng} target="_blank" rel="noopener noreferrer" className="mt-2 mb-2 block">
+                        <img src={a.generatedPng} alt="Imagen del anuncio" className="rounded-lg w-24 h-24 object-cover" />
+                      </a>
+                    )}
+                    <div className="mt-2 flex gap-1.5 flex-wrap">
                       {(a.status === 'DRAFT' || a.status === 'SCHEDULED') && (
                         <>
                           <button onClick={() => void handleSendDraft(a.id)} className="text-[10px] underline" style={{ color: 'var(--primary)' }}>
                             Enviar ahora
+                          </button>
+                          <button onClick={() => void handleRegenImage(a.id)} className="text-[10px] underline" style={{ color: 'var(--primary)' }}>
+                            {a.generatedPng ? 'Regenerar imagen' : 'Generar imagen'}
                           </button>
                           <button onClick={() => void handleCancelAnnouncement(a.id)} className="text-[10px] underline" style={{ color: 'var(--muted)' }}>
                             Cancelar
@@ -516,6 +570,16 @@ export default function AnnouncementsPage() {
                         <button onClick={() => void handleRetry(a)} className="text-[10px] underline" style={{ color: 'var(--primary)' }}>
                           Reintentar
                         </button>
+                      )}
+                      {a.status === 'SENT' && !a.generatedPng && (
+                        <span className="text-[10px]" style={{ color: 'var(--muted)' }}>
+                          Enviado como texto
+                        </span>
+                      )}
+                      {a.status === 'SENT' && a.generatedPng && (
+                        <span className="text-[10px]" style={{ color: 'var(--muted)' }}>
+                          Enviado con imagen
+                        </span>
                       )}
                     </div>
                   </div>

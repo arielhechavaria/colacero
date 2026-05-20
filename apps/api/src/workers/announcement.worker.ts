@@ -22,7 +22,24 @@ export function createAnnouncementWorker(
       const { text, announcementId } = job.data
 
       try {
-        await telegram.sendChannelMessage(text)
+        // Si tenemos un PNG generado, mandarlo via sendPhoto con caption
+        let sentAsPhoto = false
+        if (announcementId && prisma) {
+          const a = await prisma.announcement.findUnique({
+            where:  { id: announcementId },
+            select: { generatedPng: true },
+          })
+          if (a?.generatedPng) {
+            // Caption corto (Telegram limita captions de fotos a 1024 chars)
+            const caption = text.length <= 1024 ? text : text.slice(0, 1020) + '…'
+            await telegram.sendChannelPhoto(a.generatedPng, caption)
+            sentAsPhoto = true
+          }
+        }
+
+        if (!sentAsPhoto) {
+          await telegram.sendChannelMessage(text)
+        }
 
         if (announcementId && prisma) {
           await prisma.announcement.update({

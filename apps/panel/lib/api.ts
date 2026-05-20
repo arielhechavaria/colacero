@@ -857,6 +857,37 @@ export async function deleteAnnouncement(id: string): Promise<void> {
   }
 }
 
+export async function previewAnnouncementImage(input: {
+  text:        string
+  template?:   string | undefined
+  productIds?: string[] | undefined
+}): Promise<{ url: string }> {
+  const res = await fetch(`${API_BASE}/api/owner/announcements/preview-image`, {
+    method:      'POST',
+    headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
+    credentials: 'include',
+    body:        JSON.stringify(input),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string; message?: string }
+    throw new Error(body.message ?? body.error ?? 'preview_failed')
+  }
+  return res.json() as Promise<{ url: string }>
+}
+
+export async function regenerateAnnouncementImage(id: string): Promise<Announcement> {
+  const res = await fetch(`${API_BASE}/api/owner/announcements/${id}/regenerate-image`, {
+    method:      'POST',
+    headers:     { ...csrfHeader() },
+    credentials: 'include',
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string; message?: string }
+    throw new Error(body.message ?? body.error ?? 'regenerate_failed')
+  }
+  return res.json() as Promise<Announcement>
+}
+
 export async function sendAnnouncement(id: string): Promise<{ ok: boolean; jobId?: string }> {
   const res = await fetch(`${API_BASE}/api/owner/announcements/${id}/send`, {
     method:      'POST',

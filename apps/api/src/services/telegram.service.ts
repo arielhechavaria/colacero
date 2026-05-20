@@ -1,11 +1,15 @@
 export interface TelegramProvider {
   sendChannelMessage(text: string): Promise<void>
+  sendChannelPhoto(photoUrl: string, caption?: string): Promise<void>
   sendDirectMessage(chatId: string, text: string): Promise<void>
 }
 
 const mockProvider: TelegramProvider = {
   async sendChannelMessage(text) {
     console.log(`[Telegram MOCK] → canal: ${text}`)
+  },
+  async sendChannelPhoto(photoUrl, caption) {
+    console.log(`[Telegram MOCK] → canal photo: ${photoUrl}${caption ? ` · caption: ${caption}` : ''}`)
   },
   async sendDirectMessage(chatId, text) {
     console.log(`[Telegram MOCK] → DM ${chatId}: ${text}`)
@@ -39,8 +43,29 @@ function createBotApiProvider(
     }
   }
 
-  // Inline keyboard with URL button — web_app type is only valid in private chats,
-  // so we use a plain url button which works in channels and opens Telegram's in-app browser
+  async function sendPhoto(
+    chatId:      string,
+    photoUrl:    string,
+    caption:     string | undefined,
+    replyMarkup?: object,
+  ): Promise<void> {
+    const url = `https://api.telegram.org/bot${token}/sendPhoto`
+    const res = await fetch(url, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        chat_id:    chatId,
+        photo:      photoUrl,
+        ...(caption ? { caption, parse_mode: 'HTML' } : {}),
+        ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
+      }),
+    })
+    if (!res.ok) {
+      const body = await res.json() as { description?: string }
+      throw new Error(body.description ?? 'telegram_send_photo_failed')
+    }
+  }
+
   const miniAppMarkup = catalogUrl
     ? {
         inline_keyboard: [[
@@ -50,8 +75,9 @@ function createBotApiProvider(
     : undefined
 
   return {
-    sendChannelMessage: (text) => send(channelId, text, miniAppMarkup),
-    sendDirectMessage:  (chatId, text) => send(chatId, text),
+    sendChannelMessage: (text)               => send(channelId, text, miniAppMarkup),
+    sendChannelPhoto:   (photoUrl, caption)  => sendPhoto(channelId, photoUrl, caption, miniAppMarkup),
+    sendDirectMessage:  (chatId, text)       => send(chatId, text),
   }
 }
 

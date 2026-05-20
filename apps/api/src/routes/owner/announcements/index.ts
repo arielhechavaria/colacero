@@ -5,6 +5,10 @@ import {
   AiNotConfiguredError,
   type GenerateInput,
 } from '../../../services/announcement-ai.service.js'
+import {
+  generateAnnouncementPng,
+  buildImageDataFromAnnouncement,
+} from '../../../services/announcement-image.service.js'
 
 interface AnnouncementCreateBody {
   text:         string
@@ -376,6 +380,125 @@ export async function ownerAnnouncementRoutes(app: FastifyInstance) {
       }
       app.log.error({ err }, 'AI generation failed')
       return reply.status(500).send({ error: 'ai_generation_failed' })
+    }
+  })
+
+  // ── POST /:id/regenerate-image — generar/regenerar PNG con Satori ──────────
+  app.post<{ Params: AnnouncementParams }>('/:id/regenerate-image', {
+    onRequest: [app.authenticate],
+    config: { rateLimit: { max: 30, timeWindow: '1 hour' } },
+    schema: { tags: ['owner-announcements'], summary: 'Generar PNG del anuncio' },
+  }, async (req, reply) => {
+    const { businessId } = req.user
+    if (!businessId) return reply.status(403).send({ error: 'forbidden' })
+
+    const a = await app.prisma.announcement.findFirst({
+      where: { id: req.params.id, businessId },
+    })
+    if (!a) return reply.status(404).send({ error: 'not_found' })
+
+    const business = await app.prisma.business.findUnique({ where: { id: businessId } })
+    if (!business) return reply.status(404).send({ error: 'business_not_found' })
+
+    // Cargar productos referenciados
+    let productsForImage: { name: string; unitPrice: number | string; unitLabel: string }[] = []
+    if (a.productIds.length > 0) {
+      const prods = await app.prisma.product.findMany({
+        where: { id: { in: a.productIds }, businessId },
+      })
+      productsForImage = prods.map((p) => ({
+        name:      p.name,
+        unitPrice: Number(p.unitPrice),
+        unitLabel: p.unitLabel,
+      }))
+    }
+
+    try {
+      const imageData = buildImageDataFromAnnouncement({
+        text:     a.text,
+        template: a.template,
+        business: { name: business.name, slug: business.slug },
+        products: productsForImage,
+      })
+
+      const { absoluteUrl } = await generateAnnouncementPng(a.id, imageData)
+
+      const updated = await app.prisma.announcement.update({
+        where: { id: a.id },
+        data:  { generatedPng: absoluteUrl },
+      })
+
+      return reply.send({
+        ...updated,
+        scheduledAt: updated.scheduledAt?.toISOString() ?? null,
+        sentAt:      updated.sentAt?.toISOString()      ?? null,
+        createdAt:   updated.createdAt.toISOString(),
+        updatedAt:   updated.updatedAt.toISOString(),
+      })
+    } catch (err) {
+      app.log.error({ err }, 'PNG generation failed')
+      return reply.status(500).send({
+        error:   'png_generation_failed',
+        message: err instanceof Error ? err.message : String(err),
+      })
+    }
+  })
+
+  // ── POST /preview-image — preview rápido sin persistir (para el editor) ────
+  app.post<{ Body: { text: string; template?: string; productIds?: string[] } }>('/preview-image', {
+    onRequest: [app.authenticate],
+    config: { rateLimit: { max: 60, timeWindow: '1 hour' } },
+    schema: {
+      tags:    ['owner-announcements'],
+      summary: 'Generar PNG sin persistir (preview para el editor)',
+      body: {
+        type:       'object',
+        required:   ['text'],
+        properties: {
+          text:       { type: 'string', minLength: 1, maxLength: 4096 },
+          template:   { type: 'string' },
+          productIds: { type: 'array', items: { type: 'string' } },
+        },
+      },
+    },
+  }, async (req, reply) => {
+    const { businessId } = req.user
+    if (!businessId) return reply.status(403).send({ error: 'forbidden' })
+
+    const business = await app.prisma.business.findUnique({ where: { id: businessId } })
+    if (!business) return reply.status(404).send({ error: 'business_not_found' })
+
+    let productsForImage: { name: string; unitPrice: number | string; unitLabel: string }[] = []
+    if (req.body.productIds?.length) {
+      const prods = await app.prisma.product.findMany({
+        where: { id: { in: req.body.productIds }, businessId },
+      })
+      productsForImage = prods.map((p) => ({
+        name:      p.name,
+        unitPrice: Number(p.unitPrice),
+        unitLabel: p.unitLabel,
+      }))
+    }
+
+    try {
+      const imageData = buildImageDataFromAnnouncement({
+        text:     req.body.text,
+        template: req.body.template ?? null,
+        business: { name: business.name, slug: business.slug },
+        products: productsForImage,
+      })
+
+      // Para preview usamos id efímero
+      const previewId = `preview-${businessId}-${Date.now()}`
+      const { absoluteUrl } = await generateAnnouncementPng(previewId, imageData)
+
+      return reply.send({ url: absoluteUrl })
+    } catch (err) {
+      app.log.error({ err }, 'PNG preview failed')
+      return reply.status(500).send({
+        error:   'png_preview_failed',
+        message: err instanceof Error ? err.message : String(err),
+      })
     }
   })
 }

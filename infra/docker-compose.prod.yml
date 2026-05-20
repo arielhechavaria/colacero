@@ -37,6 +37,8 @@ services:
       postgres: { condition: service_healthy }
       redis:    { condition: service_healthy }
     networks: [internal]
+    volumes:
+      - uploads_data:/app/uploads
     # Expuesto directamente — sin dominio ni SSL aún
     # Cuando haya dominio: quitar ports y usar nginx
     ports:
@@ -98,3 +100,4 @@ networks:
 volumes:
   postgres_data:
   redis_data:
+  uploads_data:
