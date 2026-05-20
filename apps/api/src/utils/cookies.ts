@@ -30,7 +30,11 @@ export function setAuthCookies(reply: FastifyReply, args: SetAuthCookiesArgs): v
   reply.setCookie(CSRF_COOKIE, args.csrfToken, {
     ...baseCookie,
     httpOnly: false, // frontend reads it
-    maxAge:   ACCESS_MAX_AGE_S,
+    // cc_csrf vive tanto como el refresh token — no necesita rotar con el access token.
+    // El doble-submit es seguro mientras el atacante no pueda leer la cookie desde otro origen.
+    // Con cc_csrf = 15min y sin auto-refresh en el panel, el usuario perdía la sesión y
+    // obtenía csrf_invalid en vez de 401.
+    maxAge:   REFRESH_MAX_AGE_S,
   })
 }
 
