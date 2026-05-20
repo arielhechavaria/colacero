@@ -793,11 +793,11 @@ export interface Announcement {
 
 export interface CreateAnnouncementInput {
   text:         string
-  template?:    string
-  productIds?:  string[]
-  imageUrl?:    string
-  scheduledAt?: string
-  sendNow?:     boolean
+  template?:    string  | undefined
+  productIds?:  string[] | undefined
+  imageUrl?:    string  | undefined
+  scheduledAt?: string  | undefined
+  sendNow?:     boolean | undefined
 }
 
 export async function getAnnouncements(
