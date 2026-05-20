@@ -41,7 +41,7 @@ function downloadCsv(leads: Lead[]) {
     'id', 'email', 'phone', 'telegram', 'businessKind',
     'message', 'source', 'status', 'notes', 'createdAt', 'updatedAt',
   ]
-  const rows = leads.map((l) => headers.map((h) => csvEscape((l as Record<string, unknown>)[h])))
+  const rows = leads.map((l) => headers.map((h) => csvEscape((l as unknown as Record<string, unknown>)[h])))
   const csv  = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n')
 
   // BOM para que Excel reconozca UTF-8 (acentos OK)
