@@ -15,12 +15,21 @@ export function middleware(req: NextRequest) {
   const result  = parseTenantFromHost(host)
   const { pathname } = req.nextUrl
 
+  // Rutas que NO se reescriben — son rutas globales del app del catalog
+  // (proxy del API, internals de Next, etc.)
+  const TENANT_PASSTHROUGH_PREFIXES = ['/api/', '/_next/']
+
   // ── Subdominio de tenant: rewrite /pathname → /[slug]/pathname ────────────
   if (result.kind === 'tenant') {
     const { slug } = result
 
     // Evitar loops: si ya empieza con /[slug] no reescribir
     if (pathname === `/${slug}` || pathname.startsWith(`/${slug}/`)) {
+      return NextResponse.next()
+    }
+
+    // Pasar directo rutas globales (proxy API, Next internals)
+    if (TENANT_PASSTHROUGH_PREFIXES.some((p) => pathname.startsWith(p))) {
       return NextResponse.next()
     }
 
