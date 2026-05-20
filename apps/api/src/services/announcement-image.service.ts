@@ -10,7 +10,15 @@
 import path from 'node:path'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { env } from '@colacero/env'
-import type React from 'react'
+
+// Tipo mínimo para nodos de Satori (no necesitamos React)
+type SatoriNode = {
+  type: string
+  props: {
+    style?: Record<string, unknown>
+    children?: unknown
+  }
+}
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Font loader (lazy + cached)
@@ -65,19 +73,19 @@ export type PngLayout = 'list' | 'hero-product' | 'badge' | 'notice'
 export interface AnnouncementImageData {
   businessName: string
   businessSlug: string
-  title:        string           // text grande arriba
-  subtitle?:    string           // texto secundario
-  body?:        string           // texto principal
-  products?:    Array<{ name: string; price: number; unit: string }>
-  highlightProduct?: { name: string; price: number; unit: string }
-  callout?:     string           // ej "OFERTA", "NUEVO", "RECORDATORIO"
+  title:        string
+  subtitle?:    string | undefined
+  body?:        string | undefined
+  products?:    Array<{ name: string; price: number; unit: string }> | undefined
+  highlightProduct?: { name: string; price: number; unit: string } | undefined
+  callout?:     string | undefined
   layout:       PngLayout
 }
 
 const GRADIENT_BG = 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)'
 const GRADIENT_BRAND = 'linear-gradient(135deg, #14B8A6 0%, #8B5CF6 100%)'
 
-function Header({ businessName }: { businessName: string }): React.ReactElement {
+function Header({ businessName }: { businessName: string }): SatoriNode {
   return {
     type: 'div',
     props: {
@@ -129,10 +137,10 @@ function Header({ businessName }: { businessName: string }): React.ReactElement 
         },
       ],
     },
-  } as React.ReactElement
+  } as SatoriNode
 }
 
-function Footer({ slug }: { slug: string }): React.ReactElement {
+function Footer({ slug }: { slug: string }): SatoriNode {
   return {
     type: 'div',
     props: {
@@ -167,12 +175,12 @@ function Footer({ slug }: { slug: string }): React.ReactElement {
         },
       ],
     },
-  } as React.ReactElement
+  } as SatoriNode
 }
 
-function buildJsx(d: AnnouncementImageData): React.ReactElement {
+function buildJsx(d: AnnouncementImageData): SatoriNode {
   // Background con orbs
-  const orbs: React.ReactElement[] = [
+  const orbs: SatoriNode[] = [
     {
       type: 'div',
       props: {
@@ -185,7 +193,7 @@ function buildJsx(d: AnnouncementImageData): React.ReactElement {
           background:      'radial-gradient(circle, rgba(20,184,166,0.30) 0%, transparent 70%)',
         },
       },
-    } as React.ReactElement,
+    } as SatoriNode,
     {
       type: 'div',
       props: {
@@ -198,11 +206,11 @@ function buildJsx(d: AnnouncementImageData): React.ReactElement {
           background:      'radial-gradient(circle, rgba(139,92,246,0.30) 0%, transparent 70%)',
         },
       },
-    } as React.ReactElement,
+    } as SatoriNode,
   ]
 
   // Body content por layout
-  const bodyContent: React.ReactElement = bodyForLayout(d)
+  const bodyContent: SatoriNode = bodyForLayout(d)
 
   return {
     type: 'div',
@@ -229,10 +237,10 @@ function buildJsx(d: AnnouncementImageData): React.ReactElement {
         Footer({ slug: d.businessSlug }),
       ],
     },
-  } as React.ReactElement
+  } as SatoriNode
 }
 
-function bodyForLayout(d: AnnouncementImageData): React.ReactElement {
+function bodyForLayout(d: AnnouncementImageData): SatoriNode {
   // Callout badge
   const callout = d.callout
     ? {
@@ -254,7 +262,7 @@ function bodyForLayout(d: AnnouncementImageData): React.ReactElement {
           },
           children: d.callout,
         },
-      } as React.ReactElement
+      } as SatoriNode
     : null
 
   // Title (siempre)
@@ -272,7 +280,7 @@ function bodyForLayout(d: AnnouncementImageData): React.ReactElement {
       },
       children: d.title,
     },
-  } as React.ReactElement
+  } as SatoriNode
 
   // Subtitle
   const subtitle = d.subtitle
@@ -288,11 +296,11 @@ function bodyForLayout(d: AnnouncementImageData): React.ReactElement {
           },
           children: d.subtitle,
         },
-      } as React.ReactElement
+      } as SatoriNode
     : null
 
   // Layout-specific content
-  let extra: React.ReactElement | null = null
+  let extra: SatoriNode | null = null
 
   if (d.layout === 'hero-product' && d.highlightProduct) {
     extra = {
@@ -331,7 +339,7 @@ function bodyForLayout(d: AnnouncementImageData): React.ReactElement {
           },
         ],
       },
-    } as React.ReactElement
+    } as SatoriNode
   }
 
   if (d.layout === 'list' && d.products && d.products.length > 0) {
@@ -375,7 +383,7 @@ function bodyForLayout(d: AnnouncementImageData): React.ReactElement {
           },
         })),
       },
-    } as React.ReactElement
+    } as SatoriNode
   }
 
   if (d.body && (d.layout === 'notice' || d.layout === 'badge')) {
@@ -392,7 +400,7 @@ function bodyForLayout(d: AnnouncementImageData): React.ReactElement {
         },
         children: d.body,
       },
-    } as React.ReactElement
+    } as SatoriNode
   }
 
   return {
@@ -408,7 +416,7 @@ function bodyForLayout(d: AnnouncementImageData): React.ReactElement {
       },
       children: [callout, title, subtitle, extra].filter(Boolean),
     },
-  } as React.ReactElement
+  } as SatoriNode
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -426,8 +434,8 @@ export async function generateAnnouncementPng(
   const fonts = await loadFonts()
   const jsx = buildJsx(data)
 
-  // 1. Satori → SVG
-  const svg = await satori(jsx, {
+  // 1. Satori → SVG (cast porque construimos nodos manualmente sin React JSX)
+  const svg = await satori(jsx as unknown as Parameters<typeof satori>[0], {
     width:  1080,
     height: 1080,
     fonts,
