@@ -74,6 +74,9 @@ export default async function CatalogPage({ params }: Props) {
             name={data.business.name}
             description={data.business.description}
             nextWindow={data.nextPickupWindow}
+            address={data.business.address}
+            latitude={data.business.latitude}
+            longitude={data.business.longitude}
           />
 
           {/* Quick stats strip — desktop only */}

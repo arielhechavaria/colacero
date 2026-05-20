@@ -7,6 +7,9 @@ interface Props {
   name:        string
   description: string | null | undefined
   nextWindow:  NextPickupWindow | null
+  address:     string | null | undefined
+  latitude:    number | null | undefined
+  longitude:   number | null | undefined
 }
 
 function isOpenNow(window: NextPickupWindow | null): boolean {
@@ -51,7 +54,7 @@ function useCountdown(targetIso: string | null): string | null {
   return text
 }
 
-export function BusinessHero({ name, description, nextWindow }: Props) {
+export function BusinessHero({ name, description, nextWindow, address, latitude, longitude }: Props) {
   const openNow   = isOpenNow(nextWindow)
   const closeAt   = openNow && nextWindow
     ? `${nextWindow.date}T${nextWindow.endTime}:00`
@@ -114,26 +117,66 @@ export function BusinessHero({ name, description, nextWindow }: Props) {
           </p>
         )}
 
-        {/* Next pickup card */}
-        {nextWindow && (
-          <div
-            className="inline-flex flex-col gap-1 rounded-2xl glass px-5 py-3 text-sm"
-            style={{ border: '1px solid var(--glass-border)' }}
-          >
-            <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-              {openNow ? 'Ventana en curso' : 'Próxima recogida'}
-            </span>
-            <span className="text-base font-bold" style={{ color: 'var(--text)' }}>
-              {formatDate(nextWindow.date)} · {nextWindow.startTime}–{nextWindow.endTime}
-            </span>
-            <span className="text-xs" style={{ color: 'var(--muted)' }}>
-              {nextWindow.spotsLeft > 0
-                ? `${nextWindow.spotsLeft} cupos disponibles`
-                : 'Ventana llena — probá la siguiente'}
-              {countdownOpen && <> · {countdownOpen}</>}
-            </span>
-          </div>
-        )}
+        {/* Pickup + Location — fila horizontal en desktop */}
+        <div className="flex flex-wrap items-start gap-3">
+          {/* Next pickup card */}
+          {nextWindow && (
+            <div
+              className="inline-flex flex-col gap-1 rounded-2xl glass px-5 py-3 text-sm"
+              style={{ border: '1px solid var(--glass-border)' }}
+            >
+              <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
+                {openNow ? 'Ventana en curso' : 'Próxima recogida'}
+              </span>
+              <span className="text-base font-bold" style={{ color: 'var(--text)' }}>
+                {formatDate(nextWindow.date)} · {nextWindow.startTime}–{nextWindow.endTime}
+              </span>
+              <span className="text-xs" style={{ color: 'var(--muted)' }}>
+                {nextWindow.spotsLeft > 0
+                  ? `${nextWindow.spotsLeft} cupos disponibles`
+                  : 'Ventana llena — probá la siguiente'}
+                {countdownOpen && <> · {countdownOpen}</>}
+              </span>
+            </div>
+          )}
+
+          {/* Location button */}
+          {(address ?? (latitude != null && longitude != null)) && (() => {
+            const hasCoords = latitude != null && longitude != null
+            const geoHref   = hasCoords
+              ? `geo:${latitude},${longitude}?q=${latitude},${longitude}`
+              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address ?? '')}`
+            const mapsHref  = hasCoords
+              ? `https://www.google.com/maps?q=${latitude},${longitude}`
+              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address ?? '')}`
+
+            return (
+              <div
+                className="inline-flex flex-col gap-1 rounded-2xl glass px-5 py-3 text-sm"
+                style={{ border: '1px solid var(--glass-border)' }}
+              >
+                <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
+                  Dónde recoger
+                </span>
+                {address && (
+                  <span className="text-sm" style={{ color: 'var(--text)' }}>{address}</span>
+                )}
+                <a
+                  href={geoHref}
+                  onClick={(e) => {
+                    // Si el navegador no soporta geo:, fallback a Google Maps
+                    e.preventDefault()
+                    window.open(mapsHref, '_blank', 'noopener,noreferrer')
+                  }}
+                  className="mt-0.5 inline-flex items-center gap-1.5 text-xs font-semibold w-fit rounded-lg px-3 py-1.5 transition-opacity active:opacity-70"
+                  style={{ background: 'rgba(99,102,241,0.12)', color: 'var(--primary)', border: '1px solid rgba(99,102,241,0.2)' }}
+                >
+                  📍 Cómo llegar
+                </a>
+              </div>
+            )
+          })()}
+        </div>
       </div>
     </section>
   )

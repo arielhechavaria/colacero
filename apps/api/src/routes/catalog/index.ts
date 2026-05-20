@@ -76,6 +76,9 @@ export async function catalogRoutes(app: FastifyInstance) {
         name:        business.name,
         slug:        business.slug,
         description: business.description ?? null,
+        address:     business.address    ?? null,
+        latitude:    business.latitude   != null ? Number(business.latitude)  : null,
+        longitude:   business.longitude  != null ? Number(business.longitude) : null,
         timezone:    business.timezone,
       },
       nextPickupWindow: nextWindow

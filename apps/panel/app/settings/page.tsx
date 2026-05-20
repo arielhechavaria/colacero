@@ -53,7 +53,7 @@ function Toast({ msg, type }: { msg: string; type: 'ok' | 'error' }) {
 
 function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
   const [profile,  setProfile]  = useState<BusinessProfile | null>(null)
-  const [form,     setForm]     = useState({ name: '', description: '', timezone: '' })
+  const [form,     setForm]     = useState({ name: '', description: '', timezone: '', address: '', latitude: '', longitude: '' })
   const [saving,   setSaving]   = useState(false)
   const [feedback, setFeedback] = useState<{ msg: string; type: 'ok' | 'error' } | null>(null)
 
@@ -61,7 +61,14 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
     getBusinessProfile(token)
       .then((p) => {
         setProfile(p)
-        setForm({ name: p.name, description: p.description ?? '', timezone: p.timezone })
+        setForm({
+          name:      p.name,
+          description: p.description ?? '',
+          timezone:  p.timezone,
+          address:   p.address   ?? '',
+          latitude:  p.latitude  != null ? String(p.latitude)  : '',
+          longitude: p.longitude != null ? String(p.longitude) : '',
+        })
       })
       .catch(() => setFeedback({ msg: 'Error al cargar perfil', type: 'error' }))
   }, [token])
@@ -71,10 +78,15 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
     setSaving(true)
     setFeedback(null)
     try {
+      const lat = parseFloat(form.latitude)
+      const lon = parseFloat(form.longitude)
       const updated = await updateBusinessProfile(token, {
         name:        form.name.trim(),
         description: form.description.trim() || null,
         timezone:    form.timezone,
+        address:     form.address.trim() || null,
+        latitude:    isNaN(lat) ? null : lat,
+        longitude:   isNaN(lon) ? null : lon,
       })
       setProfile(updated)
       setFeedback({ msg: 'Perfil actualizado ✓', type: 'ok' })
@@ -166,6 +178,79 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
             disabled={!isOwner}
             className="resize-none"
           />
+        </div>
+
+        {/* Ubicación del negocio */}
+        <div className="flex flex-col gap-3 pt-1">
+          <div>
+            <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Ubicación</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
+              Tus clientes verán un botón "📍 Cómo llegar" en el catálogo.{' '}
+              <a
+                href="https://maps.google.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+                style={{ color: 'var(--primary)' }}
+              >
+                Abrí Google Maps
+              </a>
+              , click derecho en tu local → "¿Qué hay aquí?" y copiá los números.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="biz-address">Dirección</Label>
+            <Input
+              id="biz-address"
+              value={form.address}
+              onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+              placeholder="Ej: Calle 23 #456, Vedado, La Habana"
+              disabled={!isOwner}
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <div className="flex-1 flex flex-col gap-1.5">
+              <Label htmlFor="biz-lat">Latitud</Label>
+              <Input
+                id="biz-lat"
+                type="number"
+                step="any"
+                value={form.latitude}
+                onChange={(e) => setForm((f) => ({ ...f, latitude: e.target.value }))}
+                placeholder="Ej: 23.1329"
+                className="font-mono"
+                disabled={!isOwner}
+              />
+            </div>
+            <div className="flex-1 flex flex-col gap-1.5">
+              <Label htmlFor="biz-lon">Longitud</Label>
+              <Input
+                id="biz-lon"
+                type="number"
+                step="any"
+                value={form.longitude}
+                onChange={(e) => setForm((f) => ({ ...f, longitude: e.target.value }))}
+                placeholder="Ej: -82.3666"
+                className="font-mono"
+                disabled={!isOwner}
+              />
+            </div>
+          </div>
+
+          {/* Preview link si ya hay coords */}
+          {form.latitude && form.longitude && !isNaN(parseFloat(form.latitude)) && !isNaN(parseFloat(form.longitude)) && (
+            <a
+              href={`https://www.google.com/maps?q=${form.latitude},${form.longitude}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs w-fit rounded-lg px-3 py-1.5 transition-opacity hover:opacity-80"
+              style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: 'var(--primary)' }}
+            >
+              📍 Ver ubicación en Maps
+            </a>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5">

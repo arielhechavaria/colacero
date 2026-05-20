@@ -15,6 +15,9 @@ model Business {
   slug               String             @unique
   name               String
   description        String?
+  address            String?
+  latitude           Decimal?           @db.Decimal(10, 8)
+  longitude          Decimal?           @db.Decimal(11, 8)
   timezone           String             @default("America/Havana")
   subscriptionStatus SubscriptionStatus @default(TRIAL)
   status             BusinessStatus     @default(ACTIVE)

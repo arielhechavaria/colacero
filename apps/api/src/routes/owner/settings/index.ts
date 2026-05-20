@@ -22,6 +22,9 @@ interface BusinessPatchBody {
   name?:        string
   description?: string
   timezone?:    string
+  address?:     string | null
+  latitude?:    number | null
+  longitude?:   number | null
 }
 
 interface StaffCreateBody {
@@ -58,6 +61,9 @@ export async function ownerSettingsRoutes(app: FastifyInstance) {
         name:               true,
         slug:               true,
         description:        true,
+        address:            true,
+        latitude:           true,
+        longitude:          true,
         timezone:           true,
         subscriptionStatus: true,
       },
@@ -80,6 +86,9 @@ export async function ownerSettingsRoutes(app: FastifyInstance) {
           name:        { type: 'string', minLength: 1, maxLength: 100 },
           description: { type: 'string', maxLength: 500 },
           timezone:    { type: 'string', enum: ALLOWED_TIMEZONES },
+          address:     { type: 'string', maxLength: 300 },
+          latitude:    { type: 'number', minimum: -90,  maximum: 90  },
+          longitude:   { type: 'number', minimum: -180, maximum: 180 },
         },
       },
     },
@@ -88,7 +97,7 @@ export async function ownerSettingsRoutes(app: FastifyInstance) {
     if (!businessId)       return reply.status(403).send({ error: 'forbidden' })
     if (role !== 'OWNER')  return reply.status(403).send({ error: 'owner_only' })
 
-    const { name, description, timezone } = req.body
+    const { name, description, timezone, address, latitude, longitude } = req.body
 
     const updated = await app.prisma.business.update({
       where: { id: businessId },
@@ -96,12 +105,18 @@ export async function ownerSettingsRoutes(app: FastifyInstance) {
         ...(name        !== undefined ? { name }        : {}),
         ...(description !== undefined ? { description } : {}),
         ...(timezone    !== undefined ? { timezone }    : {}),
+        ...(address     !== undefined ? { address }     : {}),
+        ...(latitude    !== undefined ? { latitude }    : {}),
+        ...(longitude   !== undefined ? { longitude }   : {}),
       },
       select: {
         id:                 true,
         name:               true,
         slug:               true,
         description:        true,
+        address:            true,
+        latitude:           true,
+        longitude:          true,
         timezone:           true,
         subscriptionStatus: true,
       },

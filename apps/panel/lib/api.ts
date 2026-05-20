@@ -537,6 +537,9 @@ export interface BusinessProfile {
   name:               string
   slug:               string
   description:        string | null
+  address:            string | null
+  latitude:           number | null
+  longitude:          number | null
   timezone:           string
   subscriptionStatus: string
 }
@@ -594,7 +597,7 @@ export async function getBusinessProfile(token: string): Promise<BusinessProfile
 
 export async function updateBusinessProfile(
   token: string,
-  data:  { name?: string; description?: string | null; timezone?: string },
+  data:  { name?: string; description?: string | null; timezone?: string; address?: string | null; latitude?: number | null; longitude?: number | null },
 ): Promise<BusinessProfile> {
   const res = await fetch(`${API_BASE}/api/owner/settings/business`, {
     method:  'PATCH',
