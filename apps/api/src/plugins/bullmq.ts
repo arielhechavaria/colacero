@@ -46,7 +46,7 @@ export const bullmqPlugin = fp(async (app: FastifyInstance) => {
       env.CATALOG_URL,
     )
 
-    const announcementWorker  = createAnnouncementWorker(connection, telegram)
+    const announcementWorker  = createAnnouncementWorker(connection, telegram, app.prisma)
     const notificationWorker  = createNotificationWorker(connection, telegram)
 
     app.addHook('onClose', async () => {

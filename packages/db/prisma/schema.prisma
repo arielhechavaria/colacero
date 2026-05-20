@@ -26,6 +26,7 @@ model Business {
   products      Product[]
   pickupWindows PickupWindow[]
   orders        Order[]
+  announcements Announcement[]
 }
 
 // ─── User (staff del negocio) ────────────────────────────────────────────────
@@ -199,6 +200,30 @@ model Notification {
   @@index([orderId])
 }
 
+// ─── Announcement (mensajes al canal de Telegram, persistente) ────────────────
+
+model Announcement {
+  id           String              @id @default(cuid())
+  businessId   String
+  text         String
+  template     String?             // 'daily', 'offer', 'reminder', 'custom', 'ai', etc.
+  productIds   String[]            @default([])
+  imageUrl     String?             // imagen adjunta por el user (uploads)
+  generatedPng String?             // PNG generado server-side via Satori
+  scheduledAt  DateTime?           // null = enviar inmediato
+  status       AnnouncementStatus  @default(DRAFT)
+  sentAt       DateTime?
+  errorMessage String?
+  jobId        String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  business     Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, createdAt(sort: Desc)])
+  @@index([scheduledAt, status])
+}
+
 // ─── Lead (captura de interesados) ───────────────────────────────────────────
 
 model Lead {
@@ -280,6 +305,15 @@ enum LeadStatus {
   TRIAL
   CONVERTED
   LOST
+}
+
+enum AnnouncementStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  FAILED
+  CANCELLED
 }
 
 enum SubscriptionStatus {

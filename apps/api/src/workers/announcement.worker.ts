@@ -1,10 +1,12 @@
 import { Worker } from 'bullmq'
 import type { Redis } from 'ioredis'
+import type { PrismaClient } from '@colacero/db'
 import type { TelegramProvider } from '../services/telegram.service.js'
 
 export interface AnnouncementJob {
-  businessId: string
-  text:       string
+  businessId:      string
+  text:            string
+  announcementId?: string  // opcional para backwards compat
 }
 
 export const ANNOUNCEMENT_QUEUE = 'announcements'
@@ -12,12 +14,41 @@ export const ANNOUNCEMENT_QUEUE = 'announcements'
 export function createAnnouncementWorker(
   redis:    Redis,
   telegram: TelegramProvider,
+  prisma?:  PrismaClient,
 ): Worker {
   const worker = new Worker<AnnouncementJob>(
     ANNOUNCEMENT_QUEUE,
     async (job) => {
-      const { text } = job.data
-      await telegram.sendChannelMessage(text)
+      const { text, announcementId } = job.data
+
+      try {
+        await telegram.sendChannelMessage(text)
+
+        if (announcementId && prisma) {
+          await prisma.announcement.update({
+            where: { id: announcementId },
+            data:  {
+              status:       'SENT',
+              sentAt:       new Date(),
+              errorMessage: null,
+            },
+          })
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+
+        if (announcementId && prisma) {
+          await prisma.announcement.update({
+            where: { id: announcementId },
+            data:  {
+              status:       'FAILED',
+              errorMessage: message,
+            },
+          }).catch(() => { /* swallow secondary error */ })
+        }
+
+        throw err
+      }
     },
     {
       connection: redis,
