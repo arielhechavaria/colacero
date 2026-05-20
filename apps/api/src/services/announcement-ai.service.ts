@@ -11,7 +11,7 @@ export interface ProductForAi {
   name:      string
   price:     number
   unit:      string
-  stock?:    number
+  stock?:    number | undefined
 }
 
 export interface PickupWindowForAi {
@@ -24,10 +24,10 @@ export interface GenerateInput {
   businessName:   string
   type:           'offer' | 'fresh' | 'reminder' | 'thank-you' | 'daily' | 'custom'
   tone:           'casual' | 'formal' | 'friendly'
-  products?:      ProductForAi[]
-  pickupWindow?:  PickupWindowForAi | null
-  catalogUrl?:    string
-  customPrompt?:  string
+  products?:      ProductForAi[]   | undefined
+  pickupWindow?:  PickupWindowForAi | null | undefined
+  catalogUrl?:    string             | undefined
+  customPrompt?:  string             | undefined
 }
 
 export interface GenerateOutput {
