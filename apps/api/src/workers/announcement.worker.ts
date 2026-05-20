@@ -5,6 +5,7 @@ import type { TelegramProvider } from '../services/telegram.service.js'
 import {
   generateAnnouncementPng,
   buildImageDataFromAnnouncement,
+  buildCaptionForPhoto,
 } from '../services/announcement-image.service.js'
 
 export interface AnnouncementJob {
@@ -18,17 +19,18 @@ export const ANNOUNCEMENT_QUEUE = 'announcements'
 /**
  * Si el anuncio no tiene PNG, lo genera y lo guarda en la DB.
  * Best-effort: si falla, devuelve null y se envía como texto.
+ * Devuelve también el slug del negocio para construir el caption correcto.
  */
 async function ensurePng(
   prisma:         PrismaClient,
   announcementId: string,
-): Promise<string | null> {
+): Promise<{ pngUrl: string | null; businessSlug: string }> {
   const a = await prisma.announcement.findUnique({
     where: { id: announcementId },
     include: { business: { select: { name: true, slug: true } } },
   })
-  if (!a) return null
-  if (a.generatedPng) return a.generatedPng
+  if (!a) return { pngUrl: null, businessSlug: '' }
+  if (a.generatedPng) return { pngUrl: a.generatedPng, businessSlug: a.business.slug }
 
   try {
     // Cargar productos referenciados
@@ -58,10 +60,10 @@ async function ensurePng(
       data:  { generatedPng: absoluteUrl },
     })
 
-    return absoluteUrl
+    return { pngUrl: absoluteUrl, businessSlug: a.business.slug }
   } catch (err) {
     console.error(`[worker] PNG auto-generation failed for ${announcementId}:`, err)
-    return null
+    return { pngUrl: null, businessSlug: a.business.slug }
   }
 }
 
@@ -78,13 +80,17 @@ export function createAnnouncementWorker(
       try {
         // Auto-generar PNG si no existe (failsafe — el user no tiene que clickear)
         let pngUrl: string | null = null
+        let businessSlug = ''
         if (announcementId && prisma) {
-          pngUrl = await ensurePng(prisma, announcementId)
+          const result = await ensurePng(prisma, announcementId)
+          pngUrl = result.pngUrl
+          businessSlug = result.businessSlug
         }
 
         if (pngUrl) {
-          // Caption corto (Telegram limita a 1024 chars)
-          const caption = text.length <= 1024 ? text : text.slice(0, 1020) + '…'
+          // Caption inteligente: NO repetir lo que ya está en la imagen.
+          // Solo headline + URL del catálogo del negocio.
+          const caption = buildCaptionForPhoto(text, businessSlug)
           await telegram.sendChannelPhoto(pngUrl, caption)
         } else {
           // Fallback: texto plano si PNG falló o no hay announcementId

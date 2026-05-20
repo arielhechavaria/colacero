@@ -473,6 +473,60 @@ export interface BuildImageDataInput {
   products?:    Array<{ name: string; unitPrice: number | string; unitLabel: string }>
 }
 
+/**
+ * Construye un caption corto y limpio cuando se manda como foto.
+ * Evita repetir productos (que ya están en la imagen) y usa la URL del negocio.
+ *
+ * Estrategia: tomar headline (primera línea no vacía) + URL del catálogo.
+ * Si la segunda línea no es bullet/lista, también incluirla como subtitle.
+ */
+export function buildCaptionForPhoto(text: string, businessSlug: string): string {
+  const lines = text.split('\n')
+
+  // Indicadores de líneas que son items de lista (no van en caption)
+  const isListItem = (l: string) =>
+    /^\s*[•✓\-*]/.test(l) ||                 // bullet
+    /^\s+/.test(l) ||                         // indented
+    /^\s*[\u{1F300}-\u{1FAFF}]+\s+\w/u.test(l) // emoji+texto al inicio (productos con emoji)
+
+  const isUrlLine = (l: string) => /https?:\/\//.test(l)
+
+  // Headline: primera línea NO vacía y NO URL
+  let headline = ''
+  for (const l of lines) {
+    const t = l.trim()
+    if (t && !isUrlLine(t)) {
+      headline = t
+      break
+    }
+  }
+
+  // Subtitle: segunda línea no vacía, no URL, no bullet (opcional)
+  let subtitle = ''
+  let foundHeadline = false
+  for (const l of lines) {
+    const t = l.trim()
+    if (!t) continue
+    if (!foundHeadline) {
+      if (t === headline) foundHeadline = true
+      continue
+    }
+    if (!isUrlLine(t) && !isListItem(l)) {
+      subtitle = t
+      break
+    }
+  }
+
+  const url = `https://${businessSlug}.colacero.com/`
+
+  const parts = [headline]
+  if (subtitle && subtitle !== headline) parts.push(subtitle)
+  parts.push('') // línea en blanco
+  parts.push(`👉 ${url}`)
+
+  return parts.join('\n')
+}
+
 export function buildImageDataFromAnnouncement(input: BuildImageDataInput): AnnouncementImageData {
   const lines = input.text.split('\n').filter((l) => l.trim())
   const firstLine  = (lines[0] ?? '').trim()

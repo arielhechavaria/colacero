@@ -12,6 +12,7 @@ import {
   sendAnnouncement,
   previewAnnouncementImage,
   regenerateAnnouncementImage,
+  getMe,
   type Product,
   type Announcement,
   type AnnouncementStatus,
@@ -75,6 +76,7 @@ export default function AnnouncementsPage() {
   const [aiModalOpen, setAiModalOpen] = useState(false)
   const [pngUrl,      setPngUrl]      = useState<string | null>(null)
   const [pngLoading,  setPngLoading]  = useState(false)
+  const [businessSlug, setBusinessSlug] = useState<string>('')
 
   useEffect(() => {
     const token = (isAuthenticatedClient() ? '1' : null)
@@ -83,6 +85,7 @@ export default function AnnouncementsPage() {
 
     void getProducts(token).then(setProducts).catch(() => setProducts([])).finally(() => setLoadingP(false))
     void reloadAnnouncements()
+    void getMe('').then((u) => setBusinessSlug(u.businessSlug ?? '')).catch(() => { /* noop */ })
   }, [router])
 
   async function reloadAnnouncements() {
@@ -97,17 +100,24 @@ export default function AnnouncementsPage() {
   }
 
   // ── Template + product handling ────────────────────────────────────────────
+  function buildCatalogUrl(): string {
+    if (businessSlug) return `https://${businessSlug}.colacero.com/`
+    // Fallback durante el primer load mientras no llega me
+    return typeof window !== 'undefined'
+      ? `${window.location.protocol}//${window.location.hostname.replace('panel.', '')}/`
+      : ''
+  }
+
   function applyTemplate(tpl: TemplateDef) {
     setSelectedTpl(tpl)
     const selProds = products.filter((p) => selectedProd.has(p.id))
     const generated = tpl.build({
       products,
       selectedProducts: selProds,
-      catalogUrl: typeof window !== 'undefined'
-        ? `${window.location.protocol}//${window.location.hostname.replace('panel.', '')}/`
-        : '',
+      catalogUrl: buildCatalogUrl(),
     })
     setText(generated)
+    setPngUrl(null) // invalidar preview viejo
   }
 
   function toggleProduct(p: Product) {
@@ -121,13 +131,12 @@ export default function AnnouncementsPage() {
         setText(selectedTpl.build({
           products,
           selectedProducts: selProds,
-          catalogUrl: typeof window !== 'undefined'
-            ? `${window.location.protocol}//${window.location.hostname.replace('panel.', '')}/`
-            : '',
+          catalogUrl: buildCatalogUrl(),
         }))
       }
       return next
     })
+    setPngUrl(null) // invalidar preview viejo
   }
 
   // ── Submit ─────────────────────────────────────────────────────────────────
@@ -361,7 +370,22 @@ export default function AnnouncementsPage() {
 
             <Textarea
               value={text}
-              onChange={(e) => { setText(e.target.value); if (pngUrl) setPngUrl(null) }}
+              onChange={(e) => {
+                const newText = e.target.value
+                setText(newText)
+                if (pngUrl) setPngUrl(null)
+                // Si el user editó manualmente, desactivar plantilla para que cambios
+                // en productos no sobreescriban su edición
+                if (selectedTpl) {
+                  const selProds = products.filter((x) => selectedProd.has(x.id))
+                  const expected = selectedTpl.build({
+                    products,
+                    selectedProducts: selProds,
+                    catalogUrl: buildCatalogUrl(),
+                  })
+                  if (newText !== expected) setSelectedTpl(null)
+                }
+              }}
               placeholder="Escribí tu anuncio o usá una plantilla ↑"
               rows={8}
               maxLength={MAX_CHARS}
