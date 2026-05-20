@@ -758,7 +758,7 @@ export async function publishAnnouncement(
   token: string,
   text:  string,
 ): Promise<{ jobId: string; queue: string }> {
-  const res = await fetch(`${API_BASE}/api/owner/announcements`, {
+  const res = await fetch(`${API_BASE}/api/owner/announcements/publish`, {
     method:  'POST',
     headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
@@ -769,6 +769,105 @@ export async function publishAnnouncement(
     throw new Error(body.error ?? 'publish_failed')
   }
   return res.json() as Promise<{ jobId: string; queue: string }>
+}
+
+// ── Announcements v2 — persistentes con CRUD ──────────────────────────────────
+
+export type AnnouncementStatus = 'DRAFT' | 'SCHEDULED' | 'SENDING' | 'SENT' | 'FAILED' | 'CANCELLED'
+
+export interface Announcement {
+  id:           string
+  text:         string
+  template:     string | null
+  productIds:   string[]
+  imageUrl:     string | null
+  generatedPng: string | null
+  scheduledAt:  string | null
+  status:       AnnouncementStatus
+  sentAt:       string | null
+  errorMessage: string | null
+  jobId:        string | null
+  createdAt:    string
+  updatedAt:    string
+}
+
+export interface CreateAnnouncementInput {
+  text:         string
+  template?:    string
+  productIds?:  string[]
+  imageUrl?:    string
+  scheduledAt?: string
+  sendNow?:     boolean
+}
+
+export async function getAnnouncements(
+  limit  = 50,
+  status?: AnnouncementStatus,
+): Promise<Announcement[]> {
+  const params = new URLSearchParams({ limit: String(limit) })
+  if (status) params.set('status', status)
+  const res = await fetch(`${API_BASE}/api/owner/announcements?${params}`, {
+    credentials: 'include',
+    cache:       'no-store',
+  })
+  if (!res.ok) throw new Error('fetch_announcements_failed')
+  return res.json() as Promise<Announcement[]>
+}
+
+export async function createAnnouncement(input: CreateAnnouncementInput): Promise<Announcement> {
+  const res = await fetch(`${API_BASE}/api/owner/announcements`, {
+    method:      'POST',
+    headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
+    credentials: 'include',
+    body:        JSON.stringify(input),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'create_announcement_failed')
+  }
+  return res.json() as Promise<Announcement>
+}
+
+export async function updateAnnouncement(
+  id:    string,
+  data:  Partial<Pick<CreateAnnouncementInput, 'text' | 'template' | 'productIds' | 'imageUrl' | 'scheduledAt'>>,
+): Promise<Announcement> {
+  const res = await fetch(`${API_BASE}/api/owner/announcements/${id}`, {
+    method:      'PATCH',
+    headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
+    credentials: 'include',
+    body:        JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'update_announcement_failed')
+  }
+  return res.json() as Promise<Announcement>
+}
+
+export async function deleteAnnouncement(id: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/owner/announcements/${id}`, {
+    method:      'DELETE',
+    headers:     { ...csrfHeader() },
+    credentials: 'include',
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'delete_announcement_failed')
+  }
+}
+
+export async function sendAnnouncement(id: string): Promise<{ ok: boolean; jobId?: string }> {
+  const res = await fetch(`${API_BASE}/api/owner/announcements/${id}/send`, {
+    method:      'POST',
+    headers:     { ...csrfHeader() },
+    credentials: 'include',
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'send_announcement_failed')
+  }
+  return res.json() as Promise<{ ok: boolean; jobId?: string }>
 }
 
 export async function patchOrderStatus(

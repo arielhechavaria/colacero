@@ -1,103 +1,204 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { publishAnnouncement, getProducts, type Product, isAuthenticatedClient } from '../../lib/api'
-import { Button }   from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-
-interface SentAnnouncement {
-  text:   string
-  sentAt: Date
-  jobId:  string
-}
-
-const CATALOG_URL = typeof window !== 'undefined'
-  ? `${window.location.protocol}//${window.location.hostname}:3001/el-fogon`
-  : ''
+import {
+  getProducts,
+  getAnnouncements,
+  createAnnouncement,
+  updateAnnouncement,
+  deleteAnnouncement,
+  sendAnnouncement,
+  type Product,
+  type Announcement,
+  type AnnouncementStatus,
+  isAuthenticatedClient,
+} from '../../lib/api'
+import { TEMPLATES, type TemplateDef } from '../../lib/announcement-templates'
+import { AnnouncementPreview } from '../../components/announcement-preview'
+import { EmptyState }   from '@/components/empty-state'
+import { Button }       from '@/components/ui/button'
+import { Textarea }     from '@/components/ui/textarea'
+import { Badge }        from '@/components/ui/badge'
+import { Skeleton }     from '@/components/ui/skeleton'
 
 const MAX_CHARS = 4096
 
-function buildDailyTemplate(products: Product[]): string {
-  const lines = products
-    .filter(p => p.isActive)
-    .map(p => `  • ${p.name} — $${p.unitPrice}/${p.unitLabel}`)
-    .join('\n')
-  return `🛒 ¡Disponible hoy!\n\n${lines}\n\n⏰ Reservá antes de las 20:00 hs\n👉 ${CATALOG_URL}`
+const statusLabel: Record<AnnouncementStatus, string> = {
+  DRAFT:     'Borrador',
+  SCHEDULED: 'Programado',
+  SENDING:   'Enviando',
+  SENT:      'Enviado',
+  FAILED:    'Fallido',
+  CANCELLED: 'Cancelado',
 }
 
-function buildOfferTemplate(products: Product[]): string {
-  const first = products.find(p => p.isActive)
-  const name  = first ? first.name : 'producto'
-  return `🔥 ¡Oferta especial!\n\n${name} a precio rebajado por tiempo limitado.\n\n👉 Mirá todo en: ${CATALOG_URL}`
+const statusColor: Record<AnnouncementStatus, string> = {
+  DRAFT:     'bg-slate-500/15 text-slate-400 border-slate-500/30',
+  SCHEDULED: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+  SENDING:   'bg-amber-500/15 text-amber-400 border-amber-500/30',
+  SENT:      'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+  FAILED:    'bg-rose-500/15 text-rose-400 border-rose-500/30',
+  CANCELLED: 'bg-slate-500/15 text-slate-500 border-slate-500/30',
 }
 
-function buildReminderTemplate(): string {
-  return `⏰ Recordatorio: el plazo para reservar cierra hoy a las 20:00 hs.\n\nSi todavía no hiciste tu pedido, entrá ahora:\n👉 ${CATALOG_URL}`
+function formatWhen(iso: string | null): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return d.toLocaleString('es-CU', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
 
 export default function AnnouncementsPage() {
   const router   = useRouter()
   const tokenRef = useRef<string | null>(null)
 
-  const [text,      setText]      = useState('')
-  const [sending,   setSending]   = useState(false)
-  const [error,     setError]     = useState<string | null>(null)
-  const [history,   setHistory]   = useState<SentAnnouncement[]>([])
-  const [products,  setProducts]  = useState<Product[]>([])
-  const [selected,  setSelected]  = useState<Set<string>>(new Set())
-  const [loadingP,  setLoadingP]  = useState(true)
+  // Editor state
+  const [text,         setText]         = useState('')
+  const [selectedTpl,  setSelectedTpl]  = useState<TemplateDef | null>(null)
+  const [selectedProd, setSelectedProd] = useState<Set<string>>(new Set())
+  const [scheduledAt,  setScheduledAt]  = useState<string>('') // datetime-local format
+
+  // Data
+  const [products,      setProducts]      = useState<Product[]>([])
+  const [announcements, setAnnouncements] = useState<Announcement[]>([])
+  const [loadingP,      setLoadingP]      = useState(true)
+  const [loadingA,      setLoadingA]      = useState(true)
+
+  // UI
+  const [sending,    setSending]    = useState(false)
+  const [previewMode, setPreviewMode] = useState<'text' | 'png'>('text')
+  const [historyFilter, setHistoryFilter] = useState<AnnouncementStatus | 'ALL'>('ALL')
 
   useEffect(() => {
     const token = (isAuthenticatedClient() ? '1' : null)
     if (!token) { router.replace('/login'); return }
     tokenRef.current = token
-    getProducts(token)
-      .then(setProducts)
-      .catch(() => setProducts([]))
-      .finally(() => setLoadingP(false))
+
+    void getProducts(token).then(setProducts).catch(() => setProducts([])).finally(() => setLoadingP(false))
+    void reloadAnnouncements()
   }, [router])
 
-  function toggleProduct(p: Product) {
-    const line = `• ${p.name} — $${p.unitPrice}/${p.unitLabel}`
-    if (selected.has(p.id)) {
-      setSelected(prev => { const s = new Set(prev); s.delete(p.id); return s })
-      setText(prev => prev.replace('\n' + line, '').replace(line + '\n', '').replace(line, '').trimEnd())
-    } else {
-      setSelected(prev => new Set(prev).add(p.id))
-      setText(prev => (prev ? prev + '\n' + line : line))
+  async function reloadAnnouncements() {
+    setLoadingA(true)
+    try {
+      setAnnouncements(await getAnnouncements(100))
+    } catch {
+      toast.error('Error al cargar historial')
+    } finally {
+      setLoadingA(false)
     }
   }
 
-  function applyTemplate(tpl: string) {
-    setText(tpl)
-    setSelected(new Set())
+  // ── Template + product handling ────────────────────────────────────────────
+  function applyTemplate(tpl: TemplateDef) {
+    setSelectedTpl(tpl)
+    const selProds = products.filter((p) => selectedProd.has(p.id))
+    const generated = tpl.build({
+      products,
+      selectedProducts: selProds,
+      catalogUrl: typeof window !== 'undefined'
+        ? `${window.location.protocol}//${window.location.hostname.replace('panel.', '')}/`
+        : '',
+    })
+    setText(generated)
   }
 
-  async function handlePublish(e: React.FormEvent) {
+  function toggleProduct(p: Product) {
+    setSelectedProd((prev) => {
+      const next = new Set(prev)
+      if (next.has(p.id)) next.delete(p.id)
+      else next.add(p.id)
+      // Re-apply template si hay uno activo (regenera el texto con la selección)
+      if (selectedTpl) {
+        const selProds = products.filter((x) => next.has(x.id))
+        setText(selectedTpl.build({
+          products,
+          selectedProducts: selProds,
+          catalogUrl: typeof window !== 'undefined'
+            ? `${window.location.protocol}//${window.location.hostname.replace('panel.', '')}/`
+            : '',
+        }))
+      }
+      return next
+    })
+  }
+
+  // ── Submit ─────────────────────────────────────────────────────────────────
+  async function handlePublish(e: React.FormEvent, sendNow: boolean) {
     e.preventDefault()
-    const token = tokenRef.current
-    if (!token || !text.trim()) return
+    if (!text.trim()) return
+
     setSending(true)
-    setError(null)
     try {
-      const result = await publishAnnouncement(token, text.trim())
-      setHistory(prev => [{ text: text.trim(), sentAt: new Date(), jobId: result.jobId ?? '' }, ...prev])
+      const scheduled = scheduledAt && !sendNow ? new Date(scheduledAt).toISOString() : undefined
+
+      const ann = await createAnnouncement({
+        text:        text.trim(),
+        template:    selectedTpl?.id,
+        productIds:  Array.from(selectedProd),
+        scheduledAt: scheduled,
+        sendNow:     sendNow,
+      })
+
+      const msg = sendNow ? 'Publicado en el canal' : scheduled ? 'Programado correctamente' : 'Guardado como borrador'
+      toast.success(msg)
+
+      // Reset editor
       setText('')
-      setSelected(new Set())
-      toast.success('Publicado en el canal de Telegram')
+      setSelectedTpl(null)
+      setSelectedProd(new Set())
+      setScheduledAt('')
+      await reloadAnnouncements()
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error al publicar'
-      toast.error(msg)
-      setError(msg)
+      toast.error(err instanceof Error ? err.message : 'Error al publicar')
     } finally {
       setSending(false)
     }
   }
 
+  async function handleSendDraft(id: string) {
+    try {
+      await sendAnnouncement(id)
+      toast.success('Anuncio enviado')
+      await reloadAnnouncements()
+    } catch {
+      toast.error('Error al enviar')
+    }
+  }
+
+  async function handleCancelAnnouncement(id: string) {
+    if (!confirm('¿Cancelar este anuncio?')) return
+    try {
+      await deleteAnnouncement(id)
+      toast.success('Cancelado')
+      await reloadAnnouncements()
+    } catch {
+      toast.error('Error al cancelar')
+    }
+  }
+
+  async function handleRetry(a: Announcement) {
+    try {
+      await sendAnnouncement(a.id)
+      toast.success('Reintentando…')
+      await reloadAnnouncements()
+    } catch {
+      toast.error('Error al reintentar')
+    }
+  }
+
   const charsLeft      = MAX_CHARS - text.length
-  const activeProducts = products.filter(p => p.isActive)
+  const activeProducts = products.filter((p) => p.isActive)
+
+  const filteredHistory = useMemo(
+    () => historyFilter === 'ALL'
+      ? announcements
+      : announcements.filter((a) => a.status === historyFilter),
+    [announcements, historyFilter],
+  )
+
+  const STATUS_VALUES: AnnouncementStatus[] = ['SENT', 'SCHEDULED', 'DRAFT', 'FAILED', 'CANCELLED']
 
   return (
     <main className="min-h-screen">
@@ -107,56 +208,76 @@ export default function AnnouncementsPage() {
       >
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-bold text-gradient">Canal de anuncios</h1>
+            <h1 className="text-lg font-bold text-gradient">Anuncios</h1>
             <p className="text-sm" style={{ color: 'var(--muted)' }}>
-              Publicá en tu canal de Telegram
+              Publicá mensajes en tu canal de Telegram
             </p>
           </div>
         </div>
       </header>
 
-      <div className="px-6 py-5 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
+      <div className="px-4 py-5 lg:px-6 lg:grid lg:grid-cols-[1fr_400px] lg:gap-6 lg:items-start">
 
-        {/* ── Left column: editor ────────────────────────────────────────── */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* COLUMNA IZQUIERDA: Editor                                            */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
         <div className="flex flex-col gap-4">
 
-          {/* 1 — Plantillas */}
+          {/* Plantillas */}
           <section className="glass rounded-2xl p-5">
             <p className="text-sm font-semibold mb-3" style={{ color: 'var(--text)' }}>
-              ⚡ Plantillas rápidas
+              ⚡ Plantillas
             </p>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" onClick={() => applyTemplate(buildDailyTemplate(products))}>
-                📅 Anuncio diario
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => applyTemplate(buildOfferTemplate(products))}>
-                🔥 Oferta especial
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => applyTemplate(buildReminderTemplate())}>
-                ⏰ Recordatorio
-              </Button>
-              <Button variant="ghost" size="sm" disabled className="cursor-not-allowed opacity-50">
-                ✨ Generar con IA
-                <span className="ml-1.5 rounded-full bg-[var(--primary-dim)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--primary)]">
-                  Próx.
-                </span>
-              </Button>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {TEMPLATES.map((tpl) => {
+                const active = selectedTpl?.id === tpl.id
+                return (
+                  <button
+                    key={tpl.id}
+                    onClick={() => applyTemplate(tpl)}
+                    className="flex flex-col items-start rounded-xl border p-3 text-left transition-all hover:border-[var(--primary)]"
+                    style={
+                      active
+                        ? { backgroundColor: 'var(--primary-dim)', borderColor: 'var(--primary)' }
+                        : { backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }
+                    }
+                  >
+                    <span className="text-lg">{tpl.icon}</span>
+                    <span
+                      className="mt-1 text-xs font-semibold leading-tight"
+                      style={{ color: active ? 'var(--primary)' : 'var(--text)' }}
+                    >
+                      {tpl.name}
+                    </span>
+                    <span className="mt-0.5 text-[10px] leading-tight" style={{ color: 'var(--muted)' }}>
+                      {tpl.tagline}
+                    </span>
+                  </button>
+                )
+              })}
             </div>
           </section>
 
-          {/* 2 — Selector de productos */}
+          {/* Productos */}
           <section className="glass rounded-2xl p-5">
             <p className="text-sm font-semibold mb-3" style={{ color: 'var(--text)' }}>
-              🛒 Agregar productos al mensaje
+              🛒 Productos a destacar
+              {selectedProd.size > 0 && (
+                <Badge className="ml-2 bg-[var(--primary-dim)] text-[var(--primary)] border-[var(--border-glow)]">
+                  {selectedProd.size}
+                </Badge>
+              )}
             </p>
             {loadingP ? (
-              <p className="text-xs" style={{ color: 'var(--muted)' }}>Cargando productos…</p>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
+              </div>
             ) : activeProducts.length === 0 ? (
               <p className="text-xs" style={{ color: 'var(--muted)' }}>No hay productos activos.</p>
             ) : (
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {activeProducts.map(p => {
-                  const on = selected.has(p.id)
+                {activeProducts.map((p) => {
+                  const on = selectedProd.has(p.id)
                   return (
                     <button
                       key={p.id}
@@ -168,20 +289,12 @@ export default function AnnouncementsPage() {
                           : { backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }
                       }
                     >
-                      <span
-                        className="text-xs font-semibold"
-                        style={{ color: on ? 'var(--primary)' : 'var(--text)' }}
-                      >
+                      <span className="text-xs font-semibold" style={{ color: on ? 'var(--primary)' : 'var(--text)' }}>
                         {on ? '✓ ' : ''}{p.name}
                       </span>
-                      <span className="mt-0.5 text-xs" style={{ color: 'var(--muted)' }}>
+                      <span className="mt-0.5 text-[10px]" style={{ color: 'var(--muted)' }}>
                         ${p.unitPrice}/{p.unitLabel}
                       </span>
-                      {p.inventory && (
-                        <span className="mt-1 text-[10px]" style={{ color: 'var(--muted)' }}>
-                          Stock: {p.inventory.quantityAvailable}
-                        </span>
-                      )}
                     </button>
                   )
                 })}
@@ -189,94 +302,217 @@ export default function AnnouncementsPage() {
             )}
           </section>
 
-          {/* 3 — Editor + publicar */}
-          <form
-            onSubmit={(e) => void handlePublish(e)}
-            className="glass rounded-2xl p-5 flex flex-col gap-3"
-          >
-            <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
-              ✏️ Mensaje
-            </p>
+          {/* Editor */}
+          <section className="glass rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+                ✏️ Mensaje
+              </p>
+              <span className="text-xs" style={{ color: charsLeft < 200 ? 'var(--warning)' : 'var(--muted)' }}>
+                {charsLeft} chars
+              </span>
+            </div>
 
             <Textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Escribí tu anuncio o usá una plantilla ↑"
-              rows={7}
+              rows={8}
               maxLength={MAX_CHARS}
               className="resize-none font-mono"
             />
 
-            <div className="flex items-center justify-between">
-              <span
-                className="text-xs"
-                style={{ color: charsLeft < 200 ? 'var(--warning)' : 'var(--muted)' }}
-              >
-                {charsLeft} caracteres restantes
-              </span>
+            {/* Schedule */}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <label className="flex items-center gap-2 text-xs" style={{ color: 'var(--muted)' }}>
+                🕐 Programar para:
+              </label>
+              <input
+                type="datetime-local"
+                value={scheduledAt}
+                onChange={(e) => setScheduledAt(e.target.value)}
+                min={new Date().toISOString().slice(0, 16)}
+                className="rounded-lg border bg-transparent px-3 py-1.5 text-sm"
+                style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+              />
+              {scheduledAt && (
+                <button onClick={() => setScheduledAt('')} className="text-xs underline" style={{ color: 'var(--muted)' }}>
+                  Limpiar
+                </button>
+              )}
+            </div>
+
+            {/* Action buttons */}
+            <div className="mt-4 flex flex-wrap gap-2">
               <Button
-                type="submit"
+                type="button"
+                onClick={(e) => void handlePublish(e, true)}
                 disabled={sending || !text.trim()}
                 className="bg-gradient-teal-violet shadow-glow hover:opacity-90"
               >
-                {sending ? 'Publicando…' : '📤 Publicar en canal'}
+                {sending ? 'Enviando…' : '📤 Publicar ahora'}
+              </Button>
+              {scheduledAt && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={(e) => void handlePublish(e, false)}
+                  disabled={sending || !text.trim()}
+                >
+                  🕐 Programar
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={(e) => void handlePublish(e, false)}
+                disabled={sending || !text.trim()}
+              >
+                💾 Guardar borrador
               </Button>
             </div>
-
-            {error != null && (
-              <p
-                className="rounded-xl px-3 py-2.5 text-sm"
-                style={{ backgroundColor: 'rgba(255,61,85,0.08)', color: 'var(--error)', border: '1px solid rgba(255,61,85,0.2)' }}
-              >
-                {error}
-              </p>
-            )}
-          </form>
+          </section>
 
         </div>
 
-        {/* ── Right column: historial ────────────────────────────────────── */}
-        <div className="mt-4 lg:mt-0">
-          <section className="glass rounded-2xl p-4">
-            <p
-              className="mb-3 text-xs font-semibold uppercase tracking-wide"
-              style={{ color: 'var(--muted)' }}
-            >
-              Publicados esta sesión
-            </p>
-            {history.length === 0 ? (
-              <div className="py-6 flex flex-col items-center gap-2 text-center">
-                <span className="text-3xl">📤</span>
-                <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>Sin publicaciones aún</p>
-                <p className="text-xs" style={{ color: 'var(--muted)' }}>
-                  Escribí un mensaje y publicalo en tu canal de Telegram.
-                </p>
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* COLUMNA DERECHA: Preview + Historial                                 */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        <div className="mt-4 flex flex-col gap-4 lg:mt-0">
+
+          {/* Preview */}
+          <section className="glass rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+                👁 Preview
+              </p>
+              <div className="flex rounded-lg border p-0.5" style={{ borderColor: 'var(--border)' }}>
+                <button
+                  onClick={() => setPreviewMode('text')}
+                  className="rounded px-2 py-1 text-xs font-medium transition-colors"
+                  style={{
+                    backgroundColor: previewMode === 'text' ? 'var(--primary-dim)' : 'transparent',
+                    color:           previewMode === 'text' ? 'var(--primary)' : 'var(--muted)',
+                  }}
+                >
+                  Texto
+                </button>
+                <button
+                  onClick={() => setPreviewMode('png')}
+                  className="rounded px-2 py-1 text-xs font-medium transition-colors"
+                  style={{
+                    backgroundColor: previewMode === 'png' ? 'var(--primary-dim)' : 'transparent',
+                    color:           previewMode === 'png' ? 'var(--primary)' : 'var(--muted)',
+                  }}
+                >
+                  Imagen (próx.)
+                </button>
               </div>
+            </div>
+            <AnnouncementPreview text={text} mode={previewMode} />
+          </section>
+
+          {/* Historial */}
+          <section className="glass rounded-2xl p-5">
+            <p className="text-sm font-semibold mb-3" style={{ color: 'var(--text)' }}>
+              📜 Historial
+            </p>
+
+            {/* Filter chips */}
+            <div className="mb-3 flex flex-wrap gap-1.5">
+              <button
+                onClick={() => setHistoryFilter('ALL')}
+                className="rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all"
+                style={{
+                  backgroundColor: historyFilter === 'ALL' ? 'var(--primary-dim)' : 'transparent',
+                  border:          '1px solid var(--glass-border)',
+                  color:           historyFilter === 'ALL' ? 'var(--primary)' : 'var(--muted)',
+                }}
+              >
+                Todos ({announcements.length})
+              </button>
+              {STATUS_VALUES.map((s) => {
+                const count = announcements.filter((a) => a.status === s).length
+                if (count === 0) return null
+                return (
+                  <button
+                    key={s}
+                    onClick={() => setHistoryFilter(s)}
+                    className="rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all"
+                    style={{
+                      backgroundColor: historyFilter === s ? 'var(--primary-dim)' : 'transparent',
+                      border:          '1px solid var(--glass-border)',
+                      color:           historyFilter === s ? 'var(--primary)' : 'var(--muted)',
+                    }}
+                  >
+                    {statusLabel[s]} ({count})
+                  </button>
+                )
+              })}
+            </div>
+
+            {loadingA ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+              </div>
+            ) : filteredHistory.length === 0 ? (
+              <EmptyState
+                icon="📤"
+                title="Sin anuncios"
+                description="Cuando publiques o programes un anuncio, va a aparecer acá."
+              />
             ) : (
-              <div className="flex flex-col gap-3 overflow-y-auto max-h-[70vh]">
-                {history.map((item, i) => (
+              <div className="flex flex-col gap-2 overflow-y-auto max-h-[60vh] pr-1">
+                {filteredHistory.map((a) => (
                   <div
-                    key={i}
+                    key={a.id}
                     className="rounded-xl border p-3"
                     style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}
                   >
+                    <div className="mb-1.5 flex items-start justify-between gap-2">
+                      <Badge className={statusColor[a.status]}>{statusLabel[a.status]}</Badge>
+                      <span className="text-[10px]" style={{ color: 'var(--muted)' }}>
+                        {a.status === 'SCHEDULED' && a.scheduledAt
+                          ? `Para ${formatWhen(a.scheduledAt)}`
+                          : a.status === 'SENT' && a.sentAt
+                            ? `Enviado ${formatWhen(a.sentAt)}`
+                            : formatWhen(a.createdAt)}
+                      </span>
+                    </div>
                     <p
-                      className="whitespace-pre-wrap text-sm"
-                      style={{ color: 'var(--text)' }}
+                      className="whitespace-pre-wrap break-words text-xs"
+                      style={{ color: 'var(--text)', display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
                     >
-                      {item.text}
+                      {a.text}
                     </p>
-                    <p className="mt-1.5 text-xs" style={{ color: 'var(--muted)' }}>
-                      ✅ Enviado a las{' '}
-                      {item.sentAt.toLocaleTimeString('es-CU', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
+                    {a.errorMessage && (
+                      <p className="mt-2 rounded px-2 py-1 text-[10px]" style={{ backgroundColor: 'rgba(248,113,113,0.1)', color: 'var(--error)' }}>
+                        {a.errorMessage}
+                      </p>
+                    )}
+                    <div className="mt-2 flex gap-1.5">
+                      {(a.status === 'DRAFT' || a.status === 'SCHEDULED') && (
+                        <>
+                          <button onClick={() => void handleSendDraft(a.id)} className="text-[10px] underline" style={{ color: 'var(--primary)' }}>
+                            Enviar ahora
+                          </button>
+                          <button onClick={() => void handleCancelAnnouncement(a.id)} className="text-[10px] underline" style={{ color: 'var(--muted)' }}>
+                            Cancelar
+                          </button>
+                        </>
+                      )}
+                      {a.status === 'FAILED' && (
+                        <button onClick={() => void handleRetry(a)} className="text-[10px] underline" style={{ color: 'var(--primary)' }}>
+                          Reintentar
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
             )}
           </section>
         </div>
-
       </div>
     </main>
   )
