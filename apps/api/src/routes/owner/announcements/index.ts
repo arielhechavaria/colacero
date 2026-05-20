@@ -1,5 +1,10 @@
 import type { FastifyInstance } from 'fastify'
 import { ANNOUNCEMENT_QUEUE } from '../../../workers/announcement.worker.js'
+import {
+  generateAnnouncementVariants,
+  AiNotConfiguredError,
+  type GenerateInput,
+} from '../../../services/announcement-ai.service.js'
 
 interface AnnouncementCreateBody {
   text:         string
@@ -289,4 +294,95 @@ export async function ownerAnnouncementRoutes(app: FastifyInstance) {
 
     return reply.status(202).send({ jobId: job.id, queue: ANNOUNCEMENT_QUEUE, announcementId: announcement.id })
   })
+
+  // ── POST /ai-generate — generar variantes con IA (Claude) ──────────────────
+  app.post<{ Body: AiGenerateBody }>('/ai-generate', {
+    onRequest: [app.authenticate],
+    config: { rateLimit: { max: 20, timeWindow: '1 hour' } },
+    schema: {
+      tags:    ['owner-announcements'],
+      summary: 'Generar variantes de anuncio con IA',
+      body: {
+        type:       'object',
+        required:   ['type', 'tone'],
+        properties: {
+          type:         { type: 'string', enum: ['offer', 'fresh', 'reminder', 'thank-you', 'daily', 'custom'] },
+          tone:         { type: 'string', enum: ['casual', 'formal', 'friendly'] },
+          productIds:   { type: 'array', items: { type: 'string' }, maxItems: 10 },
+          customPrompt: { type: 'string', maxLength: 500 },
+        },
+      },
+    },
+    attachValidation: true,
+  }, async (req, reply) => {
+    const { businessId } = req.user
+    if (!businessId) return reply.status(403).send({ error: 'forbidden' })
+    if (req.validationError) return reply.status(422).send({ error: 'validation_error' })
+
+    const business = await app.prisma.business.findUnique({ where: { id: businessId } })
+    if (!business) return reply.status(404).send({ error: 'business_not_found' })
+
+    // Build product list para el prompt
+    let products: GenerateInput['products'] = []
+    if (req.body.productIds?.length) {
+      const dbProducts = await app.prisma.product.findMany({
+        where: {
+          id:         { in: req.body.productIds },
+          businessId,
+          isActive:   true,
+        },
+        include: { inventory: { select: { quantityAvailable: true } } },
+      })
+      products = dbProducts.map((p) => ({
+        name:  p.name,
+        price: Number(p.unitPrice),
+        unit:  p.unitLabel,
+        stock: p.inventory?.quantityAvailable,
+      }))
+    }
+
+    // Next pickup window
+    const nextWindow = await app.prisma.pickupWindow.findFirst({
+      where: {
+        businessId,
+        isOpen: true,
+        date:   { gte: new Date(new Date().toISOString().slice(0, 10)) },
+      },
+      orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
+    })
+
+    const catalogUrl = `https://${business.slug}.colacero.com`
+
+    try {
+      const result = await generateAnnouncementVariants({
+        businessName: business.name,
+        type:         req.body.type,
+        tone:         req.body.tone,
+        products,
+        pickupWindow: nextWindow
+          ? {
+              date:      nextWindow.date.toISOString().slice(0, 10),
+              startTime: nextWindow.startTime,
+              endTime:   nextWindow.endTime,
+            }
+          : null,
+        catalogUrl,
+        customPrompt: req.body.customPrompt,
+      })
+      return reply.send(result)
+    } catch (err) {
+      if (err instanceof AiNotConfiguredError) {
+        return reply.status(503).send({ error: 'ai_not_configured', message: 'Configurá ANTHROPIC_API_KEY en el server para activar IA.' })
+      }
+      app.log.error({ err }, 'AI generation failed')
+      return reply.status(500).send({ error: 'ai_generation_failed' })
+    }
+  })
+}
+
+interface AiGenerateBody {
+  type:         'offer' | 'fresh' | 'reminder' | 'thank-you' | 'daily' | 'custom'
+  tone:         'casual' | 'formal' | 'friendly'
+  productIds?:  string[]
+  customPrompt?: string
 }

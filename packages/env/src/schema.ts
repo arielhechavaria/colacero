@@ -50,6 +50,10 @@ export const envSchema = z.object({
   PASSWORD_RESET_TTL_MINUTES:    z.coerce.number().int().default(60),
   EMAIL_VERIFICATION_TTL_HOURS:  z.coerce.number().int().default(24),
   PANEL_URL:                     z.string().url().default('http://localhost:3002'),
+
+  // ── IA (Anthropic Claude para generar anuncios) ────────────────────
+  ANTHROPIC_API_KEY: z.string().optional(),
+  ANTHROPIC_MODEL:   z.string().default('claude-3-5-sonnet-20241022'),
 })
 
 export type EnvSchema = z.infer<typeof envSchema>

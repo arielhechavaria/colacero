@@ -11,6 +11,7 @@
     "lint": "echo 'lint ok'"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.97.1",
     "@colacero/db": "workspace:*",
     "@colacero/env": "workspace:*",
     "@colacero/shared": "workspace:*",

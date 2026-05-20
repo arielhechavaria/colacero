@@ -17,6 +17,7 @@ import {
 } from '../../lib/api'
 import { TEMPLATES, type TemplateDef } from '../../lib/announcement-templates'
 import { AnnouncementPreview } from '../../components/announcement-preview'
+import { AnnouncementAiModal } from '../../components/announcement-ai-modal'
 import { EmptyState }   from '@/components/empty-state'
 import { Button }       from '@/components/ui/button'
 import { Textarea }     from '@/components/ui/textarea'
@@ -69,6 +70,7 @@ export default function AnnouncementsPage() {
   const [sending,    setSending]    = useState(false)
   const [previewMode, setPreviewMode] = useState<'text' | 'png'>('text')
   const [historyFilter, setHistoryFilter] = useState<AnnouncementStatus | 'ALL'>('ALL')
+  const [aiModalOpen, setAiModalOpen] = useState(false)
 
   useEffect(() => {
     const token = (isAuthenticatedClient() ? '1' : null)
@@ -225,9 +227,18 @@ export default function AnnouncementsPage() {
 
           {/* Plantillas */}
           <section className="glass rounded-2xl p-5">
-            <p className="text-sm font-semibold mb-3" style={{ color: 'var(--text)' }}>
-              ⚡ Plantillas
-            </p>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+                ⚡ Plantillas
+              </p>
+              <Button
+                type="button"
+                onClick={() => setAiModalOpen(true)}
+                className="bg-gradient-teal-violet shadow-glow hover:opacity-90 text-xs h-auto py-1.5 px-3"
+              >
+                ✨ Generar con IA
+              </Button>
+            </div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {TEMPLATES.map((tpl) => {
                 const active = selectedTpl?.id === tpl.id
@@ -514,6 +525,18 @@ export default function AnnouncementsPage() {
           </section>
         </div>
       </div>
+
+      {/* AI Modal */}
+      <AnnouncementAiModal
+        open={aiModalOpen}
+        onClose={() => setAiModalOpen(false)}
+        onSelect={(generatedText) => {
+          setText(generatedText)
+          setSelectedTpl(null)
+        }}
+        productIds={Array.from(selectedProd)}
+        productNames={products.filter((p) => selectedProd.has(p.id)).map((p) => p.name)}
+      />
     </main>
   )
 }
