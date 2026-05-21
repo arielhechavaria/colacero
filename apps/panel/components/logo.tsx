@@ -6,8 +6,12 @@ interface LogoProps {
 }
 
 export function Logo({ size = 'md', variant = 'sidebar', className = '' }: LogoProps) {
-  const fontSize  = size === 'sm' ? 14 : 17
-  const textFill  = variant === 'sidebar' ? 'white' : 'var(--text)'
+  const fontSize   = size === 'sm' ? 14 : 17
+  const iconColor  = variant === 'sidebar' ? 'white' : 'var(--primary)'
+  const textColor  = variant === 'sidebar' ? 'white' : 'var(--text)'
+  const ceroColor  = variant === 'sidebar' ? 'white' : 'var(--primary)'
+  const scale      = size === 'sm' ? 0.75 : 0.90
+  const yWave      = size === 'sm' ? 4 : 6
 
   return (
     <svg
@@ -19,26 +23,27 @@ export function Logo({ size = 'md', variant = 'sidebar', className = '' }: LogoP
       className={className}
       aria-label="ColaCero"
     >
-      <g transform="translate(0,6)">
-        {/* Wave — accent color */}
+      <g transform={`translate(0,${yWave}) scale(${scale})`}>
+        {/* Wave */}
         <path
-          d="M4 14 C4 14 7 8 11 14 C15 20 19 10 23 14"
-          stroke="var(--accent)"
-          strokeWidth="2"
+          d="M4 17 C4 17 7.5 10 12 17 C16.5 24 21 12 25 17"
+          stroke={iconColor}
+          strokeWidth="2.2"
           strokeLinecap="round"
           fill="none"
         />
-        {/* Arrow — primary color */}
+        {/* Line */}
         <line
-          x1="23" y1="14" x2="33" y2="14"
-          stroke="var(--primary)"
-          strokeWidth="2"
+          x1="25" y1="17" x2="37" y2="17"
+          stroke={iconColor}
+          strokeWidth="2.2"
           strokeLinecap="round"
         />
+        {/* Arrow */}
         <polyline
-          points="29,10 34,14 29,18"
-          stroke="var(--primary)"
-          strokeWidth="2"
+          points="33,12 38,17 33,22"
+          stroke={iconColor}
+          strokeWidth="2.2"
           strokeLinecap="round"
           strokeLinejoin="round"
           fill="none"
@@ -46,23 +51,23 @@ export function Logo({ size = 'md', variant = 'sidebar', className = '' }: LogoP
       </g>
       {/* "Cola" */}
       <text
-        x="44"
+        x={size === 'sm' ? 42 : 50}
         y={size === 'sm' ? 24 : 28}
         fontFamily="var(--font-display)"
         fontWeight="800"
         fontSize={fontSize}
-        fill={textFill}
+        fill={textColor}
       >
         Cola
       </text>
-      {/* "Cero" — always primary */}
+      {/* "Cero" */}
       <text
-        x={size === 'sm' ? 85 : 100}
+        x={size === 'sm' ? 83 : 98}
         y={size === 'sm' ? 24 : 28}
         fontFamily="var(--font-display)"
         fontWeight="400"
         fontSize={fontSize}
-        fill="var(--primary)"
+        fill={ceroColor}
       >
         Cero
       </text>

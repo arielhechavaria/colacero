@@ -26,22 +26,22 @@ export function Logo({ size = 'md', className = '' }: LogoProps) {
       aria-label="ColaCero"
     >
       <g transform={`translate(0,${yWave}) scale(${scale})`}>
-        {/* Wave — accent color */}
+        {/* Wave */}
         <path
           d="M4 17 C4 17 7.5 10 12 17 C16.5 24 21 12 25 17"
-          stroke="var(--accent)"
+          stroke="var(--primary)"
           strokeWidth="2.2"
           strokeLinecap="round"
           fill="none"
         />
-        {/* Straight line — primary color */}
+        {/* Line */}
         <line
           x1="25" y1="17" x2="37" y2="17"
           stroke="var(--primary)"
           strokeWidth="2.2"
           strokeLinecap="round"
         />
-        {/* Arrow — primary color */}
+        {/* Arrow */}
         <polyline
           points="33,12 38,17 33,22"
           stroke="var(--primary)"
