@@ -1,5 +1,7 @@
 interface LogoProps {
-  size?: 'sm' | 'md' | 'lg'
+  size?:    'sm' | 'md' | 'lg'
+  /** 'sidebar' = siempre blanco (fondo oscuro fijo) | 'page' = usa var(--text) (respeta el tema) */
+  variant?: 'page' | 'sidebar'
   className?: string
 }
 
@@ -9,11 +11,14 @@ const sizes = {
   lg: { width: 200, height: 52, viewBox: '0 0 200 52', fontSize: 22, x2: 58, x3: 105 },
 }
 
-export function Logo({ size = 'md', className = '' }: LogoProps) {
-  const s = sizes[size]
-  const yText = size === 'sm' ? 20 : size === 'md' ? 28 : 32
-  const yWave = size === 'sm' ? 2 : size === 'md' ? 5 : 7
-  const scale = size === 'sm' ? 0.65 : size === 'md' ? 0.85 : 1
+export function Logo({ size = 'md', variant = 'page', className = '' }: LogoProps) {
+  const s         = sizes[size]
+  const yText     = size === 'sm' ? 20 : size === 'md' ? 28 : 32
+  const yWave     = size === 'sm' ? 2 : size === 'md' ? 5 : 7
+  const scale     = size === 'sm' ? 0.65 : size === 'md' ? 0.85 : 1
+  const iconColor = variant === 'sidebar' ? 'white' : 'var(--primary)'
+  const textColor = variant === 'sidebar' ? 'white' : 'var(--text)'
+  const ceroColor = variant === 'sidebar' ? 'white' : 'var(--primary)'
 
   return (
     <svg
@@ -29,7 +34,7 @@ export function Logo({ size = 'md', className = '' }: LogoProps) {
         {/* Wave */}
         <path
           d="M4 17 C4 17 7.5 10 12 17 C16.5 24 21 12 25 17"
-          stroke="var(--primary)"
+          stroke={iconColor}
           strokeWidth="2.2"
           strokeLinecap="round"
           fill="none"
@@ -37,14 +42,14 @@ export function Logo({ size = 'md', className = '' }: LogoProps) {
         {/* Line */}
         <line
           x1="25" y1="17" x2="37" y2="17"
-          stroke="var(--primary)"
+          stroke={iconColor}
           strokeWidth="2.2"
           strokeLinecap="round"
         />
         {/* Arrow */}
         <polyline
           points="33,12 38,17 33,22"
-          stroke="var(--primary)"
+          stroke={iconColor}
           strokeWidth="2.2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -58,7 +63,7 @@ export function Logo({ size = 'md', className = '' }: LogoProps) {
         fontFamily="var(--font-display)"
         fontWeight="800"
         fontSize={s.fontSize}
-        fill="var(--text)"
+        fill={textColor}
       >
         Cola
       </text>
@@ -69,7 +74,7 @@ export function Logo({ size = 'md', className = '' }: LogoProps) {
         fontFamily="var(--font-display)"
         fontWeight="400"
         fontSize={s.fontSize}
-        fill="var(--primary)"
+        fill={ceroColor}
       >
         Cero
       </text>

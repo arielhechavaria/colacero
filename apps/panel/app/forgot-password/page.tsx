@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
         <div className="flex justify-center mb-8">
           <div className="animate-float">
             <div className="flex items-center justify-center rounded-2xl bg-slate-950/60 px-4 py-3 shadow-glow">
-              <Logo size="md" variant="page" className="h-8 w-auto" />
+              <Logo size="md" variant="sidebar" className="h-8 w-auto" />
             </div>
           </div>
         </div>

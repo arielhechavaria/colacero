@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { getWindows, createWindow, patchWindow, deleteWindow, generateTomorrow,
+import { getWindows, createWindow, patchWindow, deleteWindow, generateTomorrow, generateDefaultSchedule,
   type PickupWindow, type CreateWindowInput, isAuthenticatedClient, } from '../../lib/api'
 import { Button }   from '@/components/ui/button'
 import { Input }    from '@/components/ui/input'
@@ -42,14 +42,15 @@ export default function WindowsPage() {
   const router   = useRouter()
   const tokenRef = useRef<string | null>(null)
 
-  const [windows,    setWindows]    = useState<PickupWindow[]>([])
-  const [loading,    setLoading]    = useState(true)
-  const [saving,     setSaving]     = useState(false)
-  const [generating, setGenerating] = useState(false)
-  const [error,      setError]      = useState<string | null>(null)
-  const [success,    setSuccess]    = useState<string | null>(null)
-  const [showForm,   setShowForm]   = useState(false)
-  const [form,       setForm]       = useState<CreateWindowInput>(EMPTY_FORM)
+  const [windows,           setWindows]          = useState<PickupWindow[]>([])
+  const [loading,           setLoading]          = useState(true)
+  const [saving,            setSaving]           = useState(false)
+  const [generating,        setGenerating]       = useState(false)
+  const [generatingSchedule, setGeneratingSchedule] = useState(false)
+  const [error,             setError]            = useState<string | null>(null)
+  const [success,           setSuccess]          = useState<string | null>(null)
+  const [showForm,          setShowForm]         = useState(false)
+  const [form,              setForm]             = useState<CreateWindowInput>(EMPTY_FORM)
 
   const fetchWindows = useCallback(async () => {
     const token = tokenRef.current
@@ -121,6 +122,30 @@ export default function WindowsPage() {
     }
   }
 
+  async function handleGenerateSchedule() {
+    if (!tokenRef.current) return
+    setGeneratingSchedule(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      const result = await generateDefaultSchedule()
+      setWindows((prev) => [...prev, ...result.created].sort((a, b) =>
+        a.date === b.date ? a.startTime.localeCompare(b.startTime) : a.date.localeCompare(b.date)
+      ))
+      const n = result.created.length
+      const s = result.skipped
+      setSuccess(
+        n > 0
+          ? `✅ ${n} ventana${n > 1 ? 's' : ''} creada${n > 1 ? 's' : ''} (L-V, 8:00-17:00)${s > 0 ? ` · ${s} día${s > 1 ? 's' : ''} ya tenía${s > 1 ? 'n' : ''} ventana` : ''}`
+          : `ℹ️ Todos los días L-V ya tienen ventana configurada${s > 0 ? ` (${s} días omitidos)` : ''}`,
+      )
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al generar horario')
+    } finally {
+      setGeneratingSchedule(false)
+    }
+  }
+
   async function handleDelete(w: PickupWindow) {
     if (!confirm(`¿Eliminar ventana ${w.startTime}–${w.endTime}?`)) return
     const token = tokenRef.current
@@ -167,7 +192,10 @@ export default function WindowsPage() {
               Configurá los horarios de entrega
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={() => void handleGenerateSchedule()} disabled={generatingSchedule}>
+              {generatingSchedule ? '…' : '📆 Generar L-V (30 días)'}
+            </Button>
             <Button variant="outline" size="sm" onClick={() => void handleGenerate()} disabled={generating}>
               {generating ? '…' : '📅 Generar mañana'}
             </Button>
@@ -265,13 +293,25 @@ export default function WindowsPage() {
 
         {/* Windows grouped by date */}
         {Object.keys(grouped).length === 0 ? (
-          <div
-            className="glass rounded-2xl p-10 text-center"
-          >
-            <p style={{ color: 'var(--muted)' }}>No hay ventanas configuradas</p>
-            <Button variant="link" size="sm" className="mt-2" onClick={() => setShowForm(true)}>
-              Crear la primera
-            </Button>
+          <div className="glass rounded-2xl p-10 text-center flex flex-col items-center gap-3">
+            <span className="text-4xl">📅</span>
+            <p className="font-semibold" style={{ color: 'var(--text)' }}>No hay ventanas configuradas</p>
+            <p className="text-sm max-w-xs" style={{ color: 'var(--muted)' }}>
+              Sin ventanas, los clientes no pueden confirmar pedidos.
+            </p>
+            <div className="flex gap-2 flex-wrap justify-center mt-1">
+              <Button
+                size="sm"
+                className="bg-gradient-teal-violet shadow-glow hover:opacity-90"
+                onClick={() => void handleGenerateSchedule()}
+                disabled={generatingSchedule}
+              >
+                {generatingSchedule ? '…' : '📆 Generar horario L-V'}
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowForm(true)}>
+                + Crear manualmente
+              </Button>
+            </div>
           </div>
         ) : (
           Object.entries(grouped).map(([date, wins]) => (

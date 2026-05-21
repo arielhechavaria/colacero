@@ -40,7 +40,14 @@ export async function telegramAuth(initData: string): Promise<TelegramAuthResult
   return res.json() as Promise<TelegramAuthResult>
 }
 
-export async function requestOtp(phone: string): Promise<{ ok: boolean; _devCode?: string }> {
+export interface RequestOtpResult {
+  ok:          boolean
+  _devCode?:   string   // solo en modo mock (dev/test)
+  requiresBot?: boolean  // true si el usuario no ha iniciado el bot de Telegram
+  botName?:    string   // ej. "@ColaCeroBot"
+}
+
+export async function requestOtp(phone: string): Promise<RequestOtpResult> {
   const res = await fetch(`${API_BASE}/api/auth/customer/request-otp`, {
     method:      'POST',
     headers:     { 'Content-Type': 'application/json' },
@@ -51,7 +58,7 @@ export async function requestOtp(phone: string): Promise<{ ok: boolean; _devCode
     const body = await res.json() as { error: string }
     throw new Error(body.error ?? 'request_otp_failed')
   }
-  return res.json() as Promise<{ ok: boolean; _devCode?: string }>
+  return res.json() as Promise<RequestOtpResult>
 }
 
 export interface VerifyOtpResult {

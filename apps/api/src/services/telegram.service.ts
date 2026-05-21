@@ -88,10 +88,12 @@ export function createTelegramProvider(
   catalogUrl?: string,
 ): TelegramProvider {
   if (provider === 'bot-api') {
-    if (!token || !channel) {
-      throw new Error('TELEGRAM_BOT_TOKEN and TELEGRAM_CHANNEL_ID are required for bot-api provider')
+    if (!token) {
+      throw new Error('TELEGRAM_BOT_TOKEN is required for bot-api provider')
     }
-    return createBotApiProvider(token, channel, catalogUrl)
+    // channel solo es requerido para sendChannelMessage/sendChannelPhoto
+    // sendDirectMessage funciona sin él
+    return createBotApiProvider(token, channel ?? '', catalogUrl)
   }
   return mockProvider
 }

@@ -308,6 +308,19 @@ export async function generateTomorrow(
   return res.json() as Promise<{ date: string; created: PickupWindow[] }>
 }
 
+export async function generateDefaultSchedule(): Promise<{ created: PickupWindow[]; skipped: number }> {
+  const res = await apiFetch(`${API_BASE}/api/owner/pickup-windows/generate-schedule`, {
+    method:  'POST',
+    headers:     { ...csrfHeader() },
+    credentials: 'include',
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'generate_schedule_failed')
+  }
+  return res.json() as Promise<{ created: PickupWindow[]; skipped: number }>
+}
+
 // ── Products ──────────────────────────────────────────────────────────────────
 
 export interface Inventory {

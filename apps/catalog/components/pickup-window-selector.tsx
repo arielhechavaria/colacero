@@ -15,11 +15,11 @@ interface Props {
   error?:        string | null
   notes:         string
   onNotesChange: (v: string) => void
+  businessSlug:  string
 }
 
-// Textarea needs to be created for catalog too
 function formatDate(iso: string): string {
-  const date = new Date(iso)
+  const date = new Date(iso + 'T00:00:00')
   return date.toLocaleDateString('es-CU', {
     weekday: 'long',
     day:     'numeric',
@@ -27,12 +27,44 @@ function formatDate(iso: string): string {
   })
 }
 
-export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, loading, error, notes, onNotesChange }: Props) {
+export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, loading, error, notes, onNotesChange, businessSlug }: Props) {
   if (windows.length === 0) {
     return (
-      <p className="py-8 text-center" style={{ color: 'var(--muted)' }}>
-        No hay ventanas de recogida disponibles por el momento.
-      </p>
+      <div className="flex flex-col items-center gap-4 py-8 text-center">
+        <span className="text-5xl">📅</span>
+        <div className="flex flex-col gap-1">
+          <p className="font-semibold text-base" style={{ color: 'var(--text)' }}>
+            No hay horarios de entrega disponibles
+          </p>
+          <p className="text-sm max-w-xs mx-auto" style={{ color: 'var(--muted)' }}>
+            Este negocio no tiene ventanas de recogida configuradas por el momento.
+            Podés volver más tarde o contactar directamente.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2 w-full max-w-xs">
+          <a
+            href={`https://t.me/${businessSlug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button
+              variant="outline"
+              className="w-full"
+            >
+              ✈️ Contactar por Telegram
+            </Button>
+          </a>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.history.back()}
+            style={{ color: 'var(--muted)' }}
+          >
+            ← Volver al catálogo
+          </Button>
+        </div>
+      </div>
     )
   }
 

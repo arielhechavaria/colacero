@@ -23,17 +23,19 @@ export default function CheckoutPage() {
   const { slug } = useParams<{ slug: string }>()
   const { items, total, clear } = useCartContext()
 
-  const [step, setStep]                   = useState<Step>('form')
-  const [loading, setLoading]             = useState(false)
-  const [error, setError]                 = useState<string | null>(null)
-  const [phone, setPhone]                 = useState('')
-  const [name, setName]                   = useState('')
-  const [authed, setAuthed]               = useState<boolean>(false)
-  const [windows, setWindows]             = useState<PickupWindow[]>([])
+  const [step, setStep]                     = useState<Step>('form')
+  const [loading, setLoading]               = useState(false)
+  const [error, setError]                   = useState<string | null>(null)
+  const [phone, setPhone]                   = useState('')
+  const [name, setName]                     = useState('')
+  const [authed, setAuthed]                 = useState<boolean>(false)
+  const [windows, setWindows]               = useState<PickupWindow[]>([])
   const [selectedWindow, setSelectedWindow] = useState<string | null>(null)
   const [reservationIds, setReservationIds] = useState<string[]>([])
-  const [notes, setNotes]                 = useState('')
-  const [devCode, setDevCode]             = useState<string | null>(null)
+  const [notes, setNotes]                   = useState('')
+  const [devCode, setDevCode]               = useState<string | null>(null)
+  const [requiresBot, setRequiresBot]       = useState(false)
+  const [botName, setBotName]               = useState<string | undefined>(undefined)
 
   // Leer reservationIds guardados por el drawer
   useEffect(() => {
@@ -74,8 +76,17 @@ export default function CheckoutPage() {
   async function handleFormSubmit(customerName: string, customerPhone: string) {
     setLoading(true)
     setError(null)
+    setRequiresBot(false)
     try {
       const otpResult = await requestOtp(customerPhone)
+
+      // El usuario todavía no ha iniciado el bot → mostrar instrucción
+      if (otpResult.requiresBot) {
+        setRequiresBot(true)
+        setBotName(otpResult.botName)
+        return
+      }
+
       if (otpResult._devCode) setDevCode(otpResult._devCode)
       setPhone(customerPhone)
       setName(customerName)
@@ -104,7 +115,7 @@ export default function CheckoutPage() {
       const msg = err instanceof Error ? err.message : ''
       setError(
         msg === 'invalid_otp'
-          ? 'Código incorrecto. Revisá el mensaje de WhatsApp.'
+          ? 'Código incorrecto. Revisá el mensaje de Telegram.'
           : 'Error al verificar el código. Intentá de nuevo.',
       )
     } finally {
@@ -243,6 +254,8 @@ export default function CheckoutPage() {
               onSubmit={handleFormSubmit}
               loading={loading}
               error={error}
+              requiresBot={requiresBot}
+              botName={botName}
             />
           )}
           {step === 'otp' && (
@@ -282,6 +295,7 @@ export default function CheckoutPage() {
               error={error}
               notes={notes}
               onNotesChange={setNotes}
+              businessSlug={slug}
             />
           )}
         </div>

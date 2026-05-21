@@ -6,9 +6,11 @@ import { Input }  from '@/components/ui/input'
 import { Label }  from '@/components/ui/label'
 
 interface Props {
-  onSubmit: (name: string, phone: string) => Promise<void>
-  loading:  boolean
-  error?:   string | null
+  onSubmit:      (name: string, phone: string) => Promise<void>
+  loading:       boolean
+  error?:        string | null
+  requiresBot?:  boolean
+  botName?:      string | undefined
 }
 
 /** Formatea el input del usuario a E.164 cubano: +537XXXXXXXX */
@@ -20,14 +22,15 @@ function formatPhone(raw: string): string {
   return raw.startsWith('+') ? raw : `+${digits}`
 }
 
-export function CheckoutForm({ onSubmit, loading, error }: Props) {
-  const [name, setName]   = useState('')
-  const [phone, setPhone] = useState('')
+export function CheckoutForm({ onSubmit, loading, error, requiresBot, botName }: Props) {
+  const [name,  setName]  = useState('')
+  // Default +53 — todos los números son cubanos por ahora
+  const [local, setLocal] = useState('')  // solo los dígitos locales (sin +53)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const formatted = formatPhone(phone)
-    void onSubmit(name.trim(), formatted)
+    const fullPhone = local ? formatPhone(local) : ''
+    void onSubmit(name.trim(), fullPhone)
   }
 
   return (
@@ -49,18 +52,52 @@ export function CheckoutForm({ onSubmit, loading, error }: Props) {
         <Label htmlFor="checkout-phone">
           Tu número de Telegram <span className="text-[var(--error)]">*</span>
         </Label>
-        <Input
-          id="checkout-phone"
-          type="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="Ej: 58901234"
-          required
-        />
+        {/* Prefix cubano fijo */}
+        <div className="flex items-center gap-2 rounded-lg border px-3 py-2"
+          style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
+        >
+          <span className="text-lg leading-none select-none">🇨🇺</span>
+          <span className="text-sm font-mono shrink-0" style={{ color: 'var(--muted)' }}>+53</span>
+          <input
+            id="checkout-phone"
+            type="tel"
+            inputMode="numeric"
+            required
+            value={local}
+            onChange={(e) => setLocal(e.target.value.replace(/\D/g, '').slice(0, 8))}
+            placeholder="58901234"
+            maxLength={8}
+            className="flex-1 bg-transparent outline-none text-sm"
+            style={{ color: 'var(--text)' }}
+          />
+        </div>
         <p className="text-xs" style={{ color: 'var(--muted)' }}>
           Recibirás un código de verificación por Telegram
         </p>
       </div>
+
+      {/* Mensaje cuando el usuario aún no inició el bot */}
+      {requiresBot && botName && (
+        <div
+          className="rounded-lg px-3 py-2.5 text-sm flex flex-col gap-1"
+          style={{ backgroundColor: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)', color: 'var(--text)' }}
+        >
+          <p className="font-medium">Primero iniciá el bot</p>
+          <p style={{ color: 'var(--muted)' }}>
+            Abrí{' '}
+            <a
+              href={`https://t.me/${botName.replace('@', '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+              style={{ color: 'var(--primary)' }}
+            >
+              {botName}
+            </a>{' '}
+            en Telegram, enviá <strong>/start</strong> y volvé aquí.
+          </p>
+        </div>
+      )}
 
       {error != null && (
         <p
@@ -73,7 +110,7 @@ export function CheckoutForm({ onSubmit, loading, error }: Props) {
 
       <Button
         type="submit"
-        disabled={loading || phone.trim() === ''}
+        disabled={loading || local.trim().length < 7}
         className="w-full bg-gradient-teal-violet shadow-glow hover:opacity-90"
       >
         {loading ? 'Enviando código…' : 'Recibir código por Telegram'}
