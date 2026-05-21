@@ -27,6 +27,7 @@ import {
     SheetTitle,
 } from '@/components/ui/sheet'
 import { EmailVerificationBanner } from './email-verification-banner'
+import { Logo } from './logo'
 
 // ── Navigation config ─────────────────────────────────────────────────────────
 
@@ -210,21 +211,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 {/* Logo */}
                 <div
                     className={cn(
-                        'flex h-16 flex-shrink-0 items-center gap-3',
+                        'flex h-16 flex-shrink-0 items-center',
                         collapsed ? 'px-3 justify-center' : 'px-5',
                     )}
                     style={{ borderBottom: '1px solid var(--glass-border)' }}
                 >
-                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-teal-violet text-white text-sm font-bold shadow-glow">
-                        C
-                    </div>
-                    {!collapsed && (
-                        <div className="min-w-0">
-                            <p className="text-sm font-bold leading-tight truncate" style={{ color: 'var(--text)' }}>
-                                ColaCero
-                            </p>
-                            <p className="text-[10px]" style={{ color: 'var(--muted)' }}>Panel de gestión</p>
+                    {collapsed ? (
+                        /* Colapsado: solo la marca (wave+arrow) */
+                        <div
+                            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl"
+                            style={{ background: 'var(--primary)' }}
+                        >
+                            <svg width="22" height="18" viewBox="0 0 42 34" fill="none">
+                                <path d="M4 17 C4 17 7.5 10 12 17 C16.5 24 21 12 25 17" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                                <line x1="25" y1="17" x2="37" y2="17" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                                <polyline points="33,12 38,17 33,22" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                            </svg>
                         </div>
+                    ) : (
+                        /* Expandido: logo completo */
+                        <Logo size="sm" variant="sidebar" />
                     )}
                 </div>
 
