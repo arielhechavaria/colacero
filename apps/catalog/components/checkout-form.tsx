@@ -6,11 +6,9 @@ import { Input }  from '@/components/ui/input'
 import { Label }  from '@/components/ui/label'
 
 interface Props {
-  onSubmit:      (name: string, phone: string) => Promise<void>
-  loading:       boolean
-  error?:        string | null
-  requiresBot?:  boolean
-  botName?:      string | undefined
+  onSubmit: (name: string, phone: string) => Promise<void>
+  loading:  boolean
+  error?:   string | null
 }
 
 /** Formatea el input del usuario a E.164 cubano: +537XXXXXXXX */
@@ -22,7 +20,7 @@ function formatPhone(raw: string): string {
   return raw.startsWith('+') ? raw : `+${digits}`
 }
 
-export function CheckoutForm({ onSubmit, loading, error, requiresBot, botName }: Props) {
+export function CheckoutForm({ onSubmit, loading, error }: Props) {
   const [name,  setName]  = useState('')
   // Default +53 — todos los números son cubanos por ahora
   const [local, setLocal] = useState('')  // solo los dígitos locales (sin +53)
@@ -75,29 +73,6 @@ export function CheckoutForm({ onSubmit, loading, error, requiresBot, botName }:
           Recibirás un código de verificación por Telegram
         </p>
       </div>
-
-      {/* Mensaje cuando el usuario aún no inició el bot */}
-      {requiresBot && botName && (
-        <div
-          className="rounded-lg px-3 py-2.5 text-sm flex flex-col gap-1"
-          style={{ backgroundColor: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)', color: 'var(--text)' }}
-        >
-          <p className="font-medium">Primero iniciá el bot</p>
-          <p style={{ color: 'var(--muted)' }}>
-            Abrí{' '}
-            <a
-              href={`https://t.me/${botName.replace('@', '')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline"
-              style={{ color: 'var(--primary)' }}
-            >
-              {botName}
-            </a>{' '}
-            en Telegram, enviá <strong>/start</strong> y volvé aquí.
-          </p>
-        </div>
-      )}
 
       {error != null && (
         <p

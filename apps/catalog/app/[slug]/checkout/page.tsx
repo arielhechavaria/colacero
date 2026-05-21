@@ -34,8 +34,6 @@ export default function CheckoutPage() {
   const [reservationIds, setReservationIds] = useState<string[]>([])
   const [notes, setNotes]                   = useState('')
   const [devCode, setDevCode]               = useState<string | null>(null)
-  const [requiresBot, setRequiresBot]       = useState(false)
-  const [botName, setBotName]               = useState<string | undefined>(undefined)
 
   // Leer reservationIds guardados por el drawer
   useEffect(() => {
@@ -76,17 +74,8 @@ export default function CheckoutPage() {
   async function handleFormSubmit(customerName: string, customerPhone: string) {
     setLoading(true)
     setError(null)
-    setRequiresBot(false)
     try {
       const otpResult = await requestOtp(customerPhone)
-
-      // El usuario todavía no ha iniciado el bot → mostrar instrucción
-      if (otpResult.requiresBot) {
-        setRequiresBot(true)
-        setBotName(otpResult.botName)
-        return
-      }
-
       if (otpResult._devCode) setDevCode(otpResult._devCode)
       setPhone(customerPhone)
       setName(customerName)
@@ -254,8 +243,6 @@ export default function CheckoutPage() {
               onSubmit={handleFormSubmit}
               loading={loading}
               error={error}
-              requiresBot={requiresBot}
-              botName={botName}
             />
           )}
           {step === 'otp' && (

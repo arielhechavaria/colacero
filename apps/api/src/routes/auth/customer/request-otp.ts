@@ -69,22 +69,23 @@ export async function requestOtpRoute(app: FastifyInstance) {
       return reply.send({ ok: true, _devCode: otp })
     }
 
-    // Modo bot-api: buscar el telegramId del customer para enviarle el DM
+    // Modo bot-api: intentar enviar por DM si el customer ya tiene telegramId
     const customer = await app.prisma.customer.findUnique({
       where:  { phone },
       select: { telegramId: true },
     })
 
-    if (!customer?.telegramId) {
-      // El usuario no ha iniciado el bot — indicarle que lo haga
-      return reply.send({ ok: true, requiresBot: true, botName: BOT_NAME })
+    if (customer?.telegramId) {
+      // Usuario ya inició el bot — enviar DM real
+      await telegram.sendDirectMessage(
+        customer.telegramId,
+        `🔑 Tu código de verificación ColaCero es: <b>${otp}</b>\n\nVálido por ${env.OTP_TTL_SECONDS / 60} minutos.`,
+      )
+      return reply.send({ ok: true })
     }
 
-    await telegram.sendDirectMessage(
-      customer.telegramId,
-      `🔑 Tu código de verificación ColaCero es: <b>${otp}</b>\n\nVálido por ${env.OTP_TTL_SECONDS / 60} minutos.`,
-    )
-
-    return reply.send({ ok: true })
+    // Sin telegramId: devolver el código en la respuesta para que el UI lo muestre
+    // (primer pedido, todavía no inició el bot — no bloqueamos al usuario)
+    return reply.send({ ok: true, _devCode: otp })
   })
 }
