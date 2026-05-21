@@ -3,37 +3,35 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { CheckoutForm }           from '../../../components/checkout-form'
-import { OtpInput }               from '../../../components/otp-input'
-import { PickupWindowSelector }   from '../../../components/pickup-window-selector'
-import { useCartContext }          from '../../../context/cart-context'
+import { TelegramLoginButton, type TelegramUser } from '../../../components/telegram-login-button'
+import { PickupWindowSelector }                   from '../../../components/pickup-window-selector'
+import { useCartContext }                          from '../../../context/cart-context'
 import {
-  requestOtp,
-  verifyOtp,
+  telegramWidgetAuth,
   getPickupWindows,
   checkout,
   isAuthenticatedClient,
   type PickupWindow,
 } from '../../../lib/client-api'
 
-type Step = 'form' | 'otp' | 'window'
+type Step = 'auth' | 'window'
+
+const TG_BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? 'ColaCeroBot'
 
 export default function CheckoutPage() {
   const router = useRouter()
   const { slug } = useParams<{ slug: string }>()
   const { items, total, clear } = useCartContext()
 
-  const [step, setStep]                     = useState<Step>('form')
+  const [step, setStep]                     = useState<Step>('auth')
   const [loading, setLoading]               = useState(false)
   const [error, setError]                   = useState<string | null>(null)
-  const [phone, setPhone]                   = useState('')
   const [name, setName]                     = useState('')
   const [authed, setAuthed]                 = useState<boolean>(false)
   const [windows, setWindows]               = useState<PickupWindow[]>([])
   const [selectedWindow, setSelectedWindow] = useState<string | null>(null)
   const [reservationIds, setReservationIds] = useState<string[]>([])
   const [notes, setNotes]                   = useState('')
-  const [devCode, setDevCode]               = useState<string | null>(null)
 
   // Leer reservationIds guardados por el drawer
   useEffect(() => {
@@ -43,7 +41,7 @@ export default function CheckoutPage() {
     }
   }, [])
 
-  // Si ya hay sesión (Telegram Mini App auth automático), saltar form + OTP
+  // Si ya hay sesión (Telegram Mini App auth automático o login previo), saltar auth
   useEffect(() => {
     if (!isAuthenticatedClient()) return
     const savedName = sessionStorage.getItem('colacero_display_name')
@@ -62,67 +60,44 @@ export default function CheckoutPage() {
     })()
   }, [slug])
 
-  // Redirigir si el carrito está vacío (sin reservas)
+  // Redirigir si el carrito está vacío
   useEffect(() => {
     if (items.length === 0) {
       router.replace(`/${slug}`)
     }
   }, [items.length, router, slug])
 
-  // ── Paso 1: solicitar OTP ──────────────────────────────────────────────────
+  // ── Auth vía Telegram Login Widget ────────────────────────────────────────
 
-  async function handleFormSubmit(customerName: string, customerPhone: string) {
+  async function handleWidgetAuth(user: TelegramUser) {
     setLoading(true)
     setError(null)
     try {
-      const otpResult = await requestOtp(customerPhone)
-      if (otpResult._devCode) setDevCode(otpResult._devCode)
-      setPhone(customerPhone)
-      setName(customerName)
-      setStep('otp')
-    } catch {
-      setError('No pudimos enviar el código. Verificá el número e intentá de nuevo.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // ── Paso 2: verificar OTP ─────────────────────────────────────────────────
-
-  async function handleOtpSubmit(otp: string) {
-    setLoading(true)
-    setError(null)
-    try {
-      await verifyOtp(phone, otp)   // server setea cookies httpOnly de sesión
+      const result = await telegramWidgetAuth(user)
       setAuthed(true)
+      if (result.customer.displayName) {
+        sessionStorage.setItem('colacero_display_name', result.customer.displayName)
+        setName(result.customer.displayName)
+      }
 
-      // Cargar ventanas de recogida
       const ws = await getPickupWindows(slug)
       setWindows(ws)
       setStep('window')
     } catch (err) {
       const msg = err instanceof Error ? err.message : ''
-      setError(
-        msg === 'invalid_otp'
-          ? 'Código incorrecto. Revisá el mensaje de Telegram.'
-          : 'Error al verificar el código. Intentá de nuevo.',
-      )
+      if (msg === 'auth_expired') {
+        setError('La autorización expiró. Tocá el botón de Telegram de nuevo.')
+      } else if (msg === 'invalid_hash') {
+        setError('No pudimos verificar tu identidad. Probá de nuevo.')
+      } else {
+        setError('Error al autenticar con Telegram. Probá de nuevo.')
+      }
     } finally {
       setLoading(false)
     }
   }
 
-  async function handleResendOtp() {
-    setError(null)
-    try {
-      const otpResult = await requestOtp(phone)
-      if (otpResult._devCode) setDevCode(otpResult._devCode)
-    } catch {
-      setError('No pudimos reenviar el código.')
-    }
-  }
-
-  // ── Paso 3: confirmar pedido ──────────────────────────────────────────────
+  // ── Confirmar pedido ──────────────────────────────────────────────────────
 
   async function handleConfirm() {
     if (!selectedWindow || !authed) return
@@ -136,7 +111,6 @@ export default function CheckoutPage() {
         ...(notes.trim() ? { notes: notes.trim() } : {}),
       })
 
-      // Limpiar estado
       clear()
       sessionStorage.removeItem('colacero_reservation_ids')
 
@@ -158,17 +132,15 @@ export default function CheckoutPage() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   const stepLabels: Record<Step, string> = {
-    form:   '1. Tu contacto',
-    otp:    '2. Verificación',
-    window: '3. Fecha de recogida',
+    auth:   '1. Identificate',
+    window: '2. Fecha de recogida',
   }
 
-  const STEPS: Step[] = ['form', 'otp', 'window']
+  const STEPS: Step[] = ['auth', 'window']
   const stepIdx = STEPS.indexOf(step)
 
   return (
     <main className="min-h-screen">
-      {/* Header glass */}
       <header
         className="sticky top-0 z-10 glass px-4 py-3"
         style={{ borderBottom: '1px solid var(--glass-border)' }}
@@ -185,7 +157,6 @@ export default function CheckoutPage() {
               {stepLabels[step]}
             </p>
           </div>
-          {/* Step dots */}
           <div className="flex gap-1.5">
             {STEPS.map((s, i) => (
               <span
@@ -206,7 +177,7 @@ export default function CheckoutPage() {
         className="mx-auto max-w-lg px-4 py-4 flex flex-col gap-4"
         style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
       >
-        {/* Resumen del carrito — glass */}
+        {/* Resumen del carrito */}
         <div className="glass rounded-2xl p-4">
           <h2
             className="mb-2 text-xs font-semibold uppercase tracking-wide"
@@ -236,42 +207,42 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* Step content — glass */}
+        {/* Step content */}
         <div className="glass rounded-2xl p-5">
-          {step === 'form' && (
-            <CheckoutForm
-              onSubmit={handleFormSubmit}
-              loading={loading}
-              error={error}
-            />
-          )}
-          {step === 'otp' && (
-            <>
-              {devCode && (
-                <div
-                  className="mb-4 rounded-xl px-4 py-3 text-sm flex items-center gap-3"
-                  style={{
-                    background: 'rgba(251,191,36,0.1)',
-                    border:     '1px solid rgba(251,191,36,0.3)',
-                    color:      '#FCD34D',
-                  }}
-                >
-                  <span className="text-lg">🔧</span>
-                  <span>
-                    Modo demo — tu código es{' '}
-                    <strong className="font-mono tracking-widest">{devCode}</strong>
-                  </span>
-                </div>
-              )}
-              <OtpInput
-                phone={phone}
-                onSubmit={handleOtpSubmit}
-                onResend={handleResendOtp}
-                loading={loading}
-                error={error}
+          {step === 'auth' && (
+            <div className="flex flex-col items-center gap-6 py-4">
+              <div className="flex flex-col items-center gap-2 text-center">
+                <span className="text-4xl">✈️</span>
+                <p className="font-semibold text-base" style={{ color: 'var(--text)' }}>
+                  Iniciá sesión con Telegram
+                </p>
+                <p className="text-sm max-w-xs" style={{ color: 'var(--muted)' }}>
+                  Es 1 tap. Sin código, sin teléfono. No compartimos tus datos con nadie.
+                </p>
+              </div>
+
+              <TelegramLoginButton
+                botUsername={TG_BOT_USERNAME}
+                onAuth={handleWidgetAuth}
               />
-            </>
+
+              {loading && (
+                <p className="text-sm" style={{ color: 'var(--muted)' }}>
+                  Autenticando…
+                </p>
+              )}
+
+              {error && (
+                <p
+                  className="rounded-lg px-3 py-2 text-sm text-center"
+                  style={{ backgroundColor: 'rgba(255,61,85,0.1)', color: 'var(--error)' }}
+                >
+                  {error}
+                </p>
+              )}
+            </div>
           )}
+
           {step === 'window' && (
             <PickupWindowSelector
               windows={windows}

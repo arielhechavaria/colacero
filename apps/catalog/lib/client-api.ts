@@ -40,6 +40,32 @@ export async function telegramAuth(initData: string): Promise<TelegramAuthResult
   return res.json() as Promise<TelegramAuthResult>
 }
 
+// ── Telegram Login Widget (web no-Mini-App) ──────────────────────────────────
+
+export interface TelegramWidgetUser {
+  id:          number
+  first_name:  string
+  last_name?:  string
+  username?:   string
+  photo_url?:  string
+  auth_date:   number
+  hash:        string
+}
+
+export async function telegramWidgetAuth(user: TelegramWidgetUser): Promise<TelegramAuthResult> {
+  const res = await fetch(`${API_BASE}/api/auth/customer/telegram-widget`, {
+    method:      'POST',
+    headers:     { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body:        JSON.stringify(user),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error: string }
+    throw new Error(body.error ?? 'widget_auth_failed')
+  }
+  return res.json() as Promise<TelegramAuthResult>
+}
+
 export interface RequestOtpResult {
   ok:          boolean
   _devCode?:   string   // solo en modo mock (dev/test)

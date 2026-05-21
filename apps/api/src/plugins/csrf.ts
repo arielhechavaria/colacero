@@ -11,6 +11,7 @@ const SKIP_PATHS = [
   '/api/auth/owner/reset-password',
   '/api/auth/owner/verify-email',
   '/api/auth/customer/telegram',
+  '/api/auth/customer/telegram-widget',
   '/api/auth/customer/request-otp',
   '/api/auth/customer/verify-otp',
   '/api/auth/refresh',
