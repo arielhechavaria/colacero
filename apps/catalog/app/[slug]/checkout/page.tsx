@@ -16,7 +16,7 @@ import {
 
 type Step = 'auth' | 'window'
 
-const TG_BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? 'ColaCeroBot'
+const TG_BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? 'Colacero'
 
 export default function CheckoutPage() {
   const router = useRouter()
