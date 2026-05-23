@@ -94,7 +94,10 @@ export async function telegramWidgetRoute(app: FastifyInstance) {
       return reply.status(422).send({ error: 'validation_error' })
     }
 
-    const botToken = env.TELEGRAM_BOT_TOKEN
+    // TELEGRAM_AUTH_BOT_TOKEN es el bot de plataforma (ej. @Colacero) usado solo para
+    // validar el Login Widget. Fallback a TELEGRAM_BOT_TOKEN para entornos que
+    // no hayan migrado todavía a la configuración de dos tokens.
+    const botToken = env.TELEGRAM_AUTH_BOT_TOKEN ?? env.TELEGRAM_BOT_TOKEN
     if (!botToken) {
       return reply.status(503).send({ error: 'telegram_not_configured' })
     }

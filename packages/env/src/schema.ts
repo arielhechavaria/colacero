@@ -35,7 +35,8 @@ export const envSchema = z.object({
 
   // ── Telegram ───────────────────────────────────────────────────────
   TELEGRAM_PROVIDER:       z.enum(['bot-api', 'mock']).default('mock'),
-  TELEGRAM_BOT_TOKEN:      z.string().optional(),
+  TELEGRAM_BOT_TOKEN:      z.string().optional(), // bot de notificaciones (ej. @elfogon_colaCero_Bot)
+  TELEGRAM_AUTH_BOT_TOKEN: z.string().optional(), // bot de auth (Login Widget — ej. @Colacero); fallback a TELEGRAM_BOT_TOKEN
   TELEGRAM_CHANNEL_ID:     z.string().optional(), // canal público de anuncios
   TELEGRAM_NOTIFY_CHAT_ID: z.string().optional(), // grupo interno del negocio
   CATALOG_URL:             z.string().url().optional(), // URL pública del catálogo (Mini App button)
