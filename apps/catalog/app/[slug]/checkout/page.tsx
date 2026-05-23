@@ -32,6 +32,25 @@ export default function CheckoutPage() {
   const [selectedWindow, setSelectedWindow] = useState<string | null>(null)
   const [reservationIds, setReservationIds] = useState<string[]>([])
   const [notes, setNotes]                   = useState('')
+  // showWidget empieza en false: le damos tiempo al TelegramAuthProvider para
+  // completar la auth de Mini App antes de mostrar el botón del widget.
+  // En Mini App, si el botón es visible y el usuario lo toca, abre el navegador — no queremos eso.
+  const [showWidget, setShowWidget]         = useState(false)
+
+  // Controlar cuándo mostrar el widget de Telegram.
+  // - Si estamos en Mini App (Telegram.WebApp.initData presente): esperamos a que
+  //   TelegramAuthProvider complete la auth. Fallback de 6s por si falla.
+  // - Si estamos en navegador normal: mostramos el widget de inmediato.
+  useEffect(() => {
+    const inMiniApp = Boolean((window as any).Telegram?.WebApp?.initData)
+    if (!inMiniApp) {
+      setShowWidget(true)
+      return
+    }
+    // Mini App: el widget aparece solo como fallback si la auth tarda demasiado
+    const fallback = setTimeout(() => setShowWidget(true), 6000)
+    return () => clearTimeout(fallback)
+  }, [])
 
   // Leer reservationIds guardados por el drawer
   useEffect(() => {
@@ -236,34 +255,47 @@ export default function CheckoutPage() {
         <div className="glass rounded-2xl p-5">
           {step === 'auth' && (
             <div className="flex flex-col items-center gap-6 py-4">
-              <div className="flex flex-col items-center gap-2 text-center">
-                <span className="text-4xl">✈️</span>
-                <p className="font-semibold text-base" style={{ color: 'var(--text)' }}>
-                  Iniciá sesión con Telegram
-                </p>
-                <p className="text-sm max-w-xs" style={{ color: 'var(--muted)' }}>
-                  Es 1 tap. Sin código, sin teléfono. No compartimos tus datos con nadie.
-                </p>
-              </div>
+              {showWidget ? (
+                /* Navegador normal — mostrar widget de Telegram */
+                <>
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <span className="text-4xl">✈️</span>
+                    <p className="font-semibold text-base" style={{ color: 'var(--text)' }}>
+                      Iniciá sesión con Telegram
+                    </p>
+                    <p className="text-sm max-w-xs" style={{ color: 'var(--muted)' }}>
+                      Es 1 tap. Sin código, sin teléfono. No compartimos tus datos con nadie.
+                    </p>
+                  </div>
 
-              <TelegramLoginButton
-                botUsername={TG_BOT_USERNAME}
-                onAuth={handleWidgetAuth}
-              />
+                  <TelegramLoginButton
+                    botUsername={TG_BOT_USERNAME}
+                    onAuth={handleWidgetAuth}
+                  />
 
-              {loading && (
-                <p className="text-sm" style={{ color: 'var(--muted)' }}>
-                  Autenticando…
-                </p>
-              )}
+                  {loading && (
+                    <p className="text-sm" style={{ color: 'var(--muted)' }}>
+                      Autenticando…
+                    </p>
+                  )}
 
-              {error && (
-                <p
-                  className="rounded-lg px-3 py-2 text-sm text-center"
-                  style={{ backgroundColor: 'rgba(255,61,85,0.1)', color: 'var(--error)' }}
-                >
-                  {error}
-                </p>
+                  {error && (
+                    <p
+                      className="rounded-lg px-3 py-2 text-sm text-center"
+                      style={{ backgroundColor: 'rgba(255,61,85,0.1)', color: 'var(--error)' }}
+                    >
+                      {error}
+                    </p>
+                  )}
+                </>
+              ) : (
+                /* Mini App — esperando auth automático de TelegramAuthProvider */
+                <div className="flex flex-col items-center gap-3 py-6">
+                  <span className="text-4xl">✈️</span>
+                  <p className="text-sm" style={{ color: 'var(--muted)' }}>
+                    Identificando con Telegram…
+                  </p>
+                </div>
               )}
             </div>
           )}
