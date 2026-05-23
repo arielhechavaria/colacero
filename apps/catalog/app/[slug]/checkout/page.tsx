@@ -60,6 +60,31 @@ export default function CheckoutPage() {
     })()
   }, [slug])
 
+  // Escuchar el evento de Mini App auth (TelegramAuthProvider dispara esto cuando completa).
+  // Resuelve la race condition donde el checkout monta ANTES de que la Mini App auth termine.
+  useEffect(() => {
+    if (authed) return
+
+    function onMiniAppAuth() {
+      if (!isAuthenticatedClient()) return
+      const savedName = sessionStorage.getItem('colacero_display_name')
+      setAuthed(true)
+      if (savedName) setName(savedName)
+      void (async () => {
+        try {
+          const ws = await getPickupWindows(slug)
+          setWindows(ws)
+          setStep('window')
+        } catch {
+          // Ignorar error de ventanas — el usuario puede reintentar
+        }
+      })()
+    }
+
+    window.addEventListener('colacero:auth', onMiniAppAuth)
+    return () => window.removeEventListener('colacero:auth', onMiniAppAuth)
+  }, [authed, slug])
+
   // Redirigir si el carrito está vacío
   useEffect(() => {
     if (items.length === 0) {

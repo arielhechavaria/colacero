@@ -88,7 +88,7 @@ export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, l
         Elegí cuándo querés recoger tu pedido:
       </p>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 max-h-[55vh] overflow-y-auto pr-1">
         {upcomingWindows.map((w) => (
           <label
             key={w.id}

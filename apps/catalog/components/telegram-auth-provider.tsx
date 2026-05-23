@@ -32,6 +32,10 @@ export function TelegramAuthProvider() {
         if (result.customer.displayName) {
           sessionStorage.setItem('colacero_display_name', result.customer.displayName)
         }
+        // Notificar a la checkout page que la auth de Mini App completó.
+        // Resuelve la race condition donde el checkout monta antes de que esta
+        // auth async termine y queda trabado en el paso de identificación.
+        window.dispatchEvent(new CustomEvent('colacero:auth'))
       } catch (err) {
         console.error('[TelegramAuth] falló la autenticación:', err)
       }
