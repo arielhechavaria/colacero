@@ -69,7 +69,7 @@ function createBotApiProvider(
   const miniAppMarkup = catalogUrl
     ? {
         inline_keyboard: [[
-          { text: '🛒 Ver catálogo', url: catalogUrl },
+          { text: '🛒 Ver catálogo', web_app: { url: catalogUrl } },
         ]],
       }
     : undefined
