@@ -19,8 +19,12 @@ interface Props {
 }
 
 function formatDate(iso: string): string {
-  const date = new Date(iso + 'T00:00:00')
-  return date.toLocaleDateString('es-CU', {
+  // w.date puede venir como "2026-05-23" o "2026-05-23T00:00:00.000Z"
+  const datePart = iso.split('T')[0]!
+  const [y, m, d] = datePart.split('-').map(Number)
+  // Construir con hora local (no UTC) para evitar off-by-one de timezone
+  const date = new Date(y!, m! - 1, d!)
+  return date.toLocaleDateString('es', {
     weekday: 'long',
     day:     'numeric',
     month:   'long',
@@ -28,7 +32,17 @@ function formatDate(iso: string): string {
 }
 
 export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, loading, error, notes, onNotesChange, businessSlug }: Props) {
-  if (windows.length === 0) {
+  // Solo ventanas de hoy en adelante, máximo 14
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const upcomingWindows = windows
+    .filter((w) => {
+      const [y, m, d] = w.date.split('T')[0]!.split('-').map(Number)
+      return new Date(y!, m! - 1, d!) >= today
+    })
+    .slice(0, 14)
+
+  if (upcomingWindows.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 py-8 text-center">
         <span className="text-5xl">📅</span>
@@ -75,7 +89,7 @@ export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, l
       </p>
 
       <div className="flex flex-col gap-2">
-        {windows.map((w) => (
+        {upcomingWindows.map((w) => (
           <label
             key={w.id}
             className="flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-colors"
