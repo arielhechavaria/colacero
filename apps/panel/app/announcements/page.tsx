@@ -424,6 +424,7 @@ export default function AnnouncementsPage() {
                 type="datetime-local"
                 value={scheduledAt}
                 onChange={(e) => setScheduledAt(e.target.value)}
+                suppressHydrationWarning
                 min={new Date().toISOString().slice(0, 16)}
                 className="rounded-lg border bg-transparent px-3 py-1.5 text-sm"
                 style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
