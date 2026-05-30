@@ -109,6 +109,13 @@ export default function LoginPage() {
               {loading ? 'Ingresando…' : 'Ingresar →'}
             </Button>
           </form>
+
+          <p className="mt-5 text-center text-sm" style={{ color: 'var(--muted)' }}>
+            ¿No tenés cuenta?{' '}
+            <Link href="/signup" style={{ color: 'var(--primary)' }}>
+              Creá tu negocio gratis
+            </Link>
+          </p>
         </div>
       </div>
     </div>

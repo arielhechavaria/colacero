@@ -118,6 +118,42 @@ export interface LoginUser {
   businessId: string
 }
 
+// ── Register ──────────────────────────────────────────────────────────────────
+
+export interface RegisterInput {
+  slug:         string
+  businessName: string
+  ownerName?:   string
+  email:        string
+  password:     string
+}
+
+export interface RegisterResult {
+  user:     { id: string; email: string; role: string; businessId: string }
+  business: { id: string; slug: string; name: string }
+}
+
+export async function registerBusiness(input: RegisterInput): Promise<RegisterResult> {
+  const res = await fetch(`${API_BASE}/api/auth/owner/register`, {
+    method:      'POST',
+    headers:     { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body:        JSON.stringify(input),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'register_failed')
+  }
+  return res.json() as Promise<RegisterResult>
+}
+
+export async function checkSlugAvailable(slug: string): Promise<boolean> {
+  const res = await fetch(`${API_BASE}/api/auth/slug-available?slug=${encodeURIComponent(slug)}`)
+  if (!res.ok) return false
+  const body = await res.json() as { available: boolean }
+  return body.available
+}
+
 export async function loginOwner(
   email: string,
   password: string,

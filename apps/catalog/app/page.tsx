@@ -50,12 +50,10 @@ export default function LandingPage() {
 
         <div className="flex flex-wrap items-center justify-center gap-4">
           <a
-            href={CONTACT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="https://panel.colacero.com/signup"
             className="bg-gradient-teal-violet shadow-glow rounded-xl px-7 py-3 text-base font-semibold text-white hover:opacity-90"
           >
-            Quiero probarlo →
+            Crear mi negocio →
           </a>
           <a
             href={DEMO_BIZ_URL}
