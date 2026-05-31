@@ -90,7 +90,7 @@ export default function SignupPage() {
 
     setLoading(true)
     try {
-      await registerBusiness({ slug, businessName, ownerName: ownerName || undefined, email, password })
+      await registerBusiness({ slug, businessName, ...(ownerName ? { ownerName } : {}), email, password })
       router.push('/dashboard')
     } catch (err) {
       const msg = err instanceof Error ? err.message : ''
