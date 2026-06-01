@@ -60,7 +60,7 @@ export default function SignupPage() {
       void checkSlugAvailable(slug).then((available) => {
         setSlugStatus(available ? 'ok' : 'taken')
       }).catch(() => setSlugStatus('idle'))
-    }, 500)
+    }, 800)
 
     return () => { if (slugTimer.current) clearTimeout(slugTimer.current) }
   }, [slug])
