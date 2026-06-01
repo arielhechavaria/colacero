@@ -148,7 +148,7 @@ export async function registerBusiness(input: RegisterInput): Promise<RegisterRe
 }
 
 export async function checkSlugAvailable(slug: string): Promise<boolean> {
-  const res = await fetch(`${API_BASE}/api/auth/slug-available?slug=${encodeURIComponent(slug)}`)
+  const res = await fetch(`${API_BASE}/api/auth/owner/slug-available?slug=${encodeURIComponent(slug)}`)
   if (!res.ok) return false
   const body = await res.json() as { available: boolean }
   return body.available
