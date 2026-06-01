@@ -14,12 +14,12 @@
  */
 
 import { useState, useEffect, Fragment } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from './theme-toggle'
-import { getMe, isAuthenticatedClient } from '../lib/api'
+import { getMe, isAuthenticatedClient, logout } from '../lib/api'
 import {
     Sheet,
     SheetContent,
@@ -96,11 +96,13 @@ function NavItem({
 function MoreSheet({
                        open,
                        onClose,
+                       onLogout,
                        pathname,
                        items,
                    }: {
     open: boolean
     onClose: () => void
+    onLogout: () => void
     pathname: string
     items: typeof SECONDARY_NAV
 }) {
@@ -146,6 +148,18 @@ function MoreSheet({
                             </Link>
                         )
                     })}
+                    <button
+                        onClick={onLogout}
+                        className="flex flex-col items-center gap-2 rounded-2xl p-4 transition-all hover:bg-red-500/10"
+                        style={{
+                            backgroundColor: 'var(--surface)',
+                            border:          '1px solid var(--border)',
+                            color:           'var(--error)',
+                        }}
+                    >
+                        <span className="text-2xl">🚪</span>
+                        <span className="text-xs font-semibold text-center leading-tight">Salir</span>
+                    </button>
                 </div>
             </SheetContent>
         </Sheet>
@@ -156,6 +170,7 @@ function MoreSheet({
 
 export function AppShell({ children }: { children: React.ReactNode }) {
     const pathname = usePathname()
+    const router   = useRouter()
     const isLogin  = pathname === '/login'
     const isPublicAuth = pathname === '/login'
                       || pathname === '/forgot-password'
@@ -180,6 +195,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             try { localStorage.setItem('panel.sidebar.collapsed', next ? '1' : '0') } catch {}
             return next
         })
+    }
+
+    async function handleLogout() {
+        try { await logout() } catch { /* noop */ }
+        router.push('/login')
     }
 
     // Detectar SUPER_ADMIN para mostrar nav extra
@@ -266,7 +286,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     })}
                 </nav>
 
-                {/* Footer — toggle + theme */}
+                {/* Footer — toggle + theme + logout */}
                 <div
                     className={cn(
                         'flex flex-shrink-0 items-center gap-2 py-4',
@@ -285,11 +305,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     </button>
                     {!collapsed && (
                         <>
-                            <span className="text-xs" style={{ color: 'var(--muted)' }}>v1.0</span>
                             <ThemeToggle />
+                            <button
+                                onClick={() => void handleLogout()}
+                                title="Cerrar sesión"
+                                className="rounded-lg p-2 transition-colors hover:bg-red-500/10"
+                                style={{ color: 'var(--muted)' }}
+                            >
+                                <span className="text-base">🚪</span>
+                            </button>
                         </>
                     )}
-                    {collapsed && <ThemeToggle />}
+                    {collapsed && (
+                        <>
+                            <ThemeToggle />
+                            <button
+                                onClick={() => void handleLogout()}
+                                title="Cerrar sesión"
+                                className="rounded-lg p-2 transition-colors hover:bg-red-500/10"
+                                style={{ color: 'var(--muted)' }}
+                            >
+                                <span className="text-base">🚪</span>
+                            </button>
+                        </>
+                    )}
                 </div>
             </aside>
 
@@ -357,6 +396,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <MoreSheet
                 open={moreOpen}
                 onClose={() => setMoreOpen(false)}
+                onLogout={() => { setMoreOpen(false); void handleLogout() }}
                 pathname={pathname}
                 items={secondaryNav}
             />
