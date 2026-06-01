@@ -1,6 +1,7 @@
 import { Worker } from 'bullmq'
 import type { Redis } from 'ioredis'
-import type { TelegramProvider } from '../services/telegram.service.js'
+import { createTelegramProvider } from '../services/telegram.service.js'
+import { env } from '@colacero/env'
 
 export const NOTIFICATION_QUEUE = 'notifications'
 
@@ -8,6 +9,7 @@ export type NotifJobData =
   | {
       type:         'business_new_order'
       chatId:       string
+      botToken?:    string
       pickupCode:   string
       customerName: string
       itemsText:    string   // "Arroz × 2kg\nPollo × 1kg"
@@ -22,8 +24,7 @@ export type NotifJobData =
     }
 
 export function createNotificationWorker(
-  redis:    Redis,
-  telegram: TelegramProvider,
+  redis: Redis,
 ): Worker {
   const worker = new Worker<NotifJobData>(
     NOTIFICATION_QUEUE,
@@ -31,6 +32,11 @@ export function createNotificationWorker(
       const data = job.data
 
       if (data.type === 'business_new_order') {
+        const resolvedToken = data.botToken ?? env.TELEGRAM_BOT_TOKEN
+        const provider = createTelegramProvider(
+          resolvedToken ? 'bot-api' : 'mock',
+          resolvedToken,
+        )
         const text = [
           '🛒 <b>Nuevo pedido</b>',
           `📋 Código: <code>${data.pickupCode}</code>`,
@@ -39,17 +45,23 @@ export function createNotificationWorker(
           `🕐 Ventana: ${data.windowTime}`,
           `💰 Total: ${data.total}`,
         ].join('\n')
-        await telegram.sendDirectMessage(data.chatId, text)
+        await provider.sendDirectMessage(data.chatId, text)
       }
 
       if (data.type === 'customer_ready') {
+        // Customer notifications always use the platform bot
+        const authToken = env.TELEGRAM_AUTH_BOT_TOKEN ?? env.TELEGRAM_BOT_TOKEN
+        const provider = createTelegramProvider(
+          authToken ? 'bot-api' : 'mock',
+          authToken,
+        )
         const text = [
           '✅ <b>¡Tu pedido está listo!</b>',
           `📋 Código de retiro: <code>${data.pickupCode}</code>`,
           `🕐 Retirá antes de las ${data.endTime} hs`,
           '¡Te esperamos!',
         ].join('\n')
-        await telegram.sendDirectMessage(data.chatId, text)
+        await provider.sendDirectMessage(data.chatId, text)
       }
     },
     {

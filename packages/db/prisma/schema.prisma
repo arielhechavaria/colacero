@@ -21,7 +21,10 @@ model Business {
   timezone           String             @default("America/Havana")
   subscriptionStatus SubscriptionStatus @default(TRIAL)
   status             BusinessStatus     @default(ACTIVE)
-  onboardedAt        DateTime?
+  onboardedAt          DateTime?
+  telegramBotToken     String?
+  telegramChannelId    String?
+  telegramNotifyChatId String?
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 

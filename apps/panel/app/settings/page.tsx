@@ -9,10 +9,14 @@ import { getMe,
   createStaff,
   deleteStaff,
   changePassword,
+  getTelegramSettings,
+  updateTelegramSettings,
   TIMEZONES,
   type BusinessProfile,
   type StaffMember,
-  type CurrentUser, isAuthenticatedClient, } from '../../lib/api'
+  type CurrentUser,
+  type TelegramSettings,
+  isAuthenticatedClient, } from '../../lib/api'
 import { Button }   from '@/components/ui/button'
 import { Input }    from '@/components/ui/input'
 import { Label }    from '@/components/ui/label'
@@ -514,14 +518,156 @@ function PasswordTab({ token }: { token: string }) {
   )
 }
 
+// ── Tab: Telegram ─────────────────────────────────────────────────────────────
+
+function TelegramTab({ token, isOwner }: { token: string; isOwner: boolean }) {
+  const [settings, setSettings] = useState<TelegramSettings | null>(null)
+  const [form,     setForm]     = useState({ botToken: '', channelId: '', notifyChatId: '' })
+  const [saving,   setSaving]   = useState(false)
+  const [feedback, setFeedback] = useState<{ msg: string; type: 'ok' | 'error' } | null>(null)
+
+  useEffect(() => {
+    getTelegramSettings()
+      .then((s) => {
+        setSettings(s)
+        setForm({
+          botToken:     '',  // write-only — never pre-fill
+          channelId:    s.channelId    ?? '',
+          notifyChatId: s.notifyChatId ?? '',
+        })
+      })
+      .catch(() => setFeedback({ msg: 'Error al cargar configuración Telegram', type: 'error' }))
+  }, [token])
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setSaving(true)
+    setFeedback(null)
+    try {
+      const payload: Parameters<typeof updateTelegramSettings>[0] = {}
+      if (form.botToken.trim())     payload.botToken     = form.botToken.trim()
+      if (form.channelId !== undefined)    payload.channelId    = form.channelId.trim()    || null
+      if (form.notifyChatId !== undefined) payload.notifyChatId = form.notifyChatId.trim() || null
+
+      await updateTelegramSettings(payload)
+
+      // Reload to reflect hasBotToken change
+      const updated = await getTelegramSettings()
+      setSettings(updated)
+      setForm((f) => ({ ...f, botToken: '' }))
+      setFeedback({ msg: 'Configuración Telegram actualizada ✓', type: 'ok' })
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'error'
+      setFeedback({
+        msg:  msg === 'owner_only' ? 'Solo el OWNER puede editar esto' : 'Error al guardar',
+        type: 'error',
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (!settings) {
+    return <p className="text-sm py-8 text-center" style={{ color: 'var(--muted)' }}>Cargando…</p>
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {feedback && <Toast {...feedback} />}
+
+      <div className="glass rounded-2xl p-5 flex flex-col gap-4">
+        <div>
+          <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Bot de Telegram</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--muted)' }}>
+            Creá un bot en{' '}
+            <a
+              href="https://t.me/BotFather"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+              style={{ color: 'var(--primary)' }}
+            >
+              @BotFather
+            </a>
+            {' '}y pegá el token acá. El token nunca se muestra una vez guardado.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="tg-token">
+            Token del bot
+            {settings.hasBotToken && (
+              <span className="ml-2 text-xs font-normal" style={{ color: 'var(--primary)' }}>
+                (ya configurado — dejá vacío para no cambiar)
+              </span>
+            )}
+          </Label>
+          <Input
+            id="tg-token"
+            type="password"
+            value={form.botToken}
+            onChange={(e) => setForm((f) => ({ ...f, botToken: e.target.value }))}
+            placeholder="Pegá el token de @BotFather"
+            disabled={!isOwner}
+            autoComplete="new-password"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="tg-channel">ID del canal de anuncios</Label>
+          <p className="text-xs" style={{ color: 'var(--muted)' }}>
+            Canal donde se publican los anuncios (ej. promos, disponibilidad).
+            Usá el username (@mi_canal) o el ID numérico (-100xxxxxxxxx).
+          </p>
+          <Input
+            id="tg-channel"
+            value={form.channelId}
+            onChange={(e) => setForm((f) => ({ ...f, channelId: e.target.value }))}
+            placeholder="@mi_canal o -100xxxxx"
+            disabled={!isOwner}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="tg-notif">ID del grupo de notificaciones</Label>
+          <p className="text-xs" style={{ color: 'var(--muted)' }}>
+            Grupo interno donde el bot avisa cuando llega un pedido nuevo.
+            Usá el username (@mi_grupo) o el ID numérico (-100xxxxxxxxx).
+          </p>
+          <Input
+            id="tg-notif"
+            value={form.notifyChatId}
+            onChange={(e) => setForm((f) => ({ ...f, notifyChatId: e.target.value }))}
+            placeholder="@mi_grupo o -100xxxxx"
+            disabled={!isOwner}
+          />
+        </div>
+
+        {isOwner ? (
+          <div className="pt-1">
+            <Button type="submit" disabled={saving} className="bg-gradient-teal-violet shadow-glow hover:opacity-90">
+              {saving ? 'Guardando…' : 'Guardar configuración Telegram'}
+            </Button>
+          </div>
+        ) : (
+          <p className="text-xs" style={{ color: 'var(--muted)' }}>
+            Solo el OWNER puede editar la configuración de Telegram.
+          </p>
+        )}
+      </div>
+    </form>
+  )
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-type Tab = 'business' | 'staff' | 'password'
+type Tab = 'business' | 'staff' | 'password' | 'telegram'
 
 const TABS: { key: Tab; label: string; icon: string }[] = [
   { key: 'business', label: 'Negocio',     icon: '🏪' },
   { key: 'staff',    label: 'Equipo',      icon: '👥' },
   { key: 'password', label: 'Contraseña',  icon: '🔑' },
+  { key: 'telegram', label: 'Telegram',    icon: '✈️' },
 ]
 
 export default function SettingsPage() {
@@ -610,6 +756,9 @@ export default function SettingsPage() {
             )}
             {tab === 'password' && (
               <PasswordTab token={token} />
+            )}
+            {tab === 'telegram' && (
+              <TelegramTab token={token} isOwner={isOwner} />
             )}
           </div>
 

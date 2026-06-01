@@ -3,7 +3,6 @@ import { Queue } from 'bullmq'
 import { Redis } from 'ioredis'
 import type { FastifyInstance } from 'fastify'
 import { env } from '@colacero/env'
-import { createTelegramProvider } from '../services/telegram.service.js'
 import { createAnnouncementWorker, ANNOUNCEMENT_QUEUE } from '../workers/announcement.worker.js'
 import { createNotificationWorker, NOTIFICATION_QUEUE, type NotifJobData } from '../workers/notification.worker.js'
 
@@ -39,15 +38,8 @@ export const bullmqPlugin = fp(async (app: FastifyInstance) => {
   // Don't start the worker in test mode — avoids teardown race conditions
   // where the connection close event fires after the test has ended.
   if (env.NODE_ENV !== 'test') {
-    const telegram = createTelegramProvider(
-      env.TELEGRAM_PROVIDER,
-      env.TELEGRAM_BOT_TOKEN,
-      env.TELEGRAM_CHANNEL_ID,
-      env.CATALOG_URL,
-    )
-
-    const announcementWorker  = createAnnouncementWorker(connection, telegram, app.prisma)
-    const notificationWorker  = createNotificationWorker(connection, telegram)
+    const announcementWorker  = createAnnouncementWorker(connection, app.prisma)
+    const notificationWorker  = createNotificationWorker(connection)
 
     app.addHook('onClose', async () => {
       await announcementWorker.close()

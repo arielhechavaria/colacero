@@ -1095,3 +1095,38 @@ export async function setBusinessStatus(
   }
   return res.json() as Promise<{ id: string; slug: string; status: BusinessStatus }>
 }
+
+// ── Telegram settings ─────────────────────────────────────────────────────────
+
+export interface TelegramSettings {
+  hasBotToken:  boolean
+  channelId:    string | null
+  notifyChatId: string | null
+}
+
+export interface TelegramSettingsInput {
+  botToken?:     string | null
+  channelId?:    string | null
+  notifyChatId?: string | null
+}
+
+export async function getTelegramSettings(): Promise<TelegramSettings> {
+  const res = await apiFetch(`${API_BASE}/api/owner/settings/telegram`, {
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error('fetch_failed')
+  return res.json() as Promise<TelegramSettings>
+}
+
+export async function updateTelegramSettings(input: TelegramSettingsInput): Promise<void> {
+  const res = await apiFetch(`${API_BASE}/api/owner/settings/telegram`, {
+    method:      'PATCH',
+    headers:     { 'Content-Type': 'application/json', ...csrfHeader() },
+    credentials: 'include',
+    body:        JSON.stringify(input),
+  })
+  if (!res.ok) {
+    const body = await res.json() as { error?: string }
+    throw new Error(body.error ?? 'update_failed')
+  }
+}

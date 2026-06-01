@@ -1,7 +1,8 @@
 import { Worker } from 'bullmq'
 import type { Redis } from 'ioredis'
 import type { PrismaClient } from '@colacero/db'
-import type { TelegramProvider } from '../services/telegram.service.js'
+import { createTelegramProvider } from '../services/telegram.service.js'
+import { env } from '@colacero/env'
 import {
   generateAnnouncementPng,
   buildImageDataFromAnnouncement,
@@ -68,14 +69,29 @@ async function ensurePng(
 }
 
 export function createAnnouncementWorker(
-  redis:    Redis,
-  telegram: TelegramProvider,
-  prisma?:  PrismaClient,
+  redis:   Redis,
+  prisma?: PrismaClient,
 ): Worker {
   const worker = new Worker<AnnouncementJob>(
     ANNOUNCEMENT_QUEUE,
     async (job) => {
-      const { text, announcementId } = job.data
+      const { text, announcementId, businessId } = job.data
+
+      // Look up per-business telegram config
+      const biz = businessId ? await prisma?.business.findUnique({
+        where: { id: businessId },
+        select: { telegramBotToken: true, telegramChannelId: true, slug: true },
+      }) : null
+      const botToken   = biz?.telegramBotToken  ?? env.TELEGRAM_BOT_TOKEN
+      const channelId  = biz?.telegramChannelId ?? env.TELEGRAM_CHANNEL_ID
+      const catalogUrl = biz?.slug ? `https://${biz.slug}.colacero.com` : env.CATALOG_URL
+
+      const telegram = createTelegramProvider(
+        botToken ? 'bot-api' : 'mock',
+        botToken,
+        channelId,
+        catalogUrl,
+      )
 
       try {
         // Auto-generar PNG si no existe (failsafe — el user no tiene que clickear)

@@ -60,13 +60,21 @@ export async function cartCheckoutRoutes(app: FastifyInstance) {
     }
 
     // A1 — Notificar al negocio sobre el nuevo pedido
-    if (env.TELEGRAM_NOTIFY_CHAT_ID) {
+    // Look up per-business Telegram config (fall back to global env)
+    const bizForNotif = await app.prisma.pickupWindow.findUnique({
+      where:  { id: req.body.pickupWindowId },
+      select: { business: { select: { telegramBotToken: true, telegramNotifyChatId: true } } },
+    })
+    const notifChatId   = bizForNotif?.business.telegramNotifyChatId ?? env.TELEGRAM_NOTIFY_CHAT_ID
+    const notifBotToken = bizForNotif?.business.telegramBotToken     ?? env.TELEGRAM_BOT_TOKEN
+    if (notifChatId && notifBotToken) {
       const itemsText = result.items
         .map(i => `  • ${i.name} × ${i.quantity}`)
         .join('\n')
       void app.notifQueue.add('business_new_order', {
         type:         'business_new_order',
-        chatId:       env.TELEGRAM_NOTIFY_CHAT_ID,
+        chatId:       notifChatId,
+        botToken:     notifBotToken,
         pickupCode:   result.pickupCode ?? '—',
         customerName: req.body.customerName ?? 'Cliente',
         itemsText:    req.body.notes ? `${itemsText}\n📝 ${req.body.notes}` : itemsText,

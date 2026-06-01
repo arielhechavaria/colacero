@@ -277,4 +277,60 @@ export async function ownerSettingsRoutes(app: FastifyInstance) {
 
     return reply.status(204).send()
   })
+
+  // ── GET /api/owner/settings/telegram ────────────────────────────────────────
+  app.get('/telegram', {
+    onRequest: [app.authenticate],
+    schema: { tags: ['owner-settings'], summary: 'Obtener config Telegram del negocio', security: [{ bearerAuth: [] }] },
+  }, async (req, reply) => {
+    const { businessId } = req.user
+    if (!businessId) return reply.status(403).send({ error: 'forbidden' })
+    const b = await app.prisma.business.findUnique({
+      where: { id: businessId },
+      select: { telegramBotToken: true, telegramChannelId: true, telegramNotifyChatId: true },
+    })
+    return reply.send({
+      hasBotToken:   !!b?.telegramBotToken,
+      channelId:     b?.telegramChannelId    ?? null,
+      notifyChatId:  b?.telegramNotifyChatId ?? null,
+    })
+  })
+
+  // ── PATCH /api/owner/settings/telegram ──────────────────────────────────────
+  interface TelegramPatchBody {
+    botToken?:     string | null
+    channelId?:    string | null
+    notifyChatId?: string | null
+  }
+
+  app.patch<{ Body: TelegramPatchBody }>('/telegram', {
+    onRequest: [app.authenticate],
+    schema: {
+      tags: ['owner-settings'],
+      summary: 'Actualizar config Telegram del negocio (solo OWNER)',
+      security: [{ bearerAuth: [] }],
+      body: {
+        type: 'object',
+        properties: {
+          botToken:     { type: 'string', nullable: true },
+          channelId:    { type: 'string', nullable: true },
+          notifyChatId: { type: 'string', nullable: true },
+        },
+      },
+    },
+  }, async (req, reply) => {
+    const { businessId, role } = req.user
+    if (!businessId)      return reply.status(403).send({ error: 'forbidden' })
+    if (role !== 'OWNER') return reply.status(403).send({ error: 'owner_only' })
+    const { botToken, channelId, notifyChatId } = req.body
+    await app.prisma.business.update({
+      where: { id: businessId },
+      data: {
+        ...(botToken     !== undefined ? { telegramBotToken:     botToken     } : {}),
+        ...(channelId    !== undefined ? { telegramChannelId:    channelId    } : {}),
+        ...(notifyChatId !== undefined ? { telegramNotifyChatId: notifyChatId } : {}),
+      },
+    })
+    return reply.status(204).send()
+  })
 }
