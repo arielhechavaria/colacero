@@ -111,6 +111,59 @@ export function ScreenshotPlaceholder({ caption }: { caption?: string }) {
   )
 }
 
+export function Step({
+  n,
+  title,
+  children,
+}: {
+  n: number
+  title: string
+  children?: ReactNode
+}) {
+  return (
+    <div className="mb-8">
+      <div className="mb-3 flex items-center gap-3">
+        <span
+          className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm font-black text-white"
+          style={{ background: 'var(--primary)' }}
+        >
+          {n}
+        </span>
+        <h3 className="text-lg font-bold" style={{ color: 'var(--text)' }}>
+          {title}
+        </h3>
+      </div>
+      {children && (
+        <div className="ml-11">{children}</div>
+      )}
+    </div>
+  )
+}
+
+export function CheckList({ children }: { children: ReactNode }) {
+  return (
+    <ul className="mb-4 space-y-2" style={{ color: 'var(--muted)' }}>
+      {children}
+    </ul>
+  )
+}
+
+export function CheckItem({
+  status = 'todo',
+  children,
+}: {
+  status?: 'ok' | 'warn' | 'todo'
+  children: ReactNode
+}) {
+  const icon = status === 'ok' ? '✅' : status === 'warn' ? '⚠️' : '☐'
+  return (
+    <li className="flex items-start gap-2 text-sm leading-relaxed">
+      <span className="mt-0.5 flex-shrink-0">{icon}</span>
+      <span>{children}</span>
+    </li>
+  )
+}
+
 export function PrevNext({
   prev,
   next,

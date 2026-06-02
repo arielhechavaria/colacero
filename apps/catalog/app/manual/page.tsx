@@ -34,8 +34,11 @@ export default function ManualIndex() {
       </Ul>
 
       <Note tone="tip">
-        Antes de empezar, te damos de alta nosotros. No hay signup público todavía — escribinos
-        por Telegram y montamos tu negocio juntos en una llamada de 30 minutos.
+        ¿Primer contacto?{' '}
+        <a href="https://panel.colacero.com/signup" className="underline">Creá tu negocio gratis</a>{' '}
+        en 2 minutos. Después seguí esta guía para configurar todo.
+        Si preferís que te ayudemos, escribinos por{' '}
+        <a href="https://t.me/Arielhechavarria" className="underline" target="_blank" rel="noopener noreferrer">Telegram</a>.
       </Note>
 
       <PrevNext

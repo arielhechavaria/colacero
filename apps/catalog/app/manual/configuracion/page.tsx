@@ -50,8 +50,29 @@ export default function ConfiguracionPage() {
         de "¿Olvidaste tu contraseña?" desde la pantalla de login.
       </Note>
 
+      <H2 id="telegram">Telegram</H2>
+      <P>
+        Configurá el bot de Telegram de tu negocio para recibir notificaciones de pedidos
+        y poder enviar anuncios broadcast a tu canal.
+      </P>
+      <Ul>
+        <li><Strong>Token del bot</Strong> — lo obtenés creando un bot con @BotFather. Se guarda encriptado y nunca se muestra en texto plano.</li>
+        <li><Strong>Channel ID</Strong> — el ID o username del canal de Telegram donde se publican los anuncios (ej. <code>@elfogondemaria</code> o un número negativo)</li>
+        <li><Strong>Chat de notificaciones</Strong> — el ID del grupo donde el bot envía el aviso de cada nuevo pedido</li>
+      </Ul>
+      <Note tone="info">
+        ¿No sabés cómo obtener el Chat ID? Seguí las instrucciones en la{' '}
+        <a href="/manual/prueba-piloto#parte-1" className="underline">Guía de prueba piloto → Paso 5</a>.
+      </Note>
+      <Note tone="warning">
+        El token del bot es como una contraseña. No lo compartas en ningún lugar público.
+        Si alguien obtiene el token, puede controlar tu bot. Si creés que fue comprometido,
+        generá uno nuevo con @BotFather y actualizalo acá.
+      </Note>
+
       <PrevNext
         prev={{ href: '/manual/analytics', label: 'Analytics' }}
+        next={{ href: '/manual/prueba-piloto', label: 'Prueba piloto' }}
       />
     </>
   )

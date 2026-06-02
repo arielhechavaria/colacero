@@ -10,17 +10,28 @@ export default function EmpezarPage() {
         Cómo hacer el primer login después de que te demos de alta y cómo verificar tu email.
       </Lead>
 
-      <H2 id="recibir-credenciales">1. Recibir tus credenciales</H2>
+      <H2 id="crear-cuenta">1. Crear tu cuenta</H2>
       <P>
-        Cuando completemos el alta, vas a recibir un mensaje (Telegram o email) con:
+        Entrá a{' '}
+        <a href="https://panel.colacero.com/signup" className="underline">panel.colacero.com/signup</a>{' '}
+        y completá el formulario:
       </P>
       <Ul>
-        <li>El <Strong>slug</Strong> de tu negocio (ej. <code>el-fogon</code>) — esto define tu subdominio</li>
-        <li>El <Strong>email</Strong> con el que vas a iniciar sesión</li>
-        <li>Una <Strong>contraseña temporal</Strong> que después podés cambiar</li>
+        <li><Strong>Nombre del negocio</Strong> — el que ven tus clientes en el catálogo</li>
+        <li><Strong>URL del catálogo</Strong> — se genera automático desde el nombre; podés editarla</li>
+        <li><Strong>Email</Strong> y <Strong>contraseña</Strong> (mínimo 10 caracteres)</li>
       </Ul>
+      <P>
+        Al enviar el formulario, quedás logueado automáticamente y aterrizás en el dashboard.
+      </P>
+      <ScreenshotPlaceholder caption="Formulario de signup" />
 
-      <H2 id="primer-login">2. Primer login</H2>
+      <Note tone="tip">
+        La URL de tu catálogo (<code>tunegocio.colacero.com</code>) se elige al momento del registro
+        y no se puede cambiar después desde el panel. Elegí algo corto, sin tildes y fácil de recordar.
+      </Note>
+
+      <H2 id="primer-login">2. Primer login (si ya tenés cuenta)</H2>
       <P>
         Entrá a <a href="https://panel.colacero.com/login" className="underline">panel.colacero.com</a> y poné tu email + contraseña.
       </P>

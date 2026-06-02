@@ -16,6 +16,7 @@ export const MANUAL_SECTIONS = [
   { href: '/manual/pedidos',       label: 'Pedidos',        icon: '📋' },
   { href: '/manual/analytics',     label: 'Analytics',      icon: '📊' },
   { href: '/manual/configuracion', label: 'Configuración',  icon: '⚙️' },
+  { href: '/manual/prueba-piloto', label: 'Prueba piloto',  icon: '🧪' },
 ]
 
 export default function ManualLayout({ children }: { children: React.ReactNode }) {
