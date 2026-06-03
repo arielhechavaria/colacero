@@ -2,11 +2,24 @@
 
 import { useState, useMemo } from 'react'
 import Image from 'next/image'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import type { CatalogProduct } from '../lib/api'
 import { getProductFallbackImage } from '../lib/product-images'
 import { AddToCartButton } from './add-to-cart-button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+
+// ── Animation variants ────────────────────────────────────────────────────────
+
+const gridVariants: Variants = {
+  hidden:  {},
+  visible: { transition: { staggerChildren: 0.05 } },
+}
+
+const cardVariants: Variants = {
+  hidden:  { opacity: 0, y: 14 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+}
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name' | 'in-stock'
 
@@ -40,10 +53,14 @@ function ProductRow({ product }: { product: CatalogProduct }) {
   const imageSrc   = product.imageUrl ?? getProductFallbackImage(product.name)
 
   return (
-    <article
-      className={`glass flex gap-3 rounded-2xl p-3 transition-all duration-200 ${
-        outOfStock ? 'opacity-50' : 'hover:scale-[1.02] hover:shadow-md'
-      }`}
+    <motion.article
+      className={`glass flex gap-3 rounded-2xl p-3 ${outOfStock ? 'opacity-50' : ''}`}
+      whileHover={outOfStock ? {} : {
+        y: -3,
+        boxShadow: '0 10px 28px rgba(15,23,42,0.1), 0 4px 10px rgba(15,23,42,0.06)',
+      }}
+      whileTap={outOfStock ? {} : { scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 28 }}
     >
       <div
         className="relative h-[88px] w-[88px] flex-shrink-0 overflow-hidden rounded-xl animate-pulse"
@@ -90,7 +107,7 @@ function ProductRow({ product }: { product: CatalogProduct }) {
           </div>
         </div>
       </div>
-    </article>
+    </motion.article>
   )
 }
 
@@ -174,31 +191,32 @@ export function CatalogView({ products }: Props) {
         <div className="flex items-center gap-2">
           {/* Pills scroll-x */}
           <div className="flex flex-1 gap-2 overflow-x-auto pb-1 min-w-0 scrollbar-none">
-            <button
-              onClick={() => setCategory(null)}
-              className="flex-shrink-0 rounded-full px-3 py-1 text-xs font-semibold transition-colors"
-              style={
-                selectedCategory === null
-                  ? { backgroundColor: 'var(--primary-dim)', color: 'var(--primary)', border: '1px solid var(--border-glow)' }
-                  : { backgroundColor: 'var(--surface)', color: 'var(--muted)', border: '1px solid var(--border)' }
-              }
-            >
-              Todos
-            </button>
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setCategory(cat === selectedCategory ? null : cat)}
-                className="flex-shrink-0 rounded-full px-3 py-1 text-xs font-semibold capitalize transition-colors"
-                style={
-                  selectedCategory === cat
-                    ? { backgroundColor: 'var(--primary-dim)', color: 'var(--primary)', border: '1px solid var(--border-glow)' }
-                    : { backgroundColor: 'var(--surface)', color: 'var(--muted)', border: '1px solid var(--border)' }
-                }
-              >
-                {cat}
-              </button>
-            ))}
+            {(['__all__', ...categories] as string[]).map((cat) => {
+              const isAll    = cat === '__all__'
+              const isActive = isAll ? selectedCategory === null : selectedCategory === cat
+              const label    = isAll ? 'Todos' : cat
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setCategory(isAll ? null : (cat === selectedCategory ? null : cat))}
+                  className="relative flex-shrink-0 rounded-full px-3 py-1 text-xs font-semibold capitalize"
+                  style={{
+                    color: isActive ? 'var(--primary)' : 'var(--muted)',
+                    border: '1px solid transparent',
+                  }}
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId="active-pill"
+                      className="absolute inset-0 rounded-full"
+                      style={{ backgroundColor: 'var(--primary-dim)', border: '1px solid var(--border-glow)' }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  <span className="relative z-10">{label}</span>
+                </button>
+              )
+            })}
           </div>
 
           {/* Ordenar dropdown */}
@@ -251,11 +269,19 @@ export function CatalogView({ products }: Props) {
           Sin resultados. Probá con otro término.
         </p>
       ) : (
-        <div className="grid gap-3 lg:grid-cols-2">
+        <motion.div
+          key={`${selectedCategory ?? 'all'}-${sortBy}-${debouncedSearch}`}
+          className="grid gap-3 lg:grid-cols-2"
+          variants={gridVariants}
+          initial="hidden"
+          animate="visible"
+        >
           {filtered.map((product) => (
-            <ProductRow key={product.id} product={product} />
+            <motion.div key={product.id} variants={cardVariants}>
+              <ProductRow product={product} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   )

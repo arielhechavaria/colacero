@@ -187,28 +187,39 @@ export function CartDrawer() {
                 ) : (
                   <>
                     <ul className="flex flex-col gap-3">
-                      {items.map((item) => (
-                        <li key={item.productId} className="flex items-center justify-between border-b pb-3"
-                          style={{ borderColor: 'var(--border)' }}>
-                          <div>
-                            <p className="font-medium leading-snug" style={{ color: 'var(--text)' }}>{item.name}</p>
-                            <p className="text-sm" style={{ color: 'var(--muted)' }}>
-                              {item.quantity} × ${Number(item.unitPrice).toFixed(2)}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold font-mono" style={{ color: 'var(--primary)' }}>
-                              ${(Number(item.unitPrice) * item.quantity).toFixed(2)}
-                            </p>
-                            <button
-                              onClick={() => removeAll(item.productId)}
-                              className="text-lg leading-none opacity-40 hover:opacity-100 transition-opacity"
-                              style={{ color: 'var(--muted)' }}
-                              aria-label={`Quitar ${item.name}`}
-                            >✕</button>
-                          </div>
-                        </li>
-                      ))}
+                      <AnimatePresence initial={false}>
+                        {items.map((item) => (
+                          <motion.li
+                            key={item.productId}
+                            layout
+                            initial={{ opacity: 0, x: -12, height: 0 }}
+                            animate={{ opacity: 1, x: 0, height: 'auto' }}
+                            exit={{ opacity: 0, x: 20, height: 0, marginBottom: 0 }}
+                            transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+                            className="flex items-center justify-between border-b pb-3 overflow-hidden"
+                            style={{ borderColor: 'var(--border)' }}
+                          >
+                            <div>
+                              <p className="font-medium leading-snug" style={{ color: 'var(--text)' }}>{item.name}</p>
+                              <p className="text-sm" style={{ color: 'var(--muted)' }}>
+                                {item.quantity} × ${Number(item.unitPrice).toFixed(2)}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold font-mono" style={{ color: 'var(--primary)' }}>
+                                ${(Number(item.unitPrice) * item.quantity).toFixed(2)}
+                              </p>
+                              <motion.button
+                                onClick={() => removeAll(item.productId)}
+                                whileTap={{ scale: 0.8 }}
+                                className="text-lg leading-none opacity-40 hover:opacity-100 transition-opacity"
+                                style={{ color: 'var(--muted)' }}
+                                aria-label={`Quitar ${item.name}`}
+                              >✕</motion.button>
+                            </div>
+                          </motion.li>
+                        ))}
+                      </AnimatePresence>
                     </ul>
 
                     <div className="mt-4 pt-4 flex items-center justify-between text-lg font-bold">
