@@ -127,8 +127,7 @@ export default function AdminBusinessesPage() {
                         href={`https://${b.slug}.colacero.com`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs hover:underline"
-                        className="text-slate-500"
+                        className="text-xs hover:underline text-slate-500"
                       >
                         {b.slug}.colacero.com ↗
                       </a>
