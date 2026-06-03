@@ -119,29 +119,46 @@ body {
     box-shadow: var(--shadow-sm);
   }
 
-  /* Botón primario — indigo sólido, sin gradiente */
+  /* Botón primario — gradiente real teal→violet */
   .bg-gradient-teal-violet {
-    background-color: var(--primary);
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #14B8A6 100%);
   }
 
-  /* Texto primario — indigo sólido, sin clip */
+  /* Texto con gradiente */
   .text-gradient {
-    color: var(--primary);
-    background: none;
-    -webkit-background-clip: unset;
-    -webkit-text-fill-color: unset;
-    background-clip: unset;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6, #14B8A6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  /* Sombra glow → sombra sutil */
+  /* Sombra glow — indigo/violet real */
   .shadow-glow {
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 0 0 1px rgba(99,102,241,0.3), 0 4px 20px rgba(99,102,241,0.2), 0 0 40px rgba(139,92,246,0.1);
   }
 }
 
-/* Animaciones eliminadas en V4 (minimalismo) */
-.animate-float { }
-.animate-glow  { }
+/* ── Animaciones ─────────────────────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.5; filter: blur(60px); }
+  50%       { opacity: 0.9; filter: blur(80px); }
+}
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes border-glow {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1; }
+}
+.animate-float    { animation: float 5s ease-in-out infinite; }
+.animate-glow     { animation: glow-pulse 6s ease-in-out infinite; }
+.animate-gradient { background-size: 200% 200%; animation: gradient-shift 5s ease infinite; }
 
 /* ── Scrollbars ──────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar          { width: 4px; height: 4px; }

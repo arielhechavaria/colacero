@@ -14,16 +14,28 @@ const NAV_LINKS = [
   { href: '/contacto', label: 'Contacto' },
 ]
 
-export function MarketingHeader() {
+export function MarketingHeader({ dark = false }: { dark?: boolean }) {
   return (
-    <header className="relative z-20 border-b" style={{ borderColor: 'var(--glass-border)' }}>
+    <header
+      className={
+        dark
+          ? 'sticky top-0 z-50 border-b border-white/[0.08] bg-[#070D1B]/80 backdrop-blur-md'
+          : 'sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-sm'
+      }
+    >
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
         <Link href="/" className="flex-shrink-0">
-          <Logo size="md" />
+          <Logo size="md" variant={dark ? 'sidebar' : 'page'} />
         </Link>
-        <nav className="hidden items-center gap-6 text-sm font-medium md:flex" style={{ color: 'var(--muted)' }}>
+        <nav
+          className={`hidden items-center gap-6 text-sm font-medium md:flex ${dark ? 'text-slate-400' : 'text-slate-500'}`}
+        >
           {NAV_LINKS.map((l) => (
-            <Link key={l.href} href={l.href} className="hover:opacity-80 transition-opacity">
+            <Link
+              key={l.href}
+              href={l.href}
+              className={`transition-colors ${dark ? 'hover:text-white' : 'hover:text-slate-900'}`}
+            >
               {l.label}
             </Link>
           ))}
@@ -31,8 +43,11 @@ export function MarketingHeader() {
         <div className="flex items-center gap-2 text-sm">
           <Link
             href={`${PANEL_URL}/login`}
-            className="rounded-xl px-4 py-2 font-medium glass hover:opacity-90"
-            style={{ color: 'var(--text)' }}
+            className={
+              dark
+                ? 'rounded-xl border border-white/10 bg-white/5 px-4 py-2 font-medium text-slate-200 hover:bg-white/10 transition-colors'
+                : 'rounded-xl border border-slate-200 bg-white px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 transition-colors'
+            }
           >
             Iniciar sesión
           </Link>
@@ -42,51 +57,48 @@ export function MarketingHeader() {
   )
 }
 
-export function MarketingFooter() {
+export function MarketingFooter({ dark = false }: { dark?: boolean }) {
+  const mutedClass = dark ? 'text-slate-500' : 'text-slate-500'
+  const borderClass = dark ? 'border-white/[0.08]' : 'border-slate-200'
+  const hoverClass = dark ? 'hover:text-slate-300' : 'hover:text-slate-900'
+  const labelClass = dark ? 'text-slate-600' : 'text-slate-400'
+
   return (
-    <footer className="relative z-10 mt-20 border-t" style={{ borderColor: 'var(--glass-border)' }}>
+    <footer className={`relative z-10 border-t ${dark ? 'bg-[#070D1B] border-white/[0.06]' : `border-slate-200`}`}>
       <div className="mx-auto max-w-6xl px-6 py-10">
         <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
           <div>
-            <Logo size="sm" />
-            <p className="mt-3 text-xs" style={{ color: 'var(--muted)' }}>
+            <Logo size="sm" variant={dark ? 'sidebar' : 'page'} />
+            <p className={`mt-3 text-xs ${mutedClass}`}>
               Recibí pedidos por Telegram.<br />Cero comisiones.
             </p>
           </div>
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-              Producto
-            </p>
-            <ul className="space-y-2 text-sm" style={{ color: 'var(--muted)' }}>
-              <li><a href={DEMO_BIZ_URL} className="hover:opacity-80">Ver demo</a></li>
-              <li><Link href="/precios" className="hover:opacity-80">Precios</Link></li>
-              <li><Link href="/faq" className="hover:opacity-80">FAQ</Link></li>
+            <p className={`mb-3 text-xs font-semibold uppercase tracking-wider ${labelClass}`}>Producto</p>
+            <ul className={`space-y-2 text-sm ${mutedClass}`}>
+              <li><a href={DEMO_BIZ_URL} className={`transition-colors ${hoverClass}`}>Ver demo</a></li>
+              <li><Link href="/precios" className={`transition-colors ${hoverClass}`}>Precios</Link></li>
+              <li><Link href="/faq" className={`transition-colors ${hoverClass}`}>FAQ</Link></li>
             </ul>
           </div>
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-              Recursos
-            </p>
-            <ul className="space-y-2 text-sm" style={{ color: 'var(--muted)' }}>
-              <li><Link href="/manual" className="hover:opacity-80">Manual de usuario</Link></li>
-              <li><Link href="/about" className="hover:opacity-80">Nosotros</Link></li>
+            <p className={`mb-3 text-xs font-semibold uppercase tracking-wider ${labelClass}`}>Recursos</p>
+            <ul className={`space-y-2 text-sm ${mutedClass}`}>
+              <li><Link href="/manual" className={`transition-colors ${hoverClass}`}>Manual de usuario</Link></li>
+              <li><Link href="/about" className={`transition-colors ${hoverClass}`}>Nosotros</Link></li>
             </ul>
           </div>
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-              Contacto
-            </p>
-            <ul className="space-y-2 text-sm" style={{ color: 'var(--muted)' }}>
-              <li><a href={CONTACT_URL} target="_blank" rel="noopener noreferrer" className="hover:opacity-80">Telegram ↗</a></li>
-              <li><Link href="/contacto" className="hover:opacity-80">Form de contacto</Link></li>
-              <li><Link href={`${PANEL_URL}/login`} className="hover:opacity-80">Iniciar sesión</Link></li>
+            <p className={`mb-3 text-xs font-semibold uppercase tracking-wider ${labelClass}`}>Contacto</p>
+            <ul className={`space-y-2 text-sm ${mutedClass}`}>
+              <li><a href={CONTACT_URL} target="_blank" rel="noopener noreferrer" className={`transition-colors ${hoverClass}`}>Telegram ↗</a></li>
+              <li><Link href="/contacto" className={`transition-colors ${hoverClass}`}>Form de contacto</Link></li>
+              <li><Link href={`${PANEL_URL}/login`} className={`transition-colors ${hoverClass}`}>Iniciar sesión</Link></li>
             </ul>
           </div>
         </div>
-        <div className="mt-10 pt-6 border-t flex flex-col items-center justify-between gap-3 sm:flex-row" style={{ borderColor: 'var(--glass-border)' }}>
-          <p className="text-xs" style={{ color: 'var(--muted)' }}>
-            © 2026 ColaCero · Hecho desde Cuba 🇨🇺
-          </p>
+        <div className={`mt-10 pt-6 border-t flex flex-col items-center justify-between gap-3 sm:flex-row ${borderClass}`}>
+          <p className={`text-xs ${mutedClass}`}>© 2026 ColaCero · Hecho desde Cuba 🇨🇺</p>
         </div>
       </div>
     </footer>
