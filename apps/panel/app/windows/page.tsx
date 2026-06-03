@@ -182,9 +182,9 @@ export default function WindowsPage() {
   return (
     <main className="min-h-screen">
       <header
-        className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white flex items-center justify-between"
+        className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white"
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <h1 className="text-lg font-bold text-gradient">Ventanas de recogida</h1>
             <p className="text-sm text-slate-500">

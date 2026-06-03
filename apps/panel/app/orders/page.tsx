@@ -155,14 +155,15 @@ export default function OrdersPage() {
     return (
         <main className="min-h-screen">
             {/* Header */}
-            <header className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white flex items-center justify-between">
-                <div className="flex items-center justify-between mb-3">
-                    <h1 className="text-lg font-bold text-gradient">Pedidos</h1>
+            <header className="sticky top-0 z-10 px-6 pt-4 pb-3 border-b border-slate-200 bg-white">
+                {/* Row 1: título + timestamp + refresh */}
+                <div className="flex items-center justify-between gap-4 mb-3">
+                    <h1 className="text-lg font-bold text-slate-900">Pedidos</h1>
                     <div className="flex items-center gap-2">
                         {lastUpdated && (
-                            <span className="text-xs font-mono hidden sm:inline text-slate-500">
-                {lastUpdated.toLocaleTimeString('es-CU', {hour: '2-digit', minute: '2-digit', second: '2-digit'})}
-              </span>
+                            <span className="text-xs font-mono hidden sm:inline text-slate-400">
+                                {lastUpdated.toLocaleTimeString('es-CU', {hour: '2-digit', minute: '2-digit', second: '2-digit'})}
+                            </span>
                         )}
                         <Button variant="outline" size="sm" onClick={() => void fetchOrders(true)}>
                             Actualizar
@@ -170,7 +171,7 @@ export default function OrdersPage() {
                     </div>
                 </div>
 
-                {/* Date navigation */}
+                {/* Row 2: date navigation */}
                 <div className="flex items-center gap-2">
                     <Button
                         variant="ghost" size="icon"
