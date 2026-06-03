@@ -221,15 +221,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                                     href={item.href}
                                     title={collapsed ? item.label : undefined}
                                     className={cn(
-                                        'flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-150',
+                                        'relative flex items-center gap-3 rounded-lg text-sm font-medium transition-colors duration-100',
                                         collapsed ? 'px-2 py-2.5 justify-center' : 'px-3 py-2.5',
                                         isActive
-                                            ? 'bg-indigo-50 text-indigo-600'
-                                            : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800',
+                                            ? 'text-indigo-600'
+                                            : 'text-slate-500 hover:text-slate-800',
                                     )}
                                 >
-                                    <span className="text-base flex-shrink-0">{item.icon}</span>
-                                    {!collapsed && <span className="truncate">{item.label}</span>}
+                                    {isActive && (
+                                        <motion.span
+                                            layoutId="sidebar-active"
+                                            className="absolute inset-0 rounded-lg bg-indigo-50"
+                                            transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                                        />
+                                    )}
+                                    <span className="relative z-10 text-base flex-shrink-0">{item.icon}</span>
+                                    {!collapsed && <span className="relative z-10 truncate">{item.label}</span>}
                                 </Link>
                             </Fragment>
                         )

@@ -1,9 +1,22 @@
 'use client'
 
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import type { PickupWindowGroup, Order, OrderStatus } from '../lib/api'
 import { OrderCard } from './order-card'
 import { Badge }    from '@/components/ui/badge'
 import { Button }   from '@/components/ui/button'
+
+// ── Variants ──────────────────────────────────────────────────────────────────
+
+const colVariants: Variants = {
+    hidden:  {},
+    visible: { transition: { staggerChildren: 0.07 } },
+}
+
+const cardVariants: Variants = {
+    hidden:  { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.28, ease: 'easeOut' } },
+}
 
 interface Props {
     window:   PickupWindowGroup
@@ -172,15 +185,29 @@ export function WindowGroup({ window: w, onAction, loading }: Props) {
                                         </span>
                                     )}
                                 </div>
-                                <div className="flex flex-col gap-2 p-2 min-h-[80px]">
+                                <motion.div
+                                    className="flex flex-col gap-2 p-2 min-h-[80px]"
+                                    variants={colVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                >
                                     {colOrders.length === 0 ? (
                                         <p className="py-4 text-center text-xs text-slate-300">—</p>
                                     ) : (
-                                        colOrders.map((order) => (
-                                            <OrderCard key={order.id} order={order} onAction={onAction} loading={loading} />
-                                        ))
+                                        <AnimatePresence initial={false}>
+                                        {colOrders.map((order) => (
+                                            <motion.div
+                                                key={order.id}
+                                                variants={cardVariants}
+                                                exit={{ opacity: 0, scale: 0.9, x: 10 }}
+                                                layout
+                                            >
+                                                <OrderCard order={order} onAction={onAction} loading={loading} />
+                                            </motion.div>
+                                        ))}
+                                        </AnimatePresence>
                                     )}
-                                </div>
+                                </motion.div>
                             </div>
                         )
                     })}

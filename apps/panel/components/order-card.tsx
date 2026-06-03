@@ -1,5 +1,6 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import type { Order, OrderStatus } from '../lib/api'
 import { Button } from '@/components/ui/button'
 import { Badge }  from '@/components/ui/badge'
@@ -27,7 +28,15 @@ export function OrderCard({ order, onAction, loading }: Props) {
     order.status === 'EXPIRED'
 
   return (
-    <div className={`bg-white rounded-xl border border-slate-200 p-3 transition-all hover:shadow-sm ${isDone ? 'opacity-40' : ''}`}>
+    <motion.div
+      className={`bg-white rounded-xl border border-slate-200 p-3 ${isDone ? 'opacity-40' : ''}`}
+      whileHover={isDone ? {} : {
+        y: -2,
+        boxShadow: '0 4px 12px rgba(15,23,42,0.08), 0 1px 4px rgba(15,23,42,0.05)',
+      }}
+      whileTap={isDone ? {} : { scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+    >
       {/* Code + customer + status dot */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0">
@@ -88,7 +97,7 @@ export function OrderCard({ order, onAction, loading }: Props) {
           )}
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
 
