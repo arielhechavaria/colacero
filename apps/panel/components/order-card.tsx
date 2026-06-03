@@ -27,17 +27,14 @@ export function OrderCard({ order, onAction, loading }: Props) {
     order.status === 'EXPIRED'
 
   return (
-    <div className={`glass rounded-xl p-3 transition-all hover:shadow-md ${isDone ? 'opacity-40' : ''}`}>
+    <div className={`bg-white rounded-xl border border-slate-200 p-3 transition-all hover:shadow-sm ${isDone ? 'opacity-40' : ''}`}>
       {/* Code + customer + status dot */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0">
-          <span
-            className="text-sm font-bold font-mono block text-gradient"
-            style={{ letterSpacing: '0.08em' }}
-          >
+          <span className="text-sm font-bold font-mono block text-indigo-600 tracking-wide">
             {order.pickupCode ?? '—'}
           </span>
-          <p className="text-[11px] truncate mt-0.5" style={{ color: 'var(--muted)' }}>
+          <p className="text-[11px] truncate mt-0.5 text-slate-500">
             {order.customer.displayName ?? order.customer.phone}
           </p>
         </div>
@@ -45,29 +42,23 @@ export function OrderCard({ order, onAction, loading }: Props) {
       </div>
 
       {/* Items */}
-      <ul
-        className="flex flex-col gap-0.5 mb-2 pt-2 border-t"
-        style={{ borderColor: 'var(--glass-border)' }}
-      >
+      <ul className="flex flex-col gap-0.5 mb-2 pt-2 border-t border-slate-100">
         {order.items.map((item) => (
           <li key={item.id} className="flex items-center text-[11px]">
-            <span style={{ color: 'var(--text)' }}>{item.name}</span>
-            <span className="ml-1" style={{ color: 'var(--muted)' }}>× {item.quantity}</span>
+            <span className="text-slate-900">{item.name}</span>
+            <span className="ml-1 text-slate-500">× {item.quantity}</span>
           </li>
         ))}
       </ul>
 
       {/* Total */}
-      <p className="text-xs font-semibold font-mono mb-2" style={{ color: 'var(--text)' }}>
+      <p className="text-xs font-semibold font-mono mb-2 text-slate-900">
         ${order.subtotal.toFixed(2)}
       </p>
 
       {/* Notas del cliente */}
       {order.notes && (
-        <p
-          className="mb-2 rounded-lg px-2 py-1.5 text-[11px] leading-snug"
-          style={{ backgroundColor: 'rgba(255,176,32,0.08)', color: 'var(--warning)', borderLeft: '2px solid var(--warning)' }}
-        >
+        <p className="mb-2 rounded-lg px-2 py-1.5 text-[11px] leading-snug bg-amber-50 text-amber-700 border-l-2 border-amber-400">
           📝 {order.notes}
         </p>
       )}

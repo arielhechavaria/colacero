@@ -38,20 +38,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                var t = localStorage.getItem('theme');
-                var dark = t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (dark) document.documentElement.classList.add('dark');
-              } catch(e) {}
-            `,
-          }}
-        />
-      </head>
+    <html lang="es">
+      <head />
       <body className={`${inter.variable} ${jetbrainsMono.variable} min-h-screen antialiased`}>
         <AppShell>
           {children}

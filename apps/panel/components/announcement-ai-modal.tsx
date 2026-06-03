@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { cn } from '@/lib/utils'
 
 const API_BASE = ''
 
@@ -12,25 +13,25 @@ type AiTone = 'casual' | 'formal' | 'friendly'
 
 const TYPES: { id: AiType; icon: string; label: string }[] = [
   { id: 'daily',      icon: '📅', label: 'Productos del día' },
-  { id: 'offer',      icon: '🔥', label: 'Oferta especial' },
-  { id: 'fresh',      icon: '🆕', label: 'Stock fresco' },
-  { id: 'reminder',   icon: '⏰', label: 'Recordatorio' },
-  { id: 'thank-you',  icon: '🙏', label: 'Agradecimiento' },
-  { id: 'custom',     icon: '✨', label: 'Personalizado' },
+  { id: 'offer',      icon: '🔥', label: 'Oferta especial'   },
+  { id: 'fresh',      icon: '🆕', label: 'Stock fresco'      },
+  { id: 'reminder',   icon: '⏰', label: 'Recordatorio'      },
+  { id: 'thank-you',  icon: '🙏', label: 'Agradecimiento'    },
+  { id: 'custom',     icon: '✨', label: 'Personalizado'     },
 ]
 
 const TONES: { id: AiTone; label: string; desc: string }[] = [
   { id: 'casual',   label: 'Cubano cercano', desc: 'Como hablándole a un vecino' },
-  { id: 'friendly', label: 'Entre amigos',   desc: 'Divertido pero respetuoso' },
+  { id: 'friendly', label: 'Entre amigos',   desc: 'Divertido pero respetuoso'   },
   { id: 'formal',   label: 'Profesional',    desc: 'Amable pero sin acartonarse' },
 ]
 
 interface Props {
-  open:            boolean
-  onClose:         () => void
-  onSelect:        (text: string) => void
-  productIds:      string[]
-  productNames?:   string[]
+  open:          boolean
+  onClose:       () => void
+  onSelect:      (text: string) => void
+  productIds:    string[]
+  productNames?: string[]
 }
 
 function csrfHeader(): Record<string, string> {
@@ -40,12 +41,12 @@ function csrfHeader(): Record<string, string> {
 }
 
 export function AnnouncementAiModal({ open, onClose, onSelect, productIds, productNames = [] }: Props) {
-  const [type,        setType]        = useState<AiType>('offer')
-  const [tone,        setTone]        = useState<AiTone>('casual')
+  const [type,         setType]         = useState<AiType>('offer')
+  const [tone,         setTone]         = useState<AiTone>('casual')
   const [customPrompt, setCustomPrompt] = useState('')
-  const [loading,     setLoading]     = useState(false)
-  const [variants,    setVariants]    = useState<string[]>([])
-  const [error,       setError]       = useState<string | null>(null)
+  const [loading,      setLoading]      = useState(false)
+  const [variants,     setVariants]     = useState<string[]>([])
+  const [error,        setError]        = useState<string | null>(null)
 
   if (!open) return null
 
@@ -67,11 +68,7 @@ export function AnnouncementAiModal({ open, onClose, onSelect, productIds, produ
       })
       const data = await res.json() as { variants?: string[]; error?: string; message?: string }
       if (!res.ok) {
-        if (data.error === 'ai_not_configured') {
-          setError(data.message ?? 'IA no configurada en el servidor.')
-        } else {
-          setError(data.message ?? data.error ?? 'Error al generar')
-        }
+        setError(data.message ?? data.error ?? 'Error al generar')
         return
       }
       setVariants(data.variants ?? [])
@@ -90,55 +87,38 @@ export function AnnouncementAiModal({ open, onClose, onSelect, productIds, produ
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8"
-      style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+      className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8 bg-black/60 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="glass relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl p-6"
-        style={{ border: '1px solid var(--glass-border)' }}
+        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white border border-slate-200 shadow-xl p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-3 mb-4">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3 mb-5">
           <div>
-            <h2 className="text-xl font-bold" style={{ color: 'var(--text)' }}>✨ Generar con IA</h2>
-            <p className="text-sm" style={{ color: 'var(--muted)' }}>
-              Claude genera 3 variantes para que elijas la mejor.
-            </p>
+            <h2 className="text-xl font-bold text-slate-900">✨ Generar con IA</h2>
+            <p className="text-sm text-slate-500">Claude genera 3 variantes para que elijas la mejor.</p>
           </div>
-          <button
-            onClick={onClose}
-            className="text-2xl leading-none"
-            style={{ color: 'var(--muted)' }}
-            aria-label="Cerrar"
-          >
-            ×
-          </button>
+          <button onClick={onClose} className="text-2xl leading-none text-slate-400 hover:text-slate-600" aria-label="Cerrar">×</button>
         </div>
 
         {/* Type selector */}
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-          Tipo de mensaje
-        </p>
-        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Tipo de mensaje</p>
+        <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {TYPES.map((t) => {
             const active = type === t.id
             return (
               <button
                 key={t.id}
                 onClick={() => setType(t.id)}
-                className="flex items-center gap-2 rounded-xl border p-3 text-left transition-colors"
-                style={
-                  active
-                    ? { backgroundColor: 'var(--primary-dim)', borderColor: 'var(--primary)' }
-                    : { backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }
-                }
+                className={cn(
+                  'flex items-center gap-2 rounded-xl border p-3 text-left transition-colors',
+                  active ? 'bg-indigo-50 border-indigo-300' : 'bg-white border-slate-200 hover:border-slate-300',
+                )}
               >
                 <span className="text-lg">{t.icon}</span>
-                <span
-                  className="text-xs font-semibold"
-                  style={{ color: active ? 'var(--primary)' : 'var(--text)' }}
-                >
+                <span className={cn('text-xs font-semibold', active ? 'text-indigo-600' : 'text-slate-700')}>
                   {t.label}
                 </span>
               </button>
@@ -147,32 +127,23 @@ export function AnnouncementAiModal({ open, onClose, onSelect, productIds, produ
         </div>
 
         {/* Tone selector */}
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-          Tono
-        </p>
-        <div className="mb-4 grid gap-2 sm:grid-cols-3">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Tono</p>
+        <div className="mb-5 grid gap-2 sm:grid-cols-3">
           {TONES.map((t) => {
             const active = tone === t.id
             return (
               <button
                 key={t.id}
                 onClick={() => setTone(t.id)}
-                className="rounded-xl border p-3 text-left transition-colors"
-                style={
-                  active
-                    ? { backgroundColor: 'var(--primary-dim)', borderColor: 'var(--primary)' }
-                    : { backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }
-                }
+                className={cn(
+                  'rounded-xl border p-3 text-left transition-colors',
+                  active ? 'bg-indigo-50 border-indigo-300' : 'bg-white border-slate-200 hover:border-slate-300',
+                )}
               >
-                <p
-                  className="text-xs font-semibold"
-                  style={{ color: active ? 'var(--primary)' : 'var(--text)' }}
-                >
+                <p className={cn('text-xs font-semibold', active ? 'text-indigo-600' : 'text-slate-700')}>
                   {t.label}
                 </p>
-                <p className="mt-0.5 text-[10px]" style={{ color: 'var(--muted)' }}>
-                  {t.desc}
-                </p>
+                <p className="mt-0.5 text-[10px] text-slate-500">{t.desc}</p>
               </button>
             )
           })}
@@ -181,9 +152,7 @@ export function AnnouncementAiModal({ open, onClose, onSelect, productIds, produ
         {/* Custom prompt */}
         {type === 'custom' && (
           <>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-              Instrucciones para la IA
-            </p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Instrucciones para la IA</p>
             <Textarea
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}
@@ -195,10 +164,10 @@ export function AnnouncementAiModal({ open, onClose, onSelect, productIds, produ
           </>
         )}
 
-        {/* Selected products info */}
+        {/* Products info */}
         {productIds.length > 0 && (
-          <p className="mb-4 rounded-lg border p-3 text-xs" style={{ borderColor: 'var(--glass-border)', color: 'var(--muted)' }}>
-            💡 La IA va a tener en cuenta los <strong>{productIds.length} productos</strong> que tenés seleccionados
+          <p className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+            💡 La IA va a tener en cuenta los <strong>{productIds.length} productos</strong> seleccionados
             {productNames.length > 0 && `: ${productNames.slice(0, 3).join(', ')}${productNames.length > 3 ? '…' : ''}`}.
           </p>
         )}
@@ -208,22 +177,22 @@ export function AnnouncementAiModal({ open, onClose, onSelect, productIds, produ
           <Button
             onClick={() => void generate()}
             disabled={loading || (type === 'custom' && !customPrompt.trim())}
-            className="w-full bg-gradient-teal-violet shadow-glow hover:opacity-90"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
           >
             {loading ? 'Generando con Claude…' : '✨ Generar 3 variantes'}
           </Button>
         )}
 
         {error && (
-          <p className="mt-3 rounded-xl px-4 py-2.5 text-sm" style={{ backgroundColor: 'rgba(220,38,38,0.1)', color: 'var(--error)', border: '1px solid rgba(220,38,38,0.2)' }}>
+          <p className="mt-3 rounded-xl px-4 py-2.5 text-sm bg-red-50 text-red-600 border border-red-200">
             {error}
           </p>
         )}
 
         {/* Variants */}
         {variants.length > 0 && (
-          <div className="mt-4">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
+          <div className="mt-5">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
               Variantes generadas — elegí una
             </p>
             <div className="space-y-3">
@@ -231,31 +200,18 @@ export function AnnouncementAiModal({ open, onClose, onSelect, productIds, produ
                 <button
                   key={i}
                   onClick={() => pickVariant(v)}
-                  className="block w-full rounded-2xl border p-4 text-left transition-all hover:border-[var(--primary)]"
-                  style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }}
+                  className="block w-full rounded-xl border border-slate-200 bg-white p-4 text-left transition-all hover:border-indigo-400 hover:shadow-sm"
                 >
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="text-[11px] font-bold" style={{ color: 'var(--primary)' }}>
-                      VARIANTE {i + 1}
-                    </span>
-                    <span className="text-[11px]" style={{ color: 'var(--muted)' }}>
-                      {v.length} chars
-                    </span>
+                    <span className="text-[11px] font-bold text-indigo-600">VARIANTE {i + 1}</span>
+                    <span className="text-[11px] text-slate-400">{v.length} chars</span>
                   </div>
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed" style={{ color: 'var(--text)' }}>
-                    {v}
-                  </p>
-                  <p className="mt-2 text-[11px] underline" style={{ color: 'var(--primary)' }}>
-                    Usar esta →
-                  </p>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{v}</p>
+                  <p className="mt-2 text-[11px] underline text-indigo-600">Usar esta →</p>
                 </button>
               ))}
             </div>
-            <Button
-              variant="outline"
-              onClick={() => { setVariants([]); setError(null) }}
-              className="mt-4 w-full"
-            >
+            <Button variant="outline" onClick={() => { setVariants([]); setError(null) }} className="mt-4 w-full">
               ↻ Generar nuevas variantes
             </Button>
           </div>

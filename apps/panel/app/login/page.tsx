@@ -53,11 +53,11 @@ export default function LoginPage() {
         </div>
 
         {/* Glass card */}
-        <div className="glass rounded-2xl p-8">
-          <h1 className="mb-1 text-xl font-bold" style={{ color: 'var(--text)', fontFamily: 'Inter, sans-serif' }}>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8">
+          <h1 className="mb-1 text-xl font-bold text-slate-900">
             Acceso al panel
           </h1>
-          <p className="mb-6 text-sm" style={{ color: 'var(--muted)' }}>
+          <p className="mb-6 text-sm text-slate-500">
             Ingresá con tu cuenta de negocio
           </p>
 
@@ -79,8 +79,7 @@ export default function LoginPage() {
                 <Label htmlFor="password">Contraseña</Label>
                 <Link
                   href="/forgot-password"
-                  className="text-xs"
-                  style={{ color: 'var(--muted)' }}
+                  className="text-xs text-slate-500"
                 >
                   ¿Olvidaste tu contraseña?
                 </Link>
@@ -96,7 +95,7 @@ export default function LoginPage() {
             </div>
 
             {error != null && (
-              <p className="rounded-xl px-4 py-2.5 text-sm" style={{ backgroundColor: 'rgba(220,38,38,0.1)', color: 'var(--error)', border: '1px solid rgba(220,38,38,0.2)' }}>
+              <p className="rounded-xl px-4 py-2.5 text-sm bg-red-50 text-red-600 border border-red-200">
                 {error}
               </p>
             )}
@@ -110,9 +109,9 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <p className="mt-5 text-center text-sm" style={{ color: 'var(--muted)' }}>
+          <p className="mt-5 text-center text-sm text-slate-500">
             ¿No tenés cuenta?{' '}
-            <Link href="/signup" style={{ color: 'var(--primary)' }}>
+            <Link href="/signup" className="text-indigo-600">
               Creá tu negocio gratis
             </Link>
           </p>

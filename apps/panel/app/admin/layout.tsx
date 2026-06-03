@@ -24,7 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (allowed !== true) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ color: 'var(--muted)' }}>
+      <div className="min-h-screen flex items-center justify-center text-slate-500">
         Verificando acceso…
       </div>
     )
@@ -32,22 +32,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b" style={{ borderColor: 'var(--border, rgba(255,255,255,0.08))' }}>
+      <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <h1 className="text-lg font-bold" style={{ color: 'var(--text)' }}>
+            <h1 className="text-lg font-bold text-slate-900">
               ColaCero Admin
             </h1>
             <nav className="flex items-center gap-4 text-sm">
-              <Link href="/admin/businesses" className="hover:underline" style={{ color: 'var(--muted)' }}>
+              <Link href="/admin/businesses" className="hover:underline text-slate-500 hover:text-slate-900">
                 Negocios
               </Link>
-              <Link href="/admin/leads" className="hover:underline" style={{ color: 'var(--muted)' }}>
+              <Link href="/admin/leads" className="hover:underline text-slate-500 hover:text-slate-900">
                 Leads
               </Link>
             </nav>
           </div>
-          <Link href="/orders" className="text-sm" style={{ color: 'var(--muted)' }}>
+          <Link href="/orders" className="text-sm text-slate-500 hover:text-slate-900">
             ← Volver al panel
           </Link>
         </div>

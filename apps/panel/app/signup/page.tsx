@@ -75,9 +75,9 @@ export default function SignupPage() {
   }
 
   function slugHintColor() {
-    if (slugStatus === 'ok')                                return '#22c55e'
-    if (slugStatus === 'taken' || slugStatus === 'invalid') return 'var(--error)'
-    return 'var(--muted)'
+    if (slugStatus === 'ok')                                return 'text-emerald-600'
+    if (slugStatus === 'taken' || slugStatus === 'invalid') return 'text-red-600'
+    return 'text-slate-500'
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -123,11 +123,11 @@ export default function SignupPage() {
           </div>
         </div>
 
-        <div className="glass rounded-2xl p-8">
-          <h1 className="mb-1 text-xl font-bold" style={{ color: 'var(--text)' }}>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8">
+          <h1 className="mb-1 text-xl font-bold text-slate-900">
             Crear mi negocio
           </h1>
-          <p className="mb-6 text-sm" style={{ color: 'var(--muted)' }}>
+          <p className="mb-6 text-sm text-slate-500">
             Gratis durante el beta · Sin tarjeta · Sin contratos
           </p>
 
@@ -156,7 +156,7 @@ export default function SignupPage() {
                 }}
                 placeholder="el-fogon"
               />
-              <p className="text-xs" style={{ color: slugHintColor() }}>{slugHint()}</p>
+              <p className={`text-xs ${slugHintColor()}`}>{slugHint()}</p>
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -212,8 +212,7 @@ export default function SignupPage() {
 
             {error != null && (
               <p
-                className="rounded-xl px-4 py-2.5 text-sm"
-                style={{ backgroundColor: 'rgba(220,38,38,0.1)', color: 'var(--error)', border: '1px solid rgba(220,38,38,0.2)' }}
+                className="rounded-xl px-4 py-2.5 text-sm bg-red-50 text-red-600 border border-red-200"
               >
                 {error}
               </p>
@@ -228,9 +227,9 @@ export default function SignupPage() {
             </Button>
           </form>
 
-          <p className="mt-5 text-center text-sm" style={{ color: 'var(--muted)' }}>
+          <p className="mt-5 text-center text-sm text-slate-500">
             ¿Ya tenés cuenta?{' '}
-            <Link href="/login" style={{ color: 'var(--primary)' }}>
+            <Link href="/login" className="text-indigo-600">
               Iniciá sesión
             </Link>
           </p>

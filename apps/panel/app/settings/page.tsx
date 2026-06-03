@@ -29,24 +29,15 @@ function GlassSelect(props: React.SelectHTMLAttributes<HTMLSelectElement> & { ch
   return (
     <select
       {...props}
-      className="w-full rounded-xl px-4 py-2.5 text-sm outline-none appearance-none"
-      style={{
-        background: 'var(--glass-bg)',
-        border:     '1px solid var(--glass-border)',
-        color:      'var(--text)',
-      }}
+      className="w-full rounded-xl px-4 py-2.5 text-sm outline-none appearance-none bg-white border border-slate-200 text-slate-900"
     />
   )
 }
 
 function Toast({ msg, type }: { msg: string; type: 'ok' | 'error' }) {
-  const bg  = type === 'ok' ? 'rgba(99,102,241,0.1)'  : 'rgba(248,113,113,0.08)'
-  const col = type === 'ok' ? '#818CF8'               : 'var(--error)'
-  const brd = type === 'ok' ? 'rgba(99,102,241,0.3)'  : 'rgba(248,113,113,0.2)'
   return (
     <div
-      className="rounded-xl px-4 py-3 text-sm"
-      style={{ background: bg, color: col, border: `1px solid ${brd}` }}
+      className={`rounded-xl px-4 py-3 text-sm ${type === 'ok' ? 'bg-indigo-50 text-indigo-500 border border-indigo-200' : 'bg-red-50 text-red-600 border border-red-200'}`}
     >
       {msg}
     </div>
@@ -103,7 +94,7 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
   }
 
   if (!profile) {
-    return <p className="text-sm py-8 text-center" style={{ color: 'var(--muted)' }}>Cargando…</p>
+    return <p className="text-sm py-8 text-center text-slate-500">Cargando…</p>
   }
 
   // Catalog URL — same host, port 3001 (or NEXT_PUBLIC_CATALOG_URL if set)
@@ -118,11 +109,11 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
       {feedback && <Toast {...feedback} />}
 
       {/* ── QR del catálogo ── */}
-      <div className="glass rounded-2xl p-5">
-        <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text)' }}>
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+        <p className="text-sm font-semibold mb-1 text-slate-900">
           Código QR del catálogo
         </p>
-        <p className="text-xs mb-4" style={{ color: 'var(--muted)' }}>
+        <p className="text-xs mb-4 text-slate-500">
           Compartilo con tus clientes o imprimilo en el local
         </p>
         <div className="flex items-start gap-5 flex-wrap">
@@ -137,12 +128,11 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
           {/* URL + copy */}
           <div className="flex flex-col gap-3 flex-1 min-w-0 justify-center">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--muted)' }}>
+              <p className="text-xs font-semibold uppercase tracking-wide mb-1 text-slate-500">
                 Link del catálogo
               </p>
               <p
-                className="text-sm font-mono break-all rounded-lg px-3 py-2"
-                style={{ background: 'var(--surface)', color: 'var(--primary)', border: '1px solid var(--border-glow)' }}
+                className="text-sm font-mono break-all rounded-lg px-3 py-2 bg-slate-50 text-indigo-600 border border-slate-200"
               >
                 {catalogUrl}
               </p>
@@ -158,7 +148,7 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
         </div>
       </div>
 
-      <div className="glass rounded-2xl p-5 flex flex-col gap-4">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="biz-name">Nombre del negocio</Label>
           <Input
@@ -187,15 +177,14 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
         {/* Ubicación del negocio */}
         <div className="flex flex-col gap-3 pt-1">
           <div>
-            <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Ubicación</p>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
+            <p className="text-sm font-semibold text-slate-900">Ubicación</p>
+            <p className="text-xs mt-0.5 text-slate-500">
               Tus clientes verán un botón "📍 Cómo llegar" en el catálogo.{' '}
               <a
                 href="https://maps.google.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline"
-                style={{ color: 'var(--primary)' }}
+                className="underline text-indigo-600"
               >
                 Abrí Google Maps
               </a>
@@ -249,8 +238,7 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
               href={`https://www.google.com/maps?q=${form.latitude},${form.longitude}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs w-fit rounded-lg px-3 py-1.5 transition-opacity hover:opacity-80"
-              style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: 'var(--primary)' }}
+              className="inline-flex items-center gap-1.5 text-xs w-fit rounded-lg px-3 py-1.5 transition-opacity hover:opacity-80 bg-slate-50 border border-slate-200 text-indigo-600"
             >
               📍 Ver ubicación en Maps
             </a>
@@ -272,7 +260,7 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
         </div>
 
         <div className="pt-1 flex items-center gap-3">
-          <p className="text-xs flex-1" style={{ color: 'var(--muted)' }}>
+          <p className="text-xs flex-1 text-slate-500">
             Slug: <span className="font-mono">{profile.slug}</span>
             {' · '}Plan: <span className="font-semibold">{profile.subscriptionStatus}</span>
           </p>
@@ -284,7 +272,7 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
         </div>
 
         {!isOwner && (
-          <p className="text-xs" style={{ color: 'var(--muted)' }}>
+          <p className="text-xs text-slate-500">
             Solo el OWNER puede editar el perfil del negocio.
           </p>
         )}
@@ -350,16 +338,16 @@ function StaffTab({ token, currentUserId, isOwner }: { token: string; currentUse
       {feedback && <Toast {...feedback} />}
 
       {/* Staff list */}
-      <div className="glass rounded-2xl overflow-hidden">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         {loading ? (
-          <p className="text-sm py-8 text-center" style={{ color: 'var(--muted)' }}>Cargando…</p>
+          <p className="text-sm py-8 text-center text-slate-500">Cargando…</p>
         ) : (
-          <ul className="divide-y" style={{ borderColor: 'var(--glass-border)' }}>
+          <ul className="divide-y divide-slate-200">
             {staff.map((u) => (
               <li key={u.id} className="flex items-center justify-between px-5 py-3">
                 <div>
-                  <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{u.email}</p>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
+                  <p className="text-sm font-medium text-slate-900">{u.email}</p>
+                  <p className="text-xs mt-0.5 text-slate-500">
                     {u.role}
                     {u.id === currentUserId && ' · tú'}
                   </p>
@@ -382,8 +370,8 @@ function StaffTab({ token, currentUserId, isOwner }: { token: string; currentUse
       {/* Add member */}
       {isOwner && (
         showForm ? (
-          <form onSubmit={handleAdd} className="glass rounded-2xl p-5 flex flex-col gap-3">
-            <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Nuevo miembro</p>
+          <form onSubmit={handleAdd} className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-3">
+            <p className="text-sm font-semibold text-slate-900">Nuevo miembro</p>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="staff-email">Email</Label>
               <Input
@@ -474,7 +462,7 @@ function PasswordTab({ token }: { token: string }) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {feedback && <Toast {...feedback} />}
 
-      <div className="glass rounded-2xl p-5 flex flex-col gap-4">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="pwd-current">Contraseña actual</Label>
           <Input
@@ -568,24 +556,23 @@ function TelegramTab({ token, isOwner }: { token: string; isOwner: boolean }) {
   }
 
   if (!settings) {
-    return <p className="text-sm py-8 text-center" style={{ color: 'var(--muted)' }}>Cargando…</p>
+    return <p className="text-sm py-8 text-center text-slate-500">Cargando…</p>
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {feedback && <Toast {...feedback} />}
 
-      <div className="glass rounded-2xl p-5 flex flex-col gap-4">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-4">
         <div>
-          <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Bot de Telegram</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--muted)' }}>
+          <p className="text-sm font-semibold text-slate-900">Bot de Telegram</p>
+          <p className="text-xs mt-1 text-slate-500">
             Creá un bot en{' '}
             <a
               href="https://t.me/BotFather"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline"
-              style={{ color: 'var(--primary)' }}
+              className="underline text-indigo-600"
             >
               @BotFather
             </a>
@@ -597,7 +584,7 @@ function TelegramTab({ token, isOwner }: { token: string; isOwner: boolean }) {
           <Label htmlFor="tg-token">
             Token del bot
             {settings.hasBotToken && (
-              <span className="ml-2 text-xs font-normal" style={{ color: 'var(--primary)' }}>
+              <span className="ml-2 text-xs font-normal text-indigo-600">
                 (ya configurado — dejá vacío para no cambiar)
               </span>
             )}
@@ -615,7 +602,7 @@ function TelegramTab({ token, isOwner }: { token: string; isOwner: boolean }) {
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="tg-channel">ID del canal de anuncios</Label>
-          <p className="text-xs" style={{ color: 'var(--muted)' }}>
+          <p className="text-xs text-slate-500">
             Canal donde se publican los anuncios (ej. promos, disponibilidad).
             Usá el username (@mi_canal) o el ID numérico (-100xxxxxxxxx).
           </p>
@@ -630,7 +617,7 @@ function TelegramTab({ token, isOwner }: { token: string; isOwner: boolean }) {
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="tg-notif">ID del grupo de notificaciones</Label>
-          <p className="text-xs" style={{ color: 'var(--muted)' }}>
+          <p className="text-xs text-slate-500">
             Grupo interno donde el bot avisa cuando llega un pedido nuevo.
             Usá el username (@mi_grupo) o el ID numérico (-100xxxxxxxxx).
           </p>
@@ -650,7 +637,7 @@ function TelegramTab({ token, isOwner }: { token: string; isOwner: boolean }) {
             </Button>
           </div>
         ) : (
-          <p className="text-xs" style={{ color: 'var(--muted)' }}>
+          <p className="text-xs text-slate-500">
             Solo el OWNER puede editar la configuración de Telegram.
           </p>
         )}
@@ -693,13 +680,12 @@ export default function SettingsPage() {
     <main className="min-h-screen">
       {/* Header */}
       <header
-        className="sticky top-0 z-10 glass px-6 py-4"
-        style={{ borderBottom: '1px solid var(--glass-border)' }}
+        className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white flex items-center justify-between"
       >
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-lg font-bold text-gradient">Configuración</h1>
           {currentUser && (
-            <span className="text-xs font-mono" style={{ color: 'var(--muted)' }}>
+            <span className="text-xs font-mono text-slate-500">
               {currentUser.email} · {currentUser.role}
             </span>
           )}
@@ -722,23 +708,18 @@ export default function SettingsPage() {
 
       {loading || !token || !currentUser ? (
         <div className="flex items-center justify-center py-20">
-          <p style={{ color: 'var(--muted)' }}>Cargando…</p>
+          <p className="text-slate-500">Cargando…</p>
         </div>
       ) : (
         <div className="px-6 py-5 lg:grid lg:grid-cols-[200px_1fr] lg:gap-6 lg:items-start">
 
           {/* Sidebar — desktop only */}
-          <nav className="hidden lg:flex flex-col gap-1 glass rounded-2xl p-3">
+          <nav className="hidden lg:flex flex-col gap-1 bg-white rounded-xl border border-slate-200 shadow-sm p-3">
             {TABS.map(({ key, label, icon }) => (
               <button
                 key={key}
                 onClick={() => setTab(key)}
-                className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-left transition-colors"
-                style={
-                  tab === key
-                    ? { background: 'var(--primary-dim)', color: 'var(--primary)', fontWeight: 600 }
-                    : { color: 'var(--text)' }
-                }
+                className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-left transition-colors ${tab === key ? 'bg-indigo-50 text-indigo-600 font-semibold' : 'text-slate-900'}`}
               >
                 <span>{icon}</span>
                 <span>{label}</span>

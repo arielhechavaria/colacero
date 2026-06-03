@@ -1,18 +1,5 @@
 'use client'
 
-/**
- * PATCH: apps/panel/components/window-group.tsx
- *
- * PROBLEMA: Kanban 3 columnas con min-w-[480px] fuerza scroll horizontal.
- *           OrderCard a ~160px de ancho hace los botones de acción inutilizables.
- *
- * FIX:
- *   - En mobile (<lg): lista vertical flat con badge de estado + botón primario
- *   - En desktop (lg+): kanban existente sin cambios
- *
- * Componentes shadcn/ui usados: Badge, Button (ya presentes en el repo)
- */
-
 import type { PickupWindowGroup, Order, OrderStatus } from '../lib/api'
 import { OrderCard } from './order-card'
 import { Badge }    from '@/components/ui/badge'
@@ -28,67 +15,38 @@ const COLUMNS: {
     key:      string
     label:    string
     statuses: OrderStatus[]
-    color:    string
-    bg:       string
+    dotClass: string
+    textClass: string
+    bgClass:  string
+    borderClass: string
 }[] = [
-    { key: 'pending',   label: 'Por preparar', statuses: ['CONFIRMED'],           color: 'var(--warning)',  bg: 'rgba(255,176,32,0.08)' },
-    { key: 'preparing', label: 'Preparando',   statuses: ['PREPARING'],           color: 'var(--primary)', bg: 'var(--primary-dim)'    },
-    { key: 'ready',     label: 'Listos',       statuses: ['READY', 'PICKED_UP'],  color: 'var(--success)', bg: 'rgba(0,214,143,0.08)'  },
+    { key: 'pending',   label: 'Por preparar', statuses: ['CONFIRMED'],           dotClass: 'bg-amber-400',   textClass: 'text-amber-700',   bgClass: 'bg-amber-50',   borderClass: 'border-amber-100' },
+    { key: 'preparing', label: 'Preparando',   statuses: ['PREPARING'],           dotClass: 'bg-indigo-500',  textClass: 'text-indigo-700',  bgClass: 'bg-indigo-50',  borderClass: 'border-indigo-100' },
+    { key: 'ready',     label: 'Listos',       statuses: ['READY', 'PICKED_UP'],  dotClass: 'bg-emerald-500', textClass: 'text-emerald-700', bgClass: 'bg-emerald-50', borderClass: 'border-emerald-100' },
 ]
 
 // ── Mobile: acción primaria según status ──────────────────────────────────────
 
-function MobileActionButton({
-                                order,
-                                onAction,
-                                loading,
-                            }: {
-    order:    Order
-    onAction: (orderId: string, newStatus: OrderStatus) => Promise<void>
-    loading:  boolean
+function MobileActionButton({ order, onAction, loading }: {
+    order: Order; onAction: (orderId: string, newStatus: OrderStatus) => Promise<void>; loading: boolean
 }) {
-    if (order.status === 'CONFIRMED') {
-        return (
-            <Button
-                variant="warning"
-                size="sm"
-                disabled={loading}
-                onClick={() => void onAction(order.id, 'PREPARING')}
-                className="text-xs"
-            >
-                Preparar
-            </Button>
-        )
-    }
-    if (order.status === 'PREPARING') {
-        return (
-            <Button
-                variant="success"
-                size="sm"
-                disabled={loading}
-                onClick={() => void onAction(order.id, 'READY')}
-                className="text-xs"
-            >
-                Listo ✓
-            </Button>
-        )
-    }
-    if (order.status === 'READY') {
-        return (
-            <Button
-                size="sm"
-                disabled={loading}
-                onClick={() => void onAction(order.id, 'PICKED_UP')}
-                className="text-xs bg-gradient-teal-violet shadow-glow hover:opacity-90"
-            >
-                Entregar
-            </Button>
-        )
-    }
+    if (order.status === 'CONFIRMED') return (
+        <Button variant="warning" size="sm" disabled={loading} onClick={() => void onAction(order.id, 'PREPARING')} className="text-xs">
+            Preparar
+        </Button>
+    )
+    if (order.status === 'PREPARING') return (
+        <Button variant="success" size="sm" disabled={loading} onClick={() => void onAction(order.id, 'READY')} className="text-xs">
+            Listo ✓
+        </Button>
+    )
+    if (order.status === 'READY') return (
+        <Button size="sm" disabled={loading} onClick={() => void onAction(order.id, 'PICKED_UP')} className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white">
+            Entregar
+        </Button>
+    )
     return null
 }
-
-// ── Mobile: badge de estado ───────────────────────────────────────────────────
 
 function MobileStatusBadge({ status }: { status: OrderStatus }) {
     const map: Partial<Record<OrderStatus, { variant: 'warning' | 'default' | 'success'; label: string }>> = {
@@ -101,52 +59,33 @@ function MobileStatusBadge({ status }: { status: OrderStatus }) {
     return <Badge variant={info.variant}>{info.label}</Badge>
 }
 
-// ── Mobile: fila de pedido ────────────────────────────────────────────────────
-
-function MobileOrderRow({
-                            order,
-                            onAction,
-                            loading,
-                        }: {
-    order:    Order
-    onAction: (orderId: string, newStatus: OrderStatus) => Promise<void>
-    loading:  boolean
+function MobileOrderRow({ order, onAction, loading }: {
+    order: Order; onAction: (orderId: string, newStatus: OrderStatus) => Promise<void>; loading: boolean
 }) {
-    const isDone =
-        order.status === 'PICKED_UP' ||
-        order.status === 'CANCELLED' ||
-        order.status === 'EXPIRED'
-
-    if (isDone) return null // Ocultamos completados en mobile para reducir ruido
+    const isDone = order.status === 'PICKED_UP' || order.status === 'CANCELLED' || order.status === 'EXPIRED'
+    if (isDone) return null
 
     return (
-        <div className="glass rounded-xl p-3 flex items-center gap-3">
-            {/* Info */}
+        <div className="bg-white rounded-xl border border-slate-200 p-3 flex items-center gap-3">
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-          <span
-              className="font-mono text-sm font-bold text-gradient"
-              style={{ letterSpacing: '0.06em' }}
-          >
-            {order.pickupCode ?? '—'}
-          </span>
+                    <span className="font-mono text-sm font-bold text-indigo-600 tracking-wide">
+                        {order.pickupCode ?? '—'}
+                    </span>
                     <MobileStatusBadge status={order.status} />
                 </div>
-                <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--muted)' }}>
+                <p className="text-xs mt-0.5 truncate text-slate-500">
                     {order.customer.displayName ?? order.customer.phone}
                 </p>
-                {/* Items summary */}
-                <p className="text-[11px] mt-0.5 truncate" style={{ color: 'var(--muted)' }}>
+                <p className="text-[11px] mt-0.5 truncate text-slate-500">
                     {order.items.map((i) => `${i.name} ×${i.quantity}`).join(', ')}
                 </p>
                 {order.notes && (
-                    <p className="text-[11px] mt-1" style={{ color: 'var(--warning)' }}>
+                    <p className="text-[11px] mt-1 text-amber-600">
                         📝 {order.notes}
                     </p>
                 )}
             </div>
-
-            {/* Action */}
             <div className="flex-shrink-0">
                 <MobileActionButton order={order} onAction={onAction} loading={loading} />
             </div>
@@ -162,34 +101,21 @@ export function WindowGroup({ window: w, onAction, loading }: Props) {
     )
     const occupancy = w.capacity > 0 ? Math.round((activeOrders.length / w.capacity) * 100) : 0
 
-    // Conteos por grupo para el header mobile
     const pendingCount   = activeOrders.filter(o => o.status === 'CONFIRMED').length
     const preparingCount = activeOrders.filter(o => o.status === 'PREPARING').length
     const readyCount     = activeOrders.filter(o => o.status === 'READY' || o.status === 'PICKED_UP').length
 
     return (
-        <section className="glass rounded-2xl overflow-hidden">
-            {/* Window header — compartido mobile/desktop */}
-            <div
-                className="flex items-center justify-between px-4 py-3 border-b"
-                style={{ borderColor: 'var(--border)' }}
-            >
+        <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            {/* Window header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
                 <div className="flex items-center gap-3 flex-wrap">
-          <span
-              className="rounded-lg px-2.5 py-1 text-xs font-semibold"
-              style={{
-                  fontFamily:      'var(--font-mono)',
-                  backgroundColor: 'var(--primary-dim)',
-                  color:           'var(--primary)',
-                  border:          '1px solid var(--border-glow)',
-              }}
-          >
-            {w.startTime} – {w.endTime}
-          </span>
-                    <span className="text-sm" style={{ color: 'var(--muted)' }}>
-            {activeOrders.length}/{w.capacity} cupos
-          </span>
-                    {/* Status summary badges — solo en mobile */}
+                    <span className="rounded-lg px-2.5 py-1 text-xs font-semibold font-mono bg-indigo-50 text-indigo-600 border border-indigo-100">
+                        {w.startTime} – {w.endTime}
+                    </span>
+                    <span className="text-sm text-slate-500">
+                        {activeOrders.length}/{w.capacity} cupos
+                    </span>
                     <div className="flex gap-1.5 lg:hidden">
                         {pendingCount   > 0 && <Badge variant="warning">{pendingCount} por prep.</Badge>}
                         {preparingCount > 0 && <Badge variant="default">{preparingCount} prep.</Badge>}
@@ -197,47 +123,35 @@ export function WindowGroup({ window: w, onAction, loading }: Props) {
                     </div>
                 </div>
 
-                {/* Occupancy bar — solo en desktop */}
+                {/* Occupancy bar — solo desktop */}
                 <div className="hidden lg:flex items-center gap-2">
-                    <div
-                        className="h-1.5 w-24 rounded-full overflow-hidden"
-                        style={{ backgroundColor: 'var(--border)' }}
-                    >
+                    <div className="h-1.5 w-24 rounded-full overflow-hidden bg-slate-100">
                         <div
                             className="h-full rounded-full transition-all"
                             style={{
                                 width:           `${Math.min(occupancy, 100)}%`,
-                                backgroundColor: occupancy > 80 ? 'var(--error)' : 'var(--primary)',
+                                backgroundColor: occupancy > 80 ? '#DC2626' : '#6366F1',
                             }}
                         />
                     </div>
-                    <span className="text-[11px]" style={{ fontFamily: 'var(--font-mono)', color: 'var(--muted)' }}>
-            {occupancy}%
-          </span>
+                    <span className="text-[11px] font-mono text-slate-500">{occupancy}%</span>
                 </div>
             </div>
 
-            {/* ── MOBILE: lista vertical ─────────────────────────────────── */}
+            {/* MOBILE: lista vertical */}
             <div className="lg:hidden">
                 {activeOrders.length === 0 ? (
-                    <p className="py-6 text-center text-sm" style={{ color: 'var(--muted)' }}>
-                        Sin pedidos activos
-                    </p>
+                    <p className="py-6 text-center text-sm text-slate-400">Sin pedidos activos</p>
                 ) : (
                     <div className="flex flex-col gap-2 p-3">
                         {activeOrders.map((order) => (
-                            <MobileOrderRow
-                                key={order.id}
-                                order={order}
-                                onAction={onAction}
-                                loading={loading}
-                            />
+                            <MobileOrderRow key={order.id} order={order} onAction={onAction} loading={loading} />
                         ))}
                     </div>
                 )}
             </div>
 
-            {/* ── DESKTOP: kanban 3 columnas (sin cambios) ──────────────── */}
+            {/* DESKTOP: kanban 3 columnas */}
             <div className="hidden lg:block overflow-x-auto">
                 <div className="grid grid-cols-3 min-w-[480px]">
                     {COLUMNS.map((col, i) => {
@@ -245,43 +159,25 @@ export function WindowGroup({ window: w, onAction, loading }: Props) {
                         return (
                             <div
                                 key={col.key}
-                                className="flex flex-col"
-                                style={i > 0 ? { borderLeft: '1px solid var(--border)' } : {}}
+                                className={`flex flex-col ${i > 0 ? 'border-l border-slate-100' : ''}`}
                             >
-                                <div
-                                    className="flex items-center gap-2 px-3 py-2"
-                                    style={{ borderBottom: '1px solid var(--border)' }}
-                                >
-                  <span
-                      className="inline-block h-2 w-2 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: col.color }}
-                  />
-                                    <span
-                                        className="text-[11px] font-semibold uppercase tracking-wide"
-                                        style={{ color: col.color }}
-                                    >
-                    {col.label}
-                  </span>
+                                <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100">
+                                    <span className={`inline-block h-2 w-2 rounded-full flex-shrink-0 ${col.dotClass}`} />
+                                    <span className={`text-[11px] font-semibold uppercase tracking-wide ${col.textClass}`}>
+                                        {col.label}
+                                    </span>
                                     {colOrders.length > 0 && (
-                                        <span
-                                            className="ml-auto text-[10px] font-semibold rounded-full px-1.5 py-0.5"
-                                            style={{ fontFamily: 'var(--font-mono)', backgroundColor: col.bg, color: col.color }}
-                                        >
-                      {colOrders.length}
-                    </span>
+                                        <span className={`ml-auto text-[10px] font-semibold font-mono rounded-full px-1.5 py-0.5 ${col.bgClass} ${col.textClass} border ${col.borderClass}`}>
+                                            {colOrders.length}
+                                        </span>
                                     )}
                                 </div>
                                 <div className="flex flex-col gap-2 p-2 min-h-[80px]">
                                     {colOrders.length === 0 ? (
-                                        <p className="py-4 text-center text-xs" style={{ color: 'var(--muted)' }}>—</p>
+                                        <p className="py-4 text-center text-xs text-slate-300">—</p>
                                     ) : (
                                         colOrders.map((order) => (
-                                            <OrderCard
-                                                key={order.id}
-                                                order={order}
-                                                onAction={onAction}
-                                                loading={loading}
-                                            />
+                                            <OrderCard key={order.id} order={order} onAction={onAction} loading={loading} />
                                         ))
                                     )}
                                 </div>

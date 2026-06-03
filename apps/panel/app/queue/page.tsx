@@ -84,7 +84,7 @@ export default function QueuePage() {
     return (
       <main className="min-h-screen px-6 py-8 max-w-4xl mx-auto space-y-3">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="glass rounded-2xl p-4">
+          <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
             <Skeleton className="h-5 w-40 mb-3" />
             <Skeleton className="h-4 w-full mb-2" />
             <Skeleton className="h-4 w-3/4" />
@@ -97,13 +97,12 @@ export default function QueuePage() {
   return (
     <main className="min-h-screen">
       <header
-        className="sticky top-0 z-10 glass px-6 py-4"
-        style={{ borderBottom: '1px solid var(--glass-border)' }}
+        className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white flex items-center justify-between"
       >
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-lg font-bold text-gradient">Cola de preparación</h1>
-            <p className="text-sm" style={{ color: 'var(--muted)' }}>
+            <p className="text-sm text-slate-500">
               {queue.length === 0
                 ? 'Todo al día ✓'
                 : `${queue.length} pedido${queue.length > 1 ? 's' : ''} pendiente${queue.length > 1 ? 's' : ''}`}
@@ -111,7 +110,7 @@ export default function QueuePage() {
           </div>
           <div className="flex items-center gap-3">
             {lastUpdated && (
-              <span className="text-xs font-mono" style={{ color: 'var(--muted)' }}>
+              <span className="text-xs font-mono text-slate-500">
                 {lastUpdated.toLocaleTimeString('es-CU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
             )}
@@ -125,18 +124,17 @@ export default function QueuePage() {
       <div className="px-6 py-5 flex flex-col gap-3">
         {error != null && (
           <div
-            className="rounded-xl px-4 py-3 text-sm"
-            style={{ backgroundColor: 'rgba(255,61,85,0.08)', color: 'var(--error)', border: '1px solid rgba(255,61,85,0.2)' }}
+            className="rounded-xl px-4 py-3 text-sm bg-red-50 text-red-600 border border-red-200"
           >
             {error}
           </div>
         )}
 
         {queue.length === 0 ? (
-          <div className="glass rounded-2xl p-10 text-center">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-10 text-center">
             <p className="text-3xl mb-2">✅</p>
-            <p className="font-semibold" style={{ color: 'var(--text)' }}>No hay pedidos pendientes</p>
-            <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
+            <p className="font-semibold text-slate-900">No hay pedidos pendientes</p>
+            <p className="text-sm mt-1 text-slate-500">
               Todos los pedidos están listos o entregados
             </p>
           </div>
@@ -146,32 +144,30 @@ export default function QueuePage() {
             const urgent = mins >= 20
 
             const borderColor = order.status === 'PREPARING'
-              ? urgent ? 'var(--error)' : 'var(--warning)'
-              : 'var(--glass-border)'
+              ? urgent ? '#DC2626' : '#D97706'
+              : '#E2E8F0'
 
             return (
               <div
                 key={order.id}
-                className="glass rounded-2xl p-4"
-                style={{ borderColor, borderWidth: '2px' }}
+                className="bg-white rounded-xl shadow-sm p-4 border-2"
+                style={{ borderColor }}
               >
                 {/* Position + code */}
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div className="flex items-center gap-3">
                     <span
-                      className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold flex-shrink-0"
-                      style={{ background: 'var(--primary-dim)', color: 'var(--primary)' }}
+                      className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold flex-shrink-0 bg-indigo-50 text-indigo-600"
                     >
                       {idx + 1}
                     </span>
                     <div>
                       <p
-                        className="text-xl font-bold tracking-widest"
-                        style={{ fontFamily: 'var(--font-mono)', color: 'var(--primary)' }}
+                        className="text-xl font-bold tracking-widest font-mono text-indigo-600"
                       >
                         {order.pickupCode ?? '—'}
                       </p>
-                      <p className="text-sm" style={{ color: 'var(--muted)' }}>
+                      <p className="text-sm text-slate-500">
                         {order.customer.displayName ?? order.customer.phone}
                       </p>
                     </div>
@@ -182,8 +178,7 @@ export default function QueuePage() {
                     </Badge>
                     {order.confirmedAt && (
                       <p
-                        className="mt-1 text-xs"
-                        style={{ color: urgent ? 'var(--error)' : 'var(--muted)', fontWeight: urgent ? 700 : 400 }}
+                        className={`mt-1 text-xs ${urgent ? 'text-red-600 font-bold' : 'text-slate-500'}`}
                       >
                         {mins} min esperando
                       </p>
@@ -193,14 +188,13 @@ export default function QueuePage() {
 
                 {/* Items */}
                 <ul
-                  className="mb-3 flex flex-col gap-1 border-t pt-3"
-                  style={{ borderColor: 'var(--border)' }}
+                  className="mb-3 flex flex-col gap-1 border-t border-slate-200 pt-3"
                 >
                   {order.items.map((item) => (
                     <li key={item.id} className="flex justify-between text-sm">
-                      <span style={{ color: 'var(--text)' }}>
+                      <span className="text-slate-900">
                         {item.name}
-                        <span className="ml-1" style={{ color: 'var(--muted)' }}>× {item.quantity} {item.unitLabel}</span>
+                        <span className="ml-1 text-slate-500">× {item.quantity} {item.unitLabel}</span>
                       </span>
                     </li>
                   ))}
@@ -209,8 +203,7 @@ export default function QueuePage() {
                 {/* Notas del cliente */}
                 {order.notes && (
                   <p
-                    className="mb-3 rounded-lg px-3 py-2 text-sm leading-snug"
-                    style={{ backgroundColor: 'rgba(255,176,32,0.08)', color: 'var(--warning)', borderLeft: '2px solid var(--warning)' }}
+                    className="mb-3 rounded-lg px-3 py-2 text-sm leading-snug bg-amber-50 text-amber-600 border-l-2 border-amber-400"
                   >
                     📝 {order.notes}
                   </p>

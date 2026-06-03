@@ -7,9 +7,9 @@ interface LogoProps {
 
 export function Logo({ size = 'md', variant = 'sidebar', className = '' }: LogoProps) {
   const fontSize   = size === 'sm' ? 14 : 17
-  const iconColor  = variant === 'sidebar' ? 'white' : 'var(--primary)'
-  const textColor  = variant === 'sidebar' ? 'white' : 'var(--text)'
-  const ceroColor  = variant === 'sidebar' ? 'white' : 'var(--primary)'
+  const iconColor  = variant === 'sidebar' ? 'white' : '#4F46E5'
+  const textColor  = variant === 'sidebar' ? 'white' : '#0F172A'
+  const ceroColor  = variant === 'sidebar' ? 'white' : '#4F46E5'
   const scale      = size === 'sm' ? 0.75 : 0.90
   const yWave      = size === 'sm' ? 4 : 6
 
@@ -53,7 +53,7 @@ export function Logo({ size = 'md', variant = 'sidebar', className = '' }: LogoP
       <text
         x={size === 'sm' ? 42 : 50}
         y={size === 'sm' ? 24 : 28}
-        fontFamily="var(--font-display)"
+        fontFamily="Inter, system-ui, sans-serif"
         fontWeight="800"
         fontSize={fontSize}
         fill={textColor}
@@ -64,7 +64,7 @@ export function Logo({ size = 'md', variant = 'sidebar', className = '' }: LogoP
       <text
         x={size === 'sm' ? 83 : 98}
         y={size === 'sm' ? 24 : 28}
-        fontFamily="var(--font-display)"
+        fontFamily="Inter, system-ui, sans-serif"
         fontWeight="400"
         fontSize={fontSize}
         fill={ceroColor}

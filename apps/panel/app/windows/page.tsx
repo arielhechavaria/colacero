@@ -163,7 +163,7 @@ export default function WindowsPage() {
       <main className="min-h-screen px-6 py-8 max-w-5xl mx-auto">
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="glass rounded-2xl p-5 flex items-center gap-4">
+            <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
               <Skeleton className="h-12 w-12 rounded-xl" />
               <div className="flex-1 space-y-2">
                 <Skeleton className="h-4 w-32" />
@@ -182,13 +182,12 @@ export default function WindowsPage() {
   return (
     <main className="min-h-screen">
       <header
-        className="sticky top-0 z-10 glass px-6 py-4"
-        style={{ borderBottom: '1px solid var(--glass-border)' }}
+        className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white flex items-center justify-between"
       >
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-lg font-bold text-gradient">Ventanas de recogida</h1>
-            <p className="text-sm" style={{ color: 'var(--muted)' }}>
+            <p className="text-sm text-slate-500">
               Configurá los horarios de entrega
             </p>
           </div>
@@ -209,16 +208,14 @@ export default function WindowsPage() {
       <div className="px-6 py-5 flex flex-col gap-4">
         {error != null && (
           <div
-            className="rounded-xl px-4 py-3 text-sm"
-            style={{ backgroundColor: 'rgba(255,61,85,0.08)', color: 'var(--error)', border: '1px solid rgba(255,61,85,0.2)' }}
+            className="rounded-xl px-4 py-3 text-sm bg-red-50 text-red-600 border border-red-200"
           >
             {error}
           </div>
         )}
         {success != null && (
           <div
-            className="rounded-xl px-4 py-3 text-sm"
-            style={{ backgroundColor: 'rgba(0,214,143,0.1)', color: 'var(--success)', border: '1px solid rgba(0,214,143,0.25)' }}
+            className="rounded-xl px-4 py-3 text-sm bg-emerald-50 text-emerald-600 border border-emerald-200"
           >
             {success}
           </div>
@@ -228,11 +225,10 @@ export default function WindowsPage() {
         {showForm && (
           <form
             onSubmit={(e) => void handleCreate(e)}
-            className="glass rounded-2xl p-5 flex flex-col gap-3"
+            className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-3"
           >
             <p
-              className="font-semibold"
-              style={{ fontFamily: 'var(--font-display)', color: 'var(--text)' }}
+              className="font-semibold text-slate-900"
             >
               Nueva ventana
             </p>
@@ -293,10 +289,10 @@ export default function WindowsPage() {
 
         {/* Windows grouped by date */}
         {Object.keys(grouped).length === 0 ? (
-          <div className="glass rounded-2xl p-10 text-center flex flex-col items-center gap-3">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-10 text-center flex flex-col items-center gap-3">
             <span className="text-4xl">📅</span>
-            <p className="font-semibold" style={{ color: 'var(--text)' }}>No hay ventanas configuradas</p>
-            <p className="text-sm max-w-xs" style={{ color: 'var(--muted)' }}>
+            <p className="font-semibold text-slate-900">No hay ventanas configuradas</p>
+            <p className="text-sm max-w-xs text-slate-500">
               Sin ventanas, los clientes no pueden confirmar pedidos.
             </p>
             <div className="flex gap-2 flex-wrap justify-center mt-1">
@@ -317,11 +313,10 @@ export default function WindowsPage() {
           Object.entries(grouped).map(([date, wins]) => (
             <section
               key={date}
-              className="glass rounded-2xl p-4"
+              className="bg-white rounded-xl border border-slate-200 shadow-sm p-4"
             >
               <p
-                className="mb-3 text-sm font-semibold capitalize"
-                style={{ color: 'var(--muted)' }}
+                className="mb-3 text-sm font-semibold capitalize text-slate-500"
               >
                 {formatDate(date)}
               </p>
@@ -329,21 +324,15 @@ export default function WindowsPage() {
                 {wins.map((w) => (
                   <div
                     key={w.id}
-                    className="flex items-center justify-between rounded-xl px-4 py-3"
-                    style={{
-                      background:  'var(--glass-bg)',
-                      border:      '1px solid var(--glass-border)',
-                      opacity:     w.isOpen ? 1 : 0.5,
-                    }}
+                    className={`flex items-center justify-between rounded-xl px-4 py-3 bg-slate-50 border border-slate-200 ${w.isOpen ? '' : 'opacity-50'}`}
                   >
                     <div>
                       <p
-                        className="font-medium"
-                        style={{ fontFamily: 'var(--font-mono)', color: 'var(--text)' }}
+                        className="font-medium font-mono text-slate-900"
                       >
                         {w.startTime} – {w.endTime}
                       </p>
-                      <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
+                      <p className="text-xs mt-0.5 text-slate-500">
                         {w.ordersCount}/{w.capacity} pedidos
                         {!w.isOpen && <span className="ml-2">· cerrada</span>}
                       </p>

@@ -14,11 +14,11 @@ const statusLabel: Record<LeadStatus, string> = {
 }
 
 const statusColor: Record<LeadStatus, string> = {
-  NEW:        'bg-blue-500/15 text-blue-400 border-blue-500/30',
-  CONTACTED:  'bg-amber-500/15 text-amber-400 border-amber-500/30',
-  TRIAL:      'bg-violet-500/15 text-violet-400 border-violet-500/30',
-  CONVERTED:  'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-  LOST:       'bg-slate-500/15 text-slate-400 border-slate-500/30',
+  NEW:        'bg-blue-100 text-blue-700 border-blue-200',
+  CONTACTED:  'bg-amber-100 text-amber-700 border-amber-200',
+  TRIAL:      'bg-violet-100 text-violet-700 border-violet-200',
+  CONVERTED:  'bg-emerald-100 text-emerald-700 border-emerald-200',
+  LOST:       'bg-slate-100 text-slate-600 border-slate-200',
 }
 
 const STATUS_VALUES: LeadStatus[] = ['NEW', 'CONTACTED', 'TRIAL', 'CONVERTED', 'LOST']
@@ -31,7 +31,6 @@ function formatDate(iso: string): string {
 function csvEscape(value: unknown): string {
   if (value === null || value === undefined) return ''
   const s = String(value)
-  // Si contiene coma, comilla doble o newline → wrap en comillas y escape comillas
   if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`
   return s
 }
@@ -43,8 +42,6 @@ function downloadCsv(leads: Lead[]) {
   ]
   const rows = leads.map((l) => headers.map((h) => csvEscape((l as unknown as Record<string, unknown>)[h])))
   const csv  = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n')
-
-  // BOM para que Excel reconozca UTF-8 (acentos OK)
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
   const url  = URL.createObjectURL(blob)
   const a    = document.createElement('a')
@@ -95,18 +92,17 @@ export default function AdminLeadsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>
+          <h2 className="text-2xl font-bold text-slate-900">
             Leads ({leads.length})
           </h2>
-          <p className="text-sm" style={{ color: 'var(--muted)' }}>
+          <p className="text-sm text-slate-500">
             Interesados que dejaron sus datos en la landing o página de contacto.
           </p>
         </div>
         {leads.length > 0 && (
           <button
             onClick={() => downloadCsv(filtered)}
-            className="rounded-xl px-4 py-2 text-sm font-medium glass hover:opacity-90"
-            style={{ color: 'var(--text)' }}
+            className="rounded-xl px-4 py-2 text-sm font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors"
           >
             ↓ Exportar CSV{filter !== 'ALL' ? ` (${filter})` : ''}
           </button>
@@ -117,10 +113,11 @@ export default function AdminLeadsPage() {
       <div className="flex flex-wrap gap-2">
         <button
           onClick={() => setFilter('ALL')}
-          className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
-            filter === 'ALL' ? 'bg-white/10' : 'opacity-60 hover:opacity-100'
+          className={`rounded-full px-3 py-1 text-xs font-semibold border transition-all ${
+            filter === 'ALL'
+              ? 'bg-indigo-50 text-indigo-600 border-indigo-200'
+              : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
           }`}
-          style={{ color: 'var(--text)', border: '1px solid var(--glass-border)' }}
         >
           Todos ({leads.length})
         </button>
@@ -128,10 +125,11 @@ export default function AdminLeadsPage() {
           <button
             key={s}
             onClick={() => setFilter(s)}
-            className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
-              filter === s ? 'bg-white/10' : 'opacity-60 hover:opacity-100'
+            className={`rounded-full px-3 py-1 text-xs font-semibold border transition-all ${
+              filter === s
+                ? 'bg-indigo-50 text-indigo-600 border-indigo-200'
+                : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
             }`}
-            style={{ color: 'var(--text)', border: '1px solid var(--glass-border)' }}
           >
             {statusLabel[s]} ({stats[s]})
           </button>
@@ -139,12 +137,12 @@ export default function AdminLeadsPage() {
       </div>
 
       {loading ? (
-        <p style={{ color: 'var(--muted)' }}>Cargando…</p>
+        <p className="text-slate-500">Cargando…</p>
       ) : filtered.length === 0 ? (
-        <div className="glass rounded-2xl p-12 text-center">
+        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
           <p className="text-4xl mb-3">📭</p>
-          <p className="font-semibold" style={{ color: 'var(--text)' }}>Sin leads en este filtro</p>
-          <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
+          <p className="font-semibold text-slate-900">Sin leads en este filtro</p>
+          <p className="text-sm mt-1 text-slate-500">
             Cuando alguien complete el form de contacto, va a aparecer acá.
           </p>
         </div>
@@ -153,15 +151,14 @@ export default function AdminLeadsPage() {
           {filtered.map((lead) => (
             <div
               key={lead.id}
-              className="glass rounded-2xl p-5"
-              style={{ border: '1px solid var(--glass-border)' }}
+              className="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
             >
               <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                 <div>
-                  <p className="font-semibold" style={{ color: 'var(--text)' }}>
+                  <p className="font-semibold text-slate-900">
                     <a href={`mailto:${lead.email}`} className="hover:underline">{lead.email}</a>
                   </p>
-                  <p className="text-xs mt-1" style={{ color: 'var(--muted)' }}>
+                  <p className="text-xs mt-1 text-slate-500">
                     {lead.telegram && <>Telegram: <span className="font-medium">{lead.telegram}</span> · </>}
                     {lead.businessKind && <>Negocio: <span className="font-medium">{lead.businessKind}</span> · </>}
                     {formatDate(lead.createdAt)} · {lead.source}
@@ -171,7 +168,7 @@ export default function AdminLeadsPage() {
               </div>
 
               {lead.message && (
-                <p className="mb-3 rounded-xl border p-3 text-sm leading-relaxed" style={{ borderColor: 'var(--glass-border)', color: 'var(--muted)' }}>
+                <p className="mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm leading-relaxed text-slate-600">
                   {lead.message}
                 </p>
               )}
@@ -182,14 +179,11 @@ export default function AdminLeadsPage() {
                     key={s}
                     onClick={() => void changeStatus(lead, s)}
                     disabled={lead.status === s}
-                    className={`rounded-lg px-3 py-1 text-xs font-medium transition-all disabled:opacity-30 ${
-                      lead.status === s ? '' : 'hover:opacity-80'
+                    className={`rounded-lg px-3 py-1 text-xs font-medium border transition-all disabled:opacity-40 ${
+                      lead.status === s
+                        ? 'bg-indigo-50 text-indigo-600 border-indigo-200'
+                        : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300 hover:text-slate-700'
                     }`}
-                    style={{
-                      backgroundColor: lead.status === s ? 'var(--primary-dim)' : 'transparent',
-                      border:          '1px solid var(--glass-border)',
-                      color:           lead.status === s ? 'var(--primary)' : 'var(--muted)',
-                    }}
                   >
                     → {statusLabel[s]}
                   </button>

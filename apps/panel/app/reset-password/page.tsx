@@ -23,8 +23,8 @@ function ResetPasswordForm() {
   if (!token) {
     return (
       <>
-        <h1 className="mb-2 text-xl font-bold" style={{ color: 'var(--text)' }}>Link inválido</h1>
-        <p className="mb-6 text-sm" style={{ color: 'var(--muted)' }}>
+        <h1 className="mb-2 text-xl font-bold text-slate-900">Link inválido</h1>
+        <p className="mb-6 text-sm text-slate-500">
           Este link de reset no es válido. Solicitá uno nuevo.
         </p>
         <Link href="/forgot-password">
@@ -67,10 +67,10 @@ function ResetPasswordForm() {
   if (done) {
     return (
       <>
-        <h1 className="mb-2 text-xl font-bold" style={{ color: 'var(--text)' }}>
+        <h1 className="mb-2 text-xl font-bold text-slate-900">
           ¡Contraseña actualizada!
         </h1>
-        <p className="text-sm" style={{ color: 'var(--muted)' }}>
+        <p className="text-sm text-slate-500">
           Tu contraseña fue restablecida. Redirigiendo al login…
         </p>
       </>
@@ -79,10 +79,10 @@ function ResetPasswordForm() {
 
   return (
     <>
-      <h1 className="mb-1 text-xl font-bold" style={{ color: 'var(--text)', fontFamily: 'Inter, sans-serif' }}>
+      <h1 className="mb-1 text-xl font-bold text-slate-900">
         Nueva contraseña
       </h1>
-      <p className="mb-6 text-sm" style={{ color: 'var(--muted)' }}>
+      <p className="mb-6 text-sm text-slate-500">
         Mínimo 10 caracteres.
       </p>
 
@@ -113,7 +113,7 @@ function ResetPasswordForm() {
         </div>
 
         {error != null && (
-          <p className="rounded-xl px-4 py-2.5 text-sm" style={{ backgroundColor: 'rgba(220,38,38,0.1)', color: 'var(--error)', border: '1px solid rgba(220,38,38,0.2)' }}>
+          <p className="rounded-xl px-4 py-2.5 text-sm bg-red-50 text-red-600 border border-red-200">
             {error}
           </p>
         )}
@@ -126,7 +126,7 @@ function ResetPasswordForm() {
           {loading ? 'Guardando…' : 'Cambiar contraseña →'}
         </Button>
 
-        <Link href="/login" className="text-center text-sm" style={{ color: 'var(--muted)' }}>
+        <Link href="/login" className="text-center text-sm text-slate-500">
           ← Volver al login
         </Link>
       </form>
@@ -155,8 +155,8 @@ export default function ResetPasswordPage() {
           </div>
         </div>
 
-        <div className="glass rounded-2xl p-8">
-          <Suspense fallback={<p style={{ color: 'var(--muted)' }}>Cargando…</p>}>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8">
+          <Suspense fallback={<p className="text-slate-500">Cargando…</p>}>
             <ResetPasswordForm />
           </Suspense>
         </div>

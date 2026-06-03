@@ -263,13 +263,12 @@ export default function AnnouncementsPage() {
   return (
     <main className="min-h-screen">
       <header
-        className="sticky top-0 z-10 glass px-6 py-4"
-        style={{ borderBottom: '1px solid var(--glass-border)' }}
+        className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white flex items-center justify-between"
       >
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-lg font-bold text-gradient">Anuncios</h1>
-            <p className="text-sm" style={{ color: 'var(--muted)' }}>
+            <p className="text-sm text-slate-500">
               Publicá mensajes en tu canal de Telegram
             </p>
           </div>
@@ -284,9 +283,9 @@ export default function AnnouncementsPage() {
         <div className="flex flex-col gap-4">
 
           {/* Plantillas */}
-          <section className="glass rounded-2xl p-5">
+          <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+              <p className="text-sm font-semibold text-slate-900">
                 ⚡ Plantillas
               </p>
               <Button
@@ -304,21 +303,15 @@ export default function AnnouncementsPage() {
                   <button
                     key={tpl.id}
                     onClick={() => applyTemplate(tpl)}
-                    className="flex flex-col items-start rounded-xl border p-3 text-left transition-all hover:border-[var(--primary)]"
-                    style={
-                      active
-                        ? { backgroundColor: 'var(--primary-dim)', borderColor: 'var(--primary)' }
-                        : { backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }
-                    }
+                    className={`flex flex-col items-start rounded-xl border p-3 text-left transition-all hover:border-indigo-400 ${active ? 'bg-indigo-50 border-indigo-400' : 'bg-white border-slate-200'}`}
                   >
                     <span className="text-lg">{tpl.icon}</span>
                     <span
-                      className="mt-1 text-xs font-semibold leading-tight"
-                      style={{ color: active ? 'var(--primary)' : 'var(--text)' }}
+                      className={`mt-1 text-xs font-semibold leading-tight ${active ? 'text-indigo-600' : 'text-slate-900'}`}
                     >
                       {tpl.name}
                     </span>
-                    <span className="mt-0.5 text-[10px] leading-tight" style={{ color: 'var(--muted)' }}>
+                    <span className="mt-0.5 text-[10px] leading-tight text-slate-500">
                       {tpl.tagline}
                     </span>
                   </button>
@@ -328,13 +321,13 @@ export default function AnnouncementsPage() {
           </section>
 
           {/* Productos */}
-          <section className="glass rounded-2xl p-5">
+          <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
             <button
               type="button"
               onClick={() => setProdExpanded((v) => !v)}
               className="flex w-full items-center justify-between mb-3"
             >
-              <p className="text-sm font-semibold flex items-center gap-1.5" style={{ color: 'var(--text)' }}>
+              <p className="text-sm font-semibold flex items-center gap-1.5 text-slate-900">
                 🛒 Productos a destacar
                 {selectedProd.size > 0 && (
                   <Badge className="bg-[var(--primary-dim)] text-[var(--primary)] border-[var(--border-glow)]">
@@ -342,7 +335,7 @@ export default function AnnouncementsPage() {
                   </Badge>
                 )}
               </p>
-              <span className="text-xs transition-transform duration-200" style={{ color: 'var(--muted)', display: 'inline-block', transform: prodExpanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}>▾</span>
+              <span className={`text-xs transition-transform duration-200 text-slate-500 inline-block ${prodExpanded ? 'rotate-0' : '-rotate-90'}`}>▾</span>
             </button>
             {prodExpanded && (
               loadingP ? (
@@ -350,7 +343,7 @@ export default function AnnouncementsPage() {
                   {[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
                 </div>
               ) : activeProducts.length === 0 ? (
-                <p className="text-xs" style={{ color: 'var(--muted)' }}>No hay productos activos.</p>
+                <p className="text-xs text-slate-500">No hay productos activos.</p>
               ) : (
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {activeProducts.map((p) => {
@@ -359,17 +352,12 @@ export default function AnnouncementsPage() {
                       <button
                         key={p.id}
                         onClick={() => toggleProduct(p)}
-                        className="flex flex-col items-start rounded-xl border p-3 text-left transition-colors"
-                        style={
-                          on
-                            ? { backgroundColor: 'var(--primary-dim)', borderColor: 'var(--primary)' }
-                            : { backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }
-                        }
+                        className={`flex flex-col items-start rounded-xl border p-3 text-left transition-colors ${on ? 'bg-indigo-50 border-indigo-400' : 'bg-white border-slate-200'}`}
                       >
-                        <span className="text-xs font-semibold" style={{ color: on ? 'var(--primary)' : 'var(--text)' }}>
+                        <span className={`text-xs font-semibold ${on ? 'text-indigo-600' : 'text-slate-900'}`}>
                           {on ? '✓ ' : ''}{p.name}
                         </span>
-                        <span className="mt-0.5 text-[10px]" style={{ color: 'var(--muted)' }}>
+                        <span className="mt-0.5 text-[10px] text-slate-500">
                           ${p.unitPrice}/{p.unitLabel}
                         </span>
                       </button>
@@ -381,12 +369,12 @@ export default function AnnouncementsPage() {
           </section>
 
           {/* Editor */}
-          <section className="glass rounded-2xl p-5">
+          <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+              <p className="text-sm font-semibold text-slate-900">
                 ✏️ Mensaje
               </p>
-              <span className="text-xs" style={{ color: charsLeft < 200 ? 'var(--warning)' : 'var(--muted)' }}>
+              <span className={`text-xs ${charsLeft < 200 ? 'text-amber-600' : 'text-slate-500'}`}>
                 {charsLeft} chars
               </span>
             </div>
@@ -417,7 +405,7 @@ export default function AnnouncementsPage() {
 
             {/* Schedule */}
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <label className="flex items-center gap-2 text-xs" style={{ color: 'var(--muted)' }}>
+              <label className="flex items-center gap-2 text-xs text-slate-500">
                 🕐 Programar para:
               </label>
               <input
@@ -426,11 +414,10 @@ export default function AnnouncementsPage() {
                 onChange={(e) => setScheduledAt(e.target.value)}
                 suppressHydrationWarning
                 min={new Date().toISOString().slice(0, 16)}
-                className="rounded-lg border bg-transparent px-3 py-1.5 text-sm"
-                style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+                className="rounded-lg border border-slate-200 bg-transparent px-3 py-1.5 text-sm text-slate-900"
               />
               {scheduledAt && (
-                <button onClick={() => setScheduledAt('')} className="text-xs underline" style={{ color: 'var(--muted)' }}>
+                <button onClick={() => setScheduledAt('')} className="text-xs underline text-slate-500">
                   Limpiar
                 </button>
               )}
@@ -475,29 +462,21 @@ export default function AnnouncementsPage() {
         <div className="mt-4 flex flex-col gap-4 lg:mt-0">
 
           {/* Preview */}
-          <section className="glass rounded-2xl p-5">
+          <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+              <p className="text-sm font-semibold text-slate-900">
                 👁 Preview
               </p>
-              <div className="flex rounded-lg border p-0.5" style={{ borderColor: 'var(--border)' }}>
+              <div className="flex rounded-lg border border-slate-200 p-0.5">
                 <button
                   onClick={() => setPreviewMode('text')}
-                  className="rounded px-2 py-1 text-xs font-medium transition-colors"
-                  style={{
-                    backgroundColor: previewMode === 'text' ? 'var(--primary-dim)' : 'transparent',
-                    color:           previewMode === 'text' ? 'var(--primary)' : 'var(--muted)',
-                  }}
+                  className={`rounded px-2 py-1 text-xs font-medium transition-colors ${previewMode === 'text' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500'}`}
                 >
                   Texto
                 </button>
                 <button
                   onClick={() => setPreviewMode('png')}
-                  className="rounded px-2 py-1 text-xs font-medium transition-colors"
-                  style={{
-                    backgroundColor: previewMode === 'png' ? 'var(--primary-dim)' : 'transparent',
-                    color:           previewMode === 'png' ? 'var(--primary)' : 'var(--muted)',
-                  }}
+                  className={`rounded px-2 py-1 text-xs font-medium transition-colors ${previewMode === 'png' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500'}`}
                 >
                   🎨 Imagen
                 </button>
@@ -518,13 +497,13 @@ export default function AnnouncementsPage() {
           </section>
 
           {/* Historial */}
-          <section className="glass rounded-2xl p-5">
+          <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
             <button
               type="button"
               onClick={() => setHistoryExpanded((v) => !v)}
               className="flex w-full items-center justify-between mb-3"
             >
-              <p className="text-sm font-semibold flex items-center gap-1.5" style={{ color: 'var(--text)' }}>
+              <p className="text-sm font-semibold flex items-center gap-1.5 text-slate-900">
                 📜 Historial
                 {announcements.length > 0 && (
                   <Badge className="bg-[var(--primary-dim)] text-[var(--primary)] border-[var(--border-glow)]">
@@ -532,7 +511,7 @@ export default function AnnouncementsPage() {
                   </Badge>
                 )}
               </p>
-              <span className="text-xs transition-transform duration-200" style={{ color: 'var(--muted)', display: 'inline-block', transform: historyExpanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}>▾</span>
+              <span className={`text-xs transition-transform duration-200 text-slate-500 inline-block ${historyExpanded ? 'rotate-0' : '-rotate-90'}`}>▾</span>
             </button>
 
             {historyExpanded && (
@@ -541,12 +520,7 @@ export default function AnnouncementsPage() {
             <div className="mb-3 flex flex-wrap gap-1.5">
               <button
                 onClick={() => setHistoryFilter('ALL')}
-                className="rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all"
-                style={{
-                  backgroundColor: historyFilter === 'ALL' ? 'var(--primary-dim)' : 'transparent',
-                  border:          '1px solid var(--glass-border)',
-                  color:           historyFilter === 'ALL' ? 'var(--primary)' : 'var(--muted)',
-                }}
+                className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all border border-slate-200 ${historyFilter === 'ALL' ? 'bg-indigo-50 text-indigo-600' : 'bg-transparent text-slate-500'}`}
               >
                 Todos ({announcements.length})
               </button>
@@ -557,12 +531,7 @@ export default function AnnouncementsPage() {
                   <button
                     key={s}
                     onClick={() => setHistoryFilter(s)}
-                    className="rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all"
-                    style={{
-                      backgroundColor: historyFilter === s ? 'var(--primary-dim)' : 'transparent',
-                      border:          '1px solid var(--glass-border)',
-                      color:           historyFilter === s ? 'var(--primary)' : 'var(--muted)',
-                    }}
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all border border-slate-200 ${historyFilter === s ? 'bg-indigo-50 text-indigo-600' : 'bg-transparent text-slate-500'}`}
                   >
                     {statusLabel[s]} ({count})
                   </button>
@@ -585,12 +554,11 @@ export default function AnnouncementsPage() {
                 {filteredHistory.map((a) => (
                   <div
                     key={a.id}
-                    className="rounded-xl border p-3"
-                    style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}
+                    className="rounded-xl border border-slate-200 bg-slate-50 p-3"
                   >
                     <div className="mb-1.5 flex items-start justify-between gap-2">
                       <Badge className={statusColor[a.status]}>{statusLabel[a.status]}</Badge>
-                      <span className="text-[10px]" style={{ color: 'var(--muted)' }}>
+                      <span className="text-[10px] text-slate-500">
                         {a.status === 'SCHEDULED' && a.scheduledAt
                           ? `Para ${formatWhen(a.scheduledAt)}`
                           : a.status === 'SENT' && a.sentAt
@@ -599,13 +567,12 @@ export default function AnnouncementsPage() {
                       </span>
                     </div>
                     <p
-                      className="whitespace-pre-wrap break-words text-xs"
-                      style={{ color: 'var(--text)', display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                      className="whitespace-pre-wrap break-words text-xs text-slate-900 line-clamp-4"
                     >
                       {a.text}
                     </p>
                     {a.errorMessage && (
-                      <p className="mt-2 rounded px-2 py-1 text-[10px]" style={{ backgroundColor: 'rgba(248,113,113,0.1)', color: 'var(--error)' }}>
+                      <p className="mt-2 rounded px-2 py-1 text-[10px] bg-red-50 text-red-600">
                         {a.errorMessage}
                       </p>
                     )}
@@ -617,29 +584,29 @@ export default function AnnouncementsPage() {
                     <div className="mt-2 flex gap-1.5 flex-wrap">
                       {(a.status === 'DRAFT' || a.status === 'SCHEDULED') && (
                         <>
-                          <button onClick={() => void handleSendDraft(a.id)} className="text-[10px] underline" style={{ color: 'var(--primary)' }}>
+                          <button onClick={() => void handleSendDraft(a.id)} className="text-[10px] underline text-indigo-600">
                             Enviar ahora
                           </button>
-                          <button onClick={() => void handleRegenImage(a.id)} className="text-[10px] underline" style={{ color: 'var(--primary)' }}>
+                          <button onClick={() => void handleRegenImage(a.id)} className="text-[10px] underline text-indigo-600">
                             {a.generatedPng ? 'Regenerar imagen' : 'Generar imagen'}
                           </button>
-                          <button onClick={() => void handleCancelAnnouncement(a.id)} className="text-[10px] underline" style={{ color: 'var(--muted)' }}>
+                          <button onClick={() => void handleCancelAnnouncement(a.id)} className="text-[10px] underline text-slate-500">
                             Cancelar
                           </button>
                         </>
                       )}
                       {a.status === 'FAILED' && (
-                        <button onClick={() => void handleRetry(a)} className="text-[10px] underline" style={{ color: 'var(--primary)' }}>
+                        <button onClick={() => void handleRetry(a)} className="text-[10px] underline text-indigo-600">
                           Reintentar
                         </button>
                       )}
                       {a.status === 'SENT' && !a.generatedPng && (
-                        <span className="text-[10px]" style={{ color: 'var(--muted)' }}>
+                        <span className="text-[10px] text-slate-500">
                           Enviado como texto
                         </span>
                       )}
                       {a.status === 'SENT' && a.generatedPng && (
-                        <span className="text-[10px]" style={{ color: 'var(--muted)' }}>
+                        <span className="text-[10px] text-slate-500">
                           Enviado con imagen
                         </span>
                       )}

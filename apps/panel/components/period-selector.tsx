@@ -114,13 +114,8 @@ export function PeriodSelector({ range, onChange }: Props) {
         className="flex flex-col sm:flex-row p-0 overflow-hidden"
       >
         {/* Sidebar de presets */}
-        <div
-          className="flex flex-col p-2 sm:w-44"
-          style={{ borderRight: '1px solid var(--border)', minWidth: 176 }}
-        >
-          <p className="text-[10px] font-bold uppercase tracking-widest px-2 pb-2"
-            style={{ color: 'var(--muted)' }}
-          >
+        <div className="flex flex-col p-2 sm:w-44 border-r border-slate-200" style={{ minWidth: 176 }}>
+          <p className="text-[10px] font-bold uppercase tracking-widest px-2 pb-2 text-slate-500">
             Atajos
           </p>
           {PRESETS.map((p) => {
@@ -132,14 +127,9 @@ export function PeriodSelector({ range, onChange }: Props) {
                 className={cn(
                   'text-left text-sm rounded-lg px-3 py-2 transition-colors',
                   isActive
-                    ? 'font-semibold'
-                    : 'hover:bg-[var(--surface)]',
+                    ? 'font-semibold bg-indigo-50 text-indigo-600'
+                    : 'text-slate-700 hover:bg-slate-50',
                 )}
-                style={
-                  isActive
-                    ? { background: 'var(--primary-dim)', color: 'var(--primary)' }
-                    : { color: 'var(--text)' }
-                }
               >
                 {p.label}
               </button>
@@ -157,11 +147,8 @@ export function PeriodSelector({ range, onChange }: Props) {
             disabled={{ after: new Date() }}
             locale={es}
           />
-          <div
-            className="flex items-center justify-between gap-2 px-3 py-2"
-            style={{ borderTop: '1px solid var(--border)' }}
-          >
-            <p className="text-xs" style={{ color: 'var(--muted)' }}>
+          <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-slate-200">
+            <p className="text-xs text-slate-500">
               {customRange?.from && customRange.to
                 ? formatRangeLabel(customRange.from, customRange.to)
                 : 'Seleccioná un rango'}

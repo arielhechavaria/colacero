@@ -2,140 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Design Tokens — Light ───────────────────────────────────────────────── */
+/* ── Design Tokens ───────────────────────────────────────────────────────── */
 :root {
   --radius: 0.5rem;
 
-  /* Palette */
+  /* Brand */
   --primary:       #6366F1;
   --primary-dark:  #4F46E5;
   --primary-light: #EEF2FF;
-  --primary-dim:   rgba(99, 102, 241, 0.1);
-  --accent:        #8B5CF6;
-
-  /* Surfaces */
-  --bg:      #F8FAFC;
-  --surface: #FFFFFF;
-  --card:    #FFFFFF;
-
-  /* Borders */
-  --border:      rgba(15, 23, 42, 0.08);
-  --border-glow: rgba(99, 102, 241, 0.3);
-
-  /* Text */
-  --text:  #0F172A;
-  --muted: #64748B;
+  --primary-dim:   rgba(99, 102, 241, 0.08);
 
   /* Semantic */
   --success: #059669;
   --warning: #D97706;
   --error:   #DC2626;
-
-  /* Glass */
-  --glass-bg:     rgba(255, 255, 255, 0.92);
-  --glass-border: rgba(15, 23, 42, 0.07);
-
-  /* Shadows — depth by layers, not by blur */
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 6px rgba(15, 23, 42, 0.04);
-  --shadow:    0 4px 8px rgba(15, 23, 42, 0.06), 0 2px 20px rgba(15, 23, 42, 0.05);
-  --shadow-lg: 0 10px 28px rgba(15, 23, 42, 0.1), 0 4px 10px rgba(15, 23, 42, 0.06);
-  --shadow-glow: 0 0 0 1px rgba(99,102,241,0.4), 0 4px 20px rgba(99,102,241,0.25), 0 0 40px rgba(139,92,246,0.15);
-}
-
-/* ── Design Tokens — Dark ────────────────────────────────────────────────── */
-.dark {
-  /* Palette */
-  --primary:       #818CF8;
-  --primary-dark:  #6366F1;
-  --primary-light: rgba(129, 140, 248, 0.15);
-  --primary-dim:   rgba(129, 140, 248, 0.08);
-  --accent:        #A78BFA;
-
-  /* Surfaces */
-  --bg:      #0B0F1A;
-  --surface: #111827;
-  --card:    #151D2E;
-
-  /* Borders */
-  --border:      rgba(255, 255, 255, 0.07);
-  --border-glow: rgba(129, 140, 248, 0.25);
-
-  /* Text */
-  --text:  #F1F5F9;
-  --muted: #64748B;
-
-  /* Semantic */
-  --success: #34D399;
-  --warning: #FBBF24;
-  --error:   #F87171;
-
-  /* Glass */
-  --glass-bg:     rgba(13, 17, 28, 0.92);
-  --glass-border: rgba(255, 255, 255, 0.07);
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 6px rgba(0, 0, 0, 0.3);
-  --shadow:    0 4px 8px rgba(0, 0, 0, 0.5), 0 2px 20px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.6), 0 4px 10px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 0 1px rgba(129,140,248,0.4), 0 4px 20px rgba(99,102,241,0.25), 0 0 40px rgba(139,92,246,0.15);
 }
 
 /* ── Base ────────────────────────────────────────────────────────────────── */
 body {
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: #F8FAFC;
+  color: #0F172A;
   font-family: var(--font-inter), 'Inter', sans-serif;
   min-height: 100vh;
 }
 
-/* Smooth theme transitions — solo color, sin interferir con transforms/animaciones */
-*, *::before, *::after {
-  transition-property: background-color, border-color, color, box-shadow;
-  transition-duration: 150ms;
-  transition-timing-function: ease;
-}
-[class*="transition-"], [class*="animate-"] {
-  transition-property: revert;
-}
-
 /* ── Components ──────────────────────────────────────────────────────────── */
 @layer components {
-
-  /* Card — fondo sólido, sin blur */
+  /* Card / glass → white card */
   .glass,
   .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
+    background: #FFFFFF;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
   }
 
-  /* Botón primario — indigo sólido, sin gradiente */
+  /* Botón primario */
   .bg-gradient-teal-violet {
     background-color: var(--primary);
   }
 
-  /* Texto primario — indigo sólido, sin clip */
   .text-gradient {
     color: var(--primary);
-    background: none;
-    -webkit-background-clip: unset;
-    -webkit-text-fill-color: unset;
-    background-clip: unset;
   }
 
-  /* Sombra glow → sombra sutil */
   .shadow-glow {
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
   }
 }
-
-/* Animaciones eliminadas en V4 (minimalismo) */
-.animate-float { }
-.animate-glow  { }
 
 /* ── Scrollbars ──────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar          { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track    { background: transparent; }
-::-webkit-scrollbar-thumb    { background: var(--border); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-*                            { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+::-webkit-scrollbar-thumb    { background: #E2E8F0; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
+*                            { scrollbar-width: thin; scrollbar-color: #E2E8F0 transparent; }

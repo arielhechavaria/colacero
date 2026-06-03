@@ -54,19 +54,18 @@ function KpiCard({
   href?:     string
 }) {
   const card = (
-    <div className={`glass rounded-2xl p-5 flex flex-col gap-1 ${href ? 'transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer' : ''}`}>
+    <div className={`bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-1 ${href ? 'transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer' : ''}`}>
       <div className="flex items-center justify-between mb-1">
         <span className="text-xl">{icon}</span>
-        <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
+        <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
           {label}
         </span>
       </div>
-        <p className={`text-2xl sm:text-3xl font-black font-mono ${gradient ? 'text-gradient' : ''}`}
-        style={gradient ? undefined : { color: 'var(--text)' }}>
+        <p className={`text-2xl sm:text-3xl font-black font-mono ${gradient ? 'text-gradient' : 'text-slate-900'}`}>
         {value}
       </p>
       {sub && (
-        <p className="text-xs" style={{ color: 'var(--muted)' }}>{sub}</p>
+        <p className="text-xs text-slate-500">{sub}</p>
       )}
     </div>
   )
@@ -78,18 +77,18 @@ function KpiCard({
 
 function FulfillmentBar({ rate, delivered, total }: { rate: number; delivered: number; total: number }) {
   return (
-    <div className="glass rounded-2xl p-5">
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Tasa de cumplimiento</p>
+        <p className="text-sm font-semibold text-slate-900">Tasa de cumplimiento</p>
         <p className="text-xl font-black font-mono text-gradient">{rate.toFixed(1)}%</p>
       </div>
-      <div className="h-3 rounded-full overflow-hidden" style={{ background: 'var(--surface)' }}>
+      <div className="h-3 rounded-full overflow-hidden bg-slate-100">
         <div
           className="h-full rounded-full bg-gradient-teal-violet transition-all duration-700"
           style={{ width: `${Math.min(rate, 100)}%` }}
         />
       </div>
-      <p className="mt-2 text-xs" style={{ color: 'var(--muted)' }}>
+      <p className="mt-2 text-xs text-slate-500">
         {delivered} entregados de {total} pedidos en el período
       </p>
     </div>
@@ -101,8 +100,8 @@ function FulfillmentBar({ rate, delivered, total }: { rate: number; delivered: n
 function TopProductsList({ items }: { items: TopProduct[] }) {
   if (items.length === 0) {
     return (
-      <div className="glass rounded-2xl p-8 text-center">
-        <p style={{ color: 'var(--muted)' }}>Sin ventas en este período</p>
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 text-center">
+        <p className="text-slate-500">Sin ventas en este período</p>
       </div>
     )
   }
@@ -110,8 +109,8 @@ function TopProductsList({ items }: { items: TopProduct[] }) {
   const maxQty = items[0]?.totalQty ?? 1
 
   return (
-    <div className="glass rounded-2xl p-5">
-      <p className="text-sm font-semibold mb-4" style={{ color: 'var(--text)' }}>
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+      <p className="text-sm font-semibold mb-4 text-slate-900">
         Productos más vendidos
       </p>
       <ul className="flex flex-col gap-3">
@@ -126,7 +125,7 @@ function TopProductsList({ items }: { items: TopProduct[] }) {
                   >
                     {i + 1}
                   </span>
-                  <span className="text-sm font-medium truncate" style={{ color: 'var(--text)' }}>
+                  <span className="text-sm font-medium truncate text-slate-900">
                     {item.name}
                   </span>
                 </div>
@@ -135,15 +134,14 @@ function TopProductsList({ items }: { items: TopProduct[] }) {
                     ${item.totalRev.toFixed(2)}
                   </span>
                   <span
-                    className="text-xs font-mono px-1.5 py-0.5 rounded-lg"
-                    style={{ background: 'var(--primary-dim)', color: 'var(--primary)' }}
+                    className="text-xs font-mono px-1.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-600"
                   >
                     {item.totalQty} {item.unitLabel}
                   </span>
                 </div>
               </div>
               {/* Bar */}
-              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--surface)' }}>
+              <div className="h-1.5 rounded-full overflow-hidden bg-slate-100">
                 <div
                   className="h-full rounded-full bg-gradient-teal-violet transition-all duration-700"
                   style={{ width: `${pct}%` }}
@@ -165,11 +163,11 @@ function CoPurchasesCard({ pairs }: { pairs: CoPurchasePair[] }) {
   const max = pairs[0]?.count ?? 1
 
   return (
-    <div className="glass rounded-2xl p-5">
-      <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text)' }}>
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+      <p className="text-sm font-semibold mb-1 text-slate-900">
         Combos frecuentes
       </p>
-      <p className="text-xs mb-4" style={{ color: 'var(--muted)' }}>
+      <p className="text-xs mb-4 text-slate-500">
         Productos que se piden juntos — últimos 28 días
       </p>
       <ul className="flex flex-col gap-3">
@@ -178,16 +176,16 @@ function CoPurchasesCard({ pairs }: { pairs: CoPurchasePair[] }) {
           return (
             <li key={i} className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
-                <span className="text-sm truncate" style={{ color: 'var(--text)' }}>
+                <span className="text-sm truncate text-slate-900">
                   {pair.nameA}
-                  <span className="mx-1.5" style={{ color: 'var(--muted)' }}>+</span>
+                  <span className="mx-1.5 text-slate-500">+</span>
                   {pair.nameB}
                 </span>
                 <span className="ml-3 flex-shrink-0 text-xs font-mono font-bold text-gradient">
                   {pair.count}×
                 </span>
               </div>
-              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--surface)' }}>
+              <div className="h-1.5 rounded-full overflow-hidden bg-slate-100">
                 <div
                   className="h-full rounded-full bg-gradient-teal-violet transition-all duration-700"
                   style={{ width: `${pct}%` }}
@@ -207,11 +205,11 @@ function WeeklyChart({ days }: { days: WeeklyDay[] }) {
   const maxOrders = Math.max(...days.map((d) => d.orders), 1)
 
   return (
-    <div className="glass rounded-2xl p-5">
-      <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text)' }}>
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+      <p className="text-sm font-semibold mb-1 text-slate-900">
         Pedidos por día de la semana
       </p>
-      <p className="text-xs mb-5" style={{ color: 'var(--muted)' }}>
+      <p className="text-xs mb-5 text-slate-500">
         Últimas 4 semanas
       </p>
       <div className="flex items-end justify-between gap-2 h-28">
@@ -220,8 +218,7 @@ function WeeklyChart({ days }: { days: WeeklyDay[] }) {
           return (
             <div key={day.day} className="flex flex-1 flex-col items-center gap-1">
               <span
-                className="text-[10px] font-mono font-semibold"
-                style={{ color: day.orders > 0 ? 'var(--primary)' : 'transparent' }}
+                className={`text-[10px] font-mono font-semibold ${day.orders > 0 ? 'text-indigo-600' : 'text-transparent'}`}
               >
                 {day.orders}
               </span>
@@ -229,7 +226,7 @@ function WeeklyChart({ days }: { days: WeeklyDay[] }) {
                 className="w-full rounded-t-lg bg-gradient-teal-violet transition-all duration-700"
                 style={{ height: `${Math.max(pct, day.orders > 0 ? 5 : 0)}%` }}
               />
-              <span className="text-[10px] font-semibold" style={{ color: 'var(--muted)' }}>
+              <span className="text-[10px] font-semibold text-slate-500">
                 {day.label}
               </span>
             </div>
@@ -245,9 +242,9 @@ function WeeklyChart({ days }: { days: WeeklyDay[] }) {
 function StockAlertsList({ alerts }: { alerts: StockAlert[] }) {
   if (alerts.length === 0) {
     return (
-      <div className="glass rounded-2xl p-5 flex items-center gap-3">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-center gap-3">
         <span className="text-xl">✅</span>
-        <p className="text-sm font-semibold" style={{ color: 'var(--success)' }}>
+        <p className="text-sm font-semibold text-emerald-600">
           Todo el stock en orden
         </p>
       </div>
@@ -255,9 +252,9 @@ function StockAlertsList({ alerts }: { alerts: StockAlert[] }) {
   }
 
   return (
-    <div className="glass rounded-2xl p-5">
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+        <p className="text-sm font-semibold text-slate-900">
           Alertas de stock
         </p>
         <Badge variant="destructive">
@@ -268,7 +265,7 @@ function StockAlertsList({ alerts }: { alerts: StockAlert[] }) {
         {alerts.map((a) => (
           <li key={a.productId}>
             <Link href="/products" className="flex items-center justify-between text-sm transition-opacity hover:opacity-70">
-              <span style={{ color: 'var(--text)' }}>{a.name}</span>
+              <span className="text-slate-900">{a.name}</span>
               <Badge variant={a.status === 'out' ? 'destructive' : 'warning'} className="ml-3 flex-shrink-0">
                 {a.status === 'out' ? 'Sin stock' : `${a.quantityAvailable} restantes`}
               </Badge>
@@ -349,18 +346,17 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen">
-      {/* Header glass */}
+      {/* Header */}
       <header
-        className="sticky top-0 z-10 glass px-6 py-4"
-        style={{ borderBottom: '1px solid var(--glass-border)' }}
+        className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white flex items-center justify-between"
       >
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between w-full">
           <div>
-            <h1 className="text-lg font-bold" style={{ color: 'var(--text)' }}>
+            <h1 className="text-lg font-bold text-slate-900">
               {greeting}{userLabel ? <>, <span className="text-gradient">{userLabel}</span></> : null}
             </h1>
             {pendingMsg && (
-              <p className="text-xs" style={{ color: 'var(--muted)' }}>
+              <p className="text-xs text-slate-500">
                 Hoy tenés {pendingMsg}
               </p>
             )}
@@ -373,8 +369,7 @@ export default function DashboardPage() {
 
       <div className="px-6 py-5 flex flex-col gap-5">
         {error && (
-          <div className="rounded-xl px-4 py-3 text-sm"
-            style={{ background: 'rgba(248,113,113,0.08)', color: 'var(--error)', border: '1px solid rgba(248,113,113,0.2)' }}>
+          <div className="rounded-xl px-4 py-3 text-sm bg-red-50 text-red-600 border border-red-200">
             {error}
           </div>
         )}
@@ -383,7 +378,7 @@ export default function DashboardPage() {
           <div className="flex flex-col gap-5">
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="glass rounded-2xl p-5 flex flex-col gap-3">
+                <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <Skeleton className="h-6 w-6 rounded-full" />
                     <Skeleton className="h-3 w-16" />
@@ -393,12 +388,12 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-            <div className="glass rounded-2xl p-5">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
               <Skeleton className="h-3 w-32 mb-3" />
               <Skeleton className="h-3 w-full rounded-full" />
               <Skeleton className="h-3 w-24 mt-2" />
             </div>
-            <div className="glass rounded-2xl p-5 flex flex-col gap-3">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-3">
               <Skeleton className="h-3 w-40 mb-1" />
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="flex flex-col gap-1">
@@ -476,8 +471,7 @@ export default function DashboardPage() {
             {/* ── Inteligencia — independiente del período ── */}
             <motion.div className="mt-2" variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.25 }}>
               <p
-                className="text-xs font-semibold uppercase tracking-widest mb-3"
-                style={{ color: 'var(--muted)' }}
+                className="text-xs font-semibold uppercase tracking-widest mb-3 text-slate-500"
               >
                 Inteligencia de negocio
               </p>

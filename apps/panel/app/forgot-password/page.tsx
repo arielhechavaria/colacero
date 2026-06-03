@@ -41,13 +41,13 @@ export default function ForgotPasswordPage() {
           </div>
         </div>
 
-        <div className="glass rounded-2xl p-8">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8">
           {!sent ? (
             <>
-              <h1 className="mb-1 text-xl font-bold" style={{ color: 'var(--text)', fontFamily: 'Inter, sans-serif' }}>
+              <h1 className="mb-1 text-xl font-bold text-slate-900">
                 Recuperar contraseña
               </h1>
-              <p className="mb-6 text-sm" style={{ color: 'var(--muted)' }}>
+              <p className="mb-6 text-sm text-slate-500">
                 Ingresá tu email y si existe una cuenta, te enviaremos un link para restablecer tu contraseña.
               </p>
 
@@ -74,8 +74,7 @@ export default function ForgotPasswordPage() {
 
                 <Link
                   href="/login"
-                  className="text-center text-sm"
-                  style={{ color: 'var(--muted)' }}
+                  className="text-center text-sm text-slate-500"
                 >
                   ← Volver al login
                 </Link>
@@ -83,10 +82,10 @@ export default function ForgotPasswordPage() {
             </>
           ) : (
             <>
-              <h1 className="mb-2 text-xl font-bold" style={{ color: 'var(--text)', fontFamily: 'Inter, sans-serif' }}>
+              <h1 className="mb-2 text-xl font-bold text-slate-900">
                 Revisá tu email
               </h1>
-              <p className="mb-6 text-sm" style={{ color: 'var(--muted)' }}>
+              <p className="mb-6 text-sm text-slate-500">
                 Si existe una cuenta con ese email, te enviamos un link para restablecer tu contraseña. El link expira en 60 minutos.
               </p>
               <Link href="/login">

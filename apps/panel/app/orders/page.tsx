@@ -130,14 +130,13 @@ export default function OrdersPage() {
             <main className="min-h-screen">
                 <div className="px-6 py-5 flex flex-col gap-4">
                     {Array.from({length: 3}).map((_, i) => (
-                        <div key={i} className="glass rounded-2xl p-5 flex flex-col gap-3">
+                        <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-3">
                             <div className="flex items-center justify-between">
                                 <Skeleton className="h-5 w-32"/>
                                 <Skeleton className="h-5 w-20"/>
                             </div>
                             {Array.from({length: 2}).map((_, j) => (
-                                <div key={j} className="flex items-center gap-3 rounded-xl border p-3"
-                                     style={{borderColor: 'var(--border)'}}>
+                                <div key={j} className="flex items-center gap-3 rounded-xl border border-slate-200 p-3">
                                     <Skeleton className="h-10 w-10 rounded-full flex-shrink-0"/>
                                     <div className="flex-1 flex flex-col gap-1.5">
                                         <Skeleton className="h-4 w-28"/>
@@ -156,13 +155,12 @@ export default function OrdersPage() {
     return (
         <main className="min-h-screen">
             {/* Header */}
-            <header className="sticky top-0 z-10 glass px-6 py-4"
-                    style={{borderBottom: '1px solid var(--glass-border)'}}>
+            <header className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white flex items-center justify-between">
                 <div className="flex items-center justify-between mb-3">
                     <h1 className="text-lg font-bold text-gradient">Pedidos</h1>
                     <div className="flex items-center gap-2">
                         {lastUpdated && (
-                            <span className="text-xs font-mono hidden sm:inline" style={{color: 'var(--muted)'}}>
+                            <span className="text-xs font-mono hidden sm:inline text-slate-500">
                 {lastUpdated.toLocaleTimeString('es-CU', {hour: '2-digit', minute: '2-digit', second: '2-digit'})}
               </span>
                         )}
@@ -232,12 +230,7 @@ export default function OrdersPage() {
 
             <div className="px-6 py-5 flex flex-col gap-4">
                 {error != null && (
-                    <div className="rounded-xl px-4 py-3 text-sm"
-                         style={{
-                             backgroundColor: 'rgba(255,61,85,0.08)',
-                             color: 'var(--error)',
-                             border: '1px solid rgba(255,61,85,0.2)'
-                         }}>
+                    <div className="rounded-xl px-4 py-3 text-sm bg-red-50 text-red-600 border border-red-200">
                         {error}
                     </div>
                 )}

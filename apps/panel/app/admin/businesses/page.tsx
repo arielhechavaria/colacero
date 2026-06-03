@@ -81,10 +81,10 @@ export default function AdminBusinessesPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>
+          <h2 className="text-2xl font-bold text-slate-900">
             Negocios ({businesses.length})
           </h2>
-          <p className="text-sm" style={{ color: 'var(--muted)' }}>
+          <p className="text-sm text-slate-500">
             Gestionar negocios activos en la plataforma.
           </p>
         </div>
@@ -99,14 +99,14 @@ export default function AdminBusinessesPage() {
       </div>
 
       {loading ? (
-        <p style={{ color: 'var(--muted)' }}>Cargando…</p>
+        <p className="text-slate-500">Cargando…</p>
       ) : filtered.length === 0 ? (
-        <p style={{ color: 'var(--muted)' }}>No hay negocios que coincidan.</p>
+        <p className="text-slate-500">No hay negocios que coincidan.</p>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border" style={{ borderColor: 'var(--border, rgba(255,255,255,0.08))' }}>
+        <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
+              <tr className="text-left text-xs uppercase tracking-wide text-slate-500 border-b border-slate-200">
                 <th className="px-4 py-3">Negocio</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3 text-right">Productos</th>
@@ -119,16 +119,16 @@ export default function AdminBusinessesPage() {
             </thead>
             <tbody>
               {filtered.map((b) => (
-                <tr key={b.id} className="border-t" style={{ borderColor: 'var(--border, rgba(255,255,255,0.06))' }}>
+                <tr key={b.id} className="border-t border-slate-200">
                   <td className="px-4 py-3">
                     <div className="flex flex-col">
-                      <span className="font-semibold" style={{ color: 'var(--text)' }}>{b.name}</span>
+                      <span className="font-semibold text-slate-900">{b.name}</span>
                       <a
                         href={`https://${b.slug}.colacero.com`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs hover:underline"
-                        style={{ color: 'var(--muted)' }}
+                        className="text-slate-500"
                       >
                         {b.slug}.colacero.com ↗
                       </a>
@@ -140,8 +140,8 @@ export default function AdminBusinessesPage() {
                   <td className="px-4 py-3 text-right tabular-nums">{b.stats.productsCount}</td>
                   <td className="px-4 py-3 text-right tabular-nums">{b.stats.ordersCount}</td>
                   <td className="px-4 py-3 text-right tabular-nums">${formatCurrency(b.stats.totalRevenue)}</td>
-                  <td className="px-4 py-3" style={{ color: 'var(--muted)' }}>{formatDate(b.stats.lastOrderAt)}</td>
-                  <td className="px-4 py-3" style={{ color: 'var(--muted)' }}>{formatDate(b.createdAt)}</td>
+                  <td className="px-4 py-3 text-slate-500">{formatDate(b.stats.lastOrderAt)}</td>
+                  <td className="px-4 py-3 text-slate-500">{formatDate(b.createdAt)}</td>
                   <td className="px-4 py-3 text-right">
                     <Button
                       variant={b.status === 'SUSPENDED' ? 'default' : 'destructive'}

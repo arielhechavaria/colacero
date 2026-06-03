@@ -31,7 +31,7 @@ function CustomerCard({ c }: { c: CustomerSummary }) {
 
   return (
     <Link href={`/customers/${c.id}`}>
-      <div className="glass rounded-2xl p-4 flex items-center gap-4 hover:scale-[1.01] transition-transform cursor-pointer">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex items-center gap-4 hover:scale-[1.01] transition-transform cursor-pointer">
         {/* Avatar */}
         <div
           className="flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center text-white font-bold text-sm bg-gradient-teal-violet"
@@ -42,12 +42,12 @@ function CustomerCard({ c }: { c: CustomerSummary }) {
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold truncate" style={{ color: 'var(--text)' }}>{name}</p>
+            <p className="text-sm font-semibold truncate text-slate-900">{name}</p>
             {c.isVip && <Badge variant="secondary" className="flex-shrink-0 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">VIP ⭐</Badge>}
             {c.isActive && !c.isVip && <Badge variant="default" className="flex-shrink-0">activo</Badge>}
           </div>
           {contact && (
-            <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--muted)' }}>{contact}</p>
+            <p className="text-xs mt-0.5 truncate text-slate-500">{contact}</p>
           )}
         </div>
 
@@ -56,10 +56,10 @@ function CustomerCard({ c }: { c: CustomerSummary }) {
           <p className="text-sm font-bold font-mono text-gradient">
             ${c.totalSpent.toLocaleString('es', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
-          <p className="text-xs" style={{ color: 'var(--muted)' }}>
+          <p className="text-xs text-slate-500">
             {c.totalOrders} pedido{c.totalOrders !== 1 ? 's' : ''}
           </p>
-          <p className="text-[10px] mt-0.5" style={{ color: 'var(--muted)' }}>{lastDate}</p>
+          <p className="text-[10px] mt-0.5 text-slate-500">{lastDate}</p>
         </div>
       </div>
     </Link>
@@ -121,12 +121,11 @@ export default function CustomersPage() {
     <main className="min-h-screen">
       {/* Header */}
       <header
-        className="sticky top-0 z-10 glass px-6 py-4"
-        style={{ borderBottom: '1px solid var(--glass-border)' }}
+        className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white flex items-center justify-between"
       >
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-lg font-bold text-gradient">Clientes</h1>
-          <span className="text-xs font-mono" style={{ color: 'var(--muted)' }}>
+          <span className="text-xs font-mono text-slate-500">
             {total} cliente{total !== 1 ? 's' : ''}
           </span>
         </div>
@@ -149,7 +148,7 @@ export default function CustomersPage() {
       <div className="px-6 py-5 flex flex-col gap-4">
         {/* Search */}
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm pointer-events-none" style={{ color: 'var(--muted)' }}>🔍</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm pointer-events-none text-slate-500">🔍</span>
           <Input
             type="search"
             placeholder="Buscar por nombre o teléfono…"
@@ -161,8 +160,7 @@ export default function CustomersPage() {
 
         {error && (
           <div
-            className="rounded-xl px-4 py-3 text-sm"
-            style={{ background: 'rgba(248,113,113,0.08)', color: 'var(--error)', border: '1px solid rgba(248,113,113,0.2)' }}
+            className="rounded-xl px-4 py-3 text-sm bg-red-50 text-red-600 border border-red-200"
           >
             {error}
           </div>
@@ -171,7 +169,7 @@ export default function CustomersPage() {
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="glass rounded-2xl p-4 flex items-center gap-4">
+              <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex items-center gap-4">
                 <Skeleton className="h-10 w-10 rounded-full" />
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-4 w-32" />

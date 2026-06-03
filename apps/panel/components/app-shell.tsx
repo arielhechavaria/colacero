@@ -1,24 +1,10 @@
 'use client'
 
-/**
- * PATCH: apps/panel/components/app-shell.tsx
- *
- * PROBLEMA: Bottom nav muestra 8 ítems a text-[8px]. Ilegible, inaccesible,
- *           labels truncados ("Cola de prep.", "Configuración").
- *
- * FIX:
- *   - Dividir en PRIMARY (4 ítems) + SECONDARY (4 ítems)
- *   - Agregar botón "Más" que abre un Sheet de shadcn/ui
- *   - Subir labels a text-[10px] e íconos a text-xl
- *   - Agregar Sheet a panel: npx shadcn@latest add sheet
- */
-
 import { useState, useEffect, Fragment } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
-import { ThemeToggle } from './theme-toggle'
 import { getMe, isAuthenticatedClient, logout } from '../lib/api'
 import {
     Sheet,
@@ -32,36 +18,33 @@ import { Logo } from './logo'
 // ── Navigation config ─────────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-    { href: '/dashboard',     icon: '📊', label: 'Dashboard'     },
-    { href: '/orders',        icon: '📋', label: 'Pedidos'       },
-    { href: '/queue',         icon: '🍳', label: 'Cola'          },
-    { href: '/windows',       icon: '🕐', label: 'Ventanas'      },
-    { href: '/products',      icon: '📦', label: 'Productos'     },
-    { href: '/customers',     icon: '👥', label: 'Clientes'      },
-    { href: '/announcements', icon: '📣', label: 'Anuncios'      },
-    { href: '/settings',      icon: '⚙️',  label: 'Config.'      },
+    { href: '/dashboard',     icon: '📊', label: 'Dashboard'  },
+    { href: '/orders',        icon: '📋', label: 'Pedidos'    },
+    { href: '/queue',         icon: '🍳', label: 'Cola'       },
+    { href: '/windows',       icon: '🕐', label: 'Ventanas'   },
+    { href: '/products',      icon: '📦', label: 'Productos'  },
+    { href: '/customers',     icon: '👥', label: 'Clientes'   },
+    { href: '/announcements', icon: '📣', label: 'Anuncios'   },
+    { href: '/settings',      icon: '⚙️',  label: 'Config.'   },
 ]
 
 const ADMIN_NAV_ITEMS = [
-    { href: '/admin/businesses', icon: '👑', label: 'Admin'   },
-    { href: '/admin/leads',      icon: '📥', label: 'Leads'   },
+    { href: '/admin/businesses', icon: '👑', label: 'Admin' },
+    { href: '/admin/leads',      icon: '📥', label: 'Leads' },
 ]
 
-/** Ítems visibles siempre en la barra inferior */
-const PRIMARY_NAV = NAV_ITEMS.slice(0, 4)
-
-/** Ítems accesibles desde el sheet "Más" */
+const PRIMARY_NAV   = NAV_ITEMS.slice(0, 4)
 const SECONDARY_NAV = NAV_ITEMS.slice(4)
 
-// ── Sub-componente: NavItem ───────────────────────────────────────────────────
+// ── NavItem ───────────────────────────────────────────────────────────────────
 
 function NavItem({
-                     href,
-                     icon,
-                     label,
-                     isActive,
-                     onClick,
-                 }: {
+    href,
+    icon,
+    label,
+    isActive,
+    onClick,
+}: {
     href: string
     icon: string
     label: string
@@ -74,32 +57,27 @@ function NavItem({
             title={label}
             {...(onClick ? { onClick } : {})}
             className={cn(
-                'flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 transition-all min-w-0 flex-1',
+                'flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 transition-all min-w-0 flex-1 text-[10px] font-semibold leading-none',
+                isActive
+                    ? 'bg-indigo-50 text-indigo-600'
+                    : 'text-slate-400 hover:text-slate-700 hover:bg-slate-50',
             )}
-            style={{
-                backgroundColor: isActive ? 'var(--primary-dim)' : 'transparent',
-                color:           isActive ? 'var(--primary)'     : 'var(--muted)',
-            }}
         >
-            {/* Ícono: subido de text-base a text-xl para mejor legibilidad */}
             <span className="text-xl leading-none">{icon}</span>
-            {/* Label: subido de text-[8px] a text-[10px] */}
-            <span className="text-[10px] font-semibold leading-none truncate w-full text-center">
-        {label}
-      </span>
+            <span className="truncate w-full text-center">{label}</span>
         </Link>
     )
 }
 
-// ── Sub-componente: MoreSheet ─────────────────────────────────────────────────
+// ── MoreSheet ─────────────────────────────────────────────────────────────────
 
 function MoreSheet({
-                       open,
-                       onClose,
-                       onLogout,
-                       pathname,
-                       items,
-                   }: {
+    open,
+    onClose,
+    onLogout,
+    pathname,
+    items,
+}: {
     open: boolean
     onClose: () => void
     onLogout: () => void
@@ -108,20 +86,9 @@ function MoreSheet({
 }) {
     return (
         <Sheet open={open} onOpenChange={(v) => { if (!v) onClose() }}>
-            <SheetContent
-                side="bottom"
-                className="rounded-t-3xl pb-safe"
-                style={{
-                    background:   'var(--glass-bg)',
-                    backdropFilter: 'blur(20px)',
-                    border:       '1px solid var(--glass-border)',
-                    borderBottom: 'none',
-                }}
-            >
+            <SheetContent side="bottom" className="rounded-t-3xl pb-safe bg-white border-t border-slate-200">
                 <SheetHeader className="mb-4">
-                    <SheetTitle style={{ color: 'var(--text)' }}>
-                        Más opciones
-                    </SheetTitle>
+                    <SheetTitle className="text-slate-900">Más opciones</SheetTitle>
                 </SheetHeader>
 
                 <div className="grid grid-cols-4 gap-3 pb-6">
@@ -133,29 +100,20 @@ function MoreSheet({
                                 href={item.href}
                                 onClick={onClose}
                                 className={cn(
-                                    'flex flex-col items-center gap-2 rounded-2xl p-4 transition-all',
+                                    'flex flex-col items-center gap-2 rounded-2xl p-4 transition-all border',
+                                    isActive
+                                        ? 'bg-indigo-50 border-indigo-200 text-indigo-600'
+                                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50',
                                 )}
-                                style={{
-                                    backgroundColor: isActive ? 'var(--primary-dim)' : 'var(--surface)',
-                                    border:          isActive ? '1px solid var(--border-glow)' : '1px solid var(--border)',
-                                    color:           isActive ? 'var(--primary)' : 'var(--text)',
-                                }}
                             >
                                 <span className="text-2xl">{item.icon}</span>
-                                <span className="text-xs font-semibold text-center leading-tight">
-                  {item.label}
-                </span>
+                                <span className="text-xs font-semibold text-center leading-tight">{item.label}</span>
                             </Link>
                         )
                     })}
                     <button
                         onClick={onLogout}
-                        className="flex flex-col items-center gap-2 rounded-2xl p-4 transition-all hover:bg-red-500/10"
-                        style={{
-                            backgroundColor: 'var(--surface)',
-                            border:          '1px solid var(--border)',
-                            color:           'var(--error)',
-                        }}
+                        className="flex flex-col items-center gap-2 rounded-2xl p-4 transition-all bg-white border border-slate-200 text-red-500 hover:bg-red-50"
                     >
                         <span className="text-2xl">🚪</span>
                         <span className="text-xs font-semibold text-center leading-tight">Salir</span>
@@ -171,17 +129,17 @@ function MoreSheet({
 export function AppShell({ children }: { children: React.ReactNode }) {
     const pathname = usePathname()
     const router   = useRouter()
-    const isLogin  = pathname === '/login'
+
     const isPublicAuth = pathname === '/login'
                       || pathname === '/forgot-password'
                       || pathname?.startsWith('/reset-password')
                       || pathname?.startsWith('/verify-email')
                       || pathname?.startsWith('/signup')
-    const [moreOpen, setMoreOpen] = useState(false)
-    const [isAdmin,  setIsAdmin]  = useState(false)
+
+    const [moreOpen,  setMoreOpen]  = useState(false)
+    const [isAdmin,   setIsAdmin]   = useState(false)
     const [collapsed, setCollapsed] = useState(false)
 
-    // Hydrate collapsed state from localStorage (lg+ only)
     useEffect(() => {
         try {
             const saved = localStorage.getItem('panel.sidebar.collapsed')
@@ -202,54 +160,49 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         router.push('/login')
     }
 
-    // Detectar SUPER_ADMIN para mostrar nav extra
     useEffect(() => {
         if (isPublicAuth) return
         if (!isAuthenticatedClient()) return
         void getMe('')
             .then((u) => setIsAdmin(u.role === 'SUPER_ADMIN'))
-            .catch(() => { /* noop */ })
+            .catch(() => {})
     }, [pathname, isPublicAuth])
 
-    if (isPublicAuth) {
-        return <>{children}</>
-    }
+    if (isPublicAuth) return <>{children}</>
 
     const navItemsFull = isAdmin ? [...NAV_ITEMS, ...ADMIN_NAV_ITEMS] : NAV_ITEMS
     const secondaryNav = isAdmin ? [...SECONDARY_NAV, ...ADMIN_NAV_ITEMS] : SECONDARY_NAV
 
+    const isSecondaryActive = secondaryNav.some(
+        (i) => pathname === i.href || pathname.startsWith(i.href + '/'),
+    )
+
     return (
-        <div className="flex min-h-screen">
-            {/* ── Sidebar — desktop (lg+) - colapsable ─────────────────────── */}
+        <div className="flex min-h-screen bg-slate-50">
+
+            {/* ── Sidebar — desktop (lg+) ────────────────────────────────── */}
             <aside
                 className={cn(
-                    'fixed left-0 top-0 z-20 hidden lg:flex h-full flex-col glass transition-[width] duration-200',
+                    'fixed left-0 top-0 z-20 hidden lg:flex h-full flex-col bg-white border-r border-slate-200 transition-[width] duration-200',
                     collapsed ? 'w-[64px]' : 'w-[240px]',
                 )}
-                style={{ borderRight: '1px solid var(--glass-border)' }}
             >
                 {/* Logo */}
                 <div
                     className={cn(
-                        'flex h-16 flex-shrink-0 items-center',
+                        'flex h-16 flex-shrink-0 items-center border-b border-slate-100',
                         collapsed ? 'px-3 justify-center' : 'px-5',
                     )}
-                    style={{ borderBottom: '1px solid var(--glass-border)' }}
                 >
                     {collapsed ? (
-                        /* Colapsado: solo la marca (wave+arrow) */
-                        <div
-                            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl"
-                            style={{ background: 'var(--primary)' }}
-                        >
-                            <svg width="22" height="18" viewBox="0 0 42 34" fill="none">
+                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-600">
+                            <svg width="18" height="15" viewBox="0 0 42 34" fill="none">
                                 <path d="M4 17 C4 17 7.5 10 12 17 C16.5 24 21 12 25 17" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
                                 <line x1="25" y1="17" x2="37" y2="17" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
                                 <polyline points="33,12 38,17 33,22" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
                             </svg>
                         </div>
                     ) : (
-                        /* Expandido: logo completo */
                         <Logo size="sm" variant="sidebar" />
                     )}
                 </div>
@@ -262,20 +215,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         return (
                             <Fragment key={item.href}>
                                 {showDividerBefore && (
-                                    <div
-                                        className="my-2 mx-1 h-px"
-                                        style={{ background: 'var(--glass-border)' }}
-                                    />
+                                    <div className="my-2 mx-1 h-px bg-slate-100" />
                                 )}
                                 <Link
                                     href={item.href}
                                     title={collapsed ? item.label : undefined}
                                     className={cn(
-                                        'flex items-center gap-3 rounded-xl text-sm font-medium transition-all duration-150 border',
+                                        'flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-150',
                                         collapsed ? 'px-2 py-2.5 justify-center' : 'px-3 py-2.5',
                                         isActive
-                                            ? 'bg-[var(--primary-dim)] text-[var(--primary)] border-[var(--border-glow)]'
-                                            : 'text-[var(--muted)] border-transparent hover:bg-[var(--primary-dim)] hover:text-[var(--primary)]',
+                                            ? 'bg-indigo-50 text-indigo-600'
+                                            : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800',
                                     )}
                                 >
                                     <span className="text-base flex-shrink-0">{item.icon}</span>
@@ -286,49 +236,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     })}
                 </nav>
 
-                {/* Footer — toggle + theme + logout */}
+                {/* Footer */}
                 <div
                     className={cn(
-                        'flex flex-shrink-0 items-center gap-2 py-4',
-                        collapsed ? 'flex-col px-2' : 'justify-between px-5',
+                        'flex flex-shrink-0 items-center gap-2 py-3 border-t border-slate-100',
+                        collapsed ? 'flex-col px-2' : 'px-4',
                     )}
-                    style={{ borderTop: '1px solid var(--glass-border)' }}
                 >
                     <button
                         onClick={toggleCollapsed}
-                        title={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
-                        className="rounded-lg p-2 transition-colors hover:bg-[var(--primary-dim)]"
-                        style={{ color: 'var(--muted)' }}
+                        title={collapsed ? 'Expandir' : 'Colapsar'}
+                        className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
                         aria-label="Toggle sidebar"
                     >
-                        <span className="text-base">{collapsed ? '⇥' : '⇤'}</span>
+                        <span className="text-sm">{collapsed ? '⇥' : '⇤'}</span>
                     </button>
-                    {!collapsed && (
-                        <>
-                            <ThemeToggle />
-                            <button
-                                onClick={() => void handleLogout()}
-                                title="Cerrar sesión"
-                                className="rounded-lg p-2 transition-colors hover:bg-red-500/10"
-                                style={{ color: 'var(--muted)' }}
-                            >
-                                <span className="text-base">🚪</span>
-                            </button>
-                        </>
-                    )}
-                    {collapsed && (
-                        <>
-                            <ThemeToggle />
-                            <button
-                                onClick={() => void handleLogout()}
-                                title="Cerrar sesión"
-                                className="rounded-lg p-2 transition-colors hover:bg-red-500/10"
-                                style={{ color: 'var(--muted)' }}
-                            >
-                                <span className="text-base">🚪</span>
-                            </button>
-                        </>
-                    )}
+                    {!collapsed && <div className="flex-1" />}
+                    <button
+                        onClick={() => void handleLogout()}
+                        title="Cerrar sesión"
+                        className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                    >
+                        <span className="text-sm">🚪</span>
+                    </button>
                 </div>
             </aside>
 
@@ -342,21 +272,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <EmailVerificationBanner />
                 <motion.div
                     key={pathname}
-                    initial={{ opacity: 0, y: 6 }}
+                    initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.18, ease: 'easeOut' }}
+                    transition={{ duration: 0.15, ease: 'easeOut' }}
                 >
                     {children}
                 </motion.div>
             </main>
 
-            {/* ── Bottom nav — mobile + tablet (<lg) ────────────────────── */}
-            <nav
-                className="fixed bottom-0 left-0 right-0 z-20 lg:hidden glass"
-                style={{ borderTop: '1px solid var(--glass-border)' }}
-            >
+            {/* ── Bottom nav — mobile (<lg) ──────────────────────────────── */}
+            <nav className="fixed bottom-0 left-0 right-0 z-20 lg:hidden bg-white border-t border-slate-200">
                 <div className="flex items-center justify-around px-1 py-1 pb-safe">
-                    {/* 4 ítems primarios */}
                     {PRIMARY_NAV.map((item) => {
                         const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
                         return (
@@ -370,29 +296,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         )
                     })}
 
-                    {/* Botón "Más" */}
                     <button
                         onClick={() => setMoreOpen(true)}
                         className={cn(
-                            'flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 transition-all min-w-0 flex-1',
-                            // Resaltar si la ruta activa es una secundaria
-                            secondaryNav.some(i => pathname === i.href || pathname.startsWith(i.href + '/'))
-                                ? 'bg-[var(--primary-dim)]'
-                                : '',
+                            'flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 transition-all min-w-0 flex-1 text-[10px] font-semibold leading-none',
+                            isSecondaryActive
+                                ? 'bg-indigo-50 text-indigo-600'
+                                : 'text-slate-400 hover:text-slate-700 hover:bg-slate-50',
                         )}
-                        style={{
-                            color: secondaryNav.some(i => pathname === i.href || pathname.startsWith(i.href + '/'))
-                                ? 'var(--primary)'
-                                : 'var(--muted)',
-                        }}
                     >
                         <span className="text-xl leading-none">···</span>
-                        <span className="text-[10px] font-semibold leading-none">Más</span>
+                        <span>Más</span>
                     </button>
                 </div>
             </nav>
 
-            {/* Sheet de navegación secundaria */}
             <MoreSheet
                 open={moreOpen}
                 onClose={() => setMoreOpen(false)}

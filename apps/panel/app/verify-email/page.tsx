@@ -43,8 +43,8 @@ function VerifyEmailContent() {
   if (status === 'verifying') {
     return (
       <>
-        <h1 className="mb-2 text-xl font-bold" style={{ color: 'var(--text)' }}>Verificando…</h1>
-        <p className="text-sm" style={{ color: 'var(--muted)' }}>Confirmando tu email.</p>
+        <h1 className="mb-2 text-xl font-bold text-slate-900">Verificando…</h1>
+        <p className="text-sm text-slate-500">Confirmando tu email.</p>
       </>
     )
   }
@@ -52,10 +52,10 @@ function VerifyEmailContent() {
   if (status === 'success') {
     return (
       <>
-        <h1 className="mb-2 text-xl font-bold" style={{ color: 'var(--text)' }}>
+        <h1 className="mb-2 text-xl font-bold text-slate-900">
           ✓ Email verificado
         </h1>
-        <p className="mb-6 text-sm" style={{ color: 'var(--muted)' }}>
+        <p className="mb-6 text-sm text-slate-500">
           {email ? <><strong>{email}</strong> quedó confirmado.</> : 'Tu email quedó confirmado.'}
         </p>
         <Link href="/orders">
@@ -69,10 +69,10 @@ function VerifyEmailContent() {
 
   return (
     <>
-      <h1 className="mb-2 text-xl font-bold" style={{ color: 'var(--text)' }}>
+      <h1 className="mb-2 text-xl font-bold text-slate-900">
         Link inválido
       </h1>
-      <p className="mb-6 text-sm" style={{ color: 'var(--muted)' }}>{error}</p>
+      <p className="mb-6 text-sm text-slate-500">{error}</p>
       <Link href="/orders">
         <Button className="w-full bg-gradient-teal-violet shadow-glow hover:opacity-90">
           Volver al panel
@@ -103,8 +103,8 @@ export default function VerifyEmailPage() {
           </div>
         </div>
 
-        <div className="glass rounded-2xl p-8">
-          <Suspense fallback={<p style={{ color: 'var(--muted)' }}>Cargando…</p>}>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8">
+          <Suspense fallback={<p className="text-slate-500">Cargando…</p>}>
             <VerifyEmailContent />
           </Suspense>
         </div>
