@@ -345,12 +345,11 @@ function ProductsTable({
             {(['Producto', 'Categoría', 'Precio', 'Stock', 'Estado', 'Acciones'] as const).map((h, i) => (
               <th
                 key={h}
-                className={`px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide ${
+                className={`px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500 ${
                   h === 'Categoría' ? 'hidden md:table-cell' :
                   h === 'Estado'    ? 'hidden sm:table-cell' :
                   h === 'Acciones'  ? 'text-right' : ''
                 }`}
-                className="text-slate-500"
               >
                 {h}
               </th>
