@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getCatalog } from '../../lib/api'
 import { Logo } from '../../components/logo'
-import { ThemeToggle } from '../../components/theme-toggle'
 import { CatalogView } from '../../components/catalog-view'
 import { CartSidebar } from '../../components/cart-sidebar'
 import { BusinessHero } from '../../components/business-hero'
@@ -59,7 +58,6 @@ export default async function CatalogPage({ params }: Props) {
               recogé sin cola
             </span>
           </div>
-          <ThemeToggle className="flex-shrink-0" />
         </div>
       </header>
 

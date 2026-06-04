@@ -51,21 +51,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang="es" className="dark">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        {/* Prevent FOUC: apply saved theme before paint */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                var t = localStorage.getItem('theme');
-                var dark = t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (dark) document.documentElement.classList.add('dark');
-              } catch(e) {}
-            `,
-          }}
-        />
       </head>
       <body className={`${inter.variable} ${jetbrainsMono.variable} min-h-screen antialiased overflow-x-hidden`}>
         <TelegramAuthProvider />
