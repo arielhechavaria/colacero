@@ -330,7 +330,7 @@ export default function AnnouncementsPage() {
               <p className="text-sm font-semibold flex items-center gap-1.5 text-slate-900">
                 🛒 Productos a destacar
                 {selectedProd.size > 0 && (
-                  <Badge className="bg-[var(--primary-dim)] text-[var(--primary)] border-[var(--border-glow)]">
+                  <Badge className="bg-indigo-50 text-indigo-600 border-indigo-200">
                     {selectedProd.size}
                   </Badge>
                 )}
@@ -506,7 +506,7 @@ export default function AnnouncementsPage() {
               <p className="text-sm font-semibold flex items-center gap-1.5 text-slate-900">
                 📜 Historial
                 {announcements.length > 0 && (
-                  <Badge className="bg-[var(--primary-dim)] text-[var(--primary)] border-[var(--border-glow)]">
+                  <Badge className="bg-indigo-50 text-indigo-600 border-indigo-200">
                     {announcements.length}
                   </Badge>
                 )}

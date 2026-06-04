@@ -20,7 +20,7 @@ export function AnnouncementPreview({ text, imageUrl, pngUrl, mode = 'text', bus
       className="rounded-3xl p-4 sm:p-5"
       style={{
         background: '#1d2733',  // estilo chat Telegram dark
-        border:     '1px solid var(--glass-border)',
+        border:     '1px solid rgba(255,255,255,0.08)',
       }}
     >
       <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.4)' }}>
