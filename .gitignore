@@ -9,3 +9,4 @@ _tmp_*
 apps/panel/.next
 .idea/
 .atl/
+*.tsbuildinfo
