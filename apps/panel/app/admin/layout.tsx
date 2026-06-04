@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -32,22 +32,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b border-slate-200 bg-white">
+      <header className="border-b border-white/[0.08] bg-white">
         <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <h1 className="text-lg font-bold text-slate-900">
+            <h1 className="text-lg font-bold text-white">
               ColaCero Admin
             </h1>
             <nav className="flex items-center gap-4 text-sm">
-              <Link href="/admin/businesses" className="hover:underline text-slate-500 hover:text-slate-900">
+              <Link href="/admin/businesses" className="hover:underline text-slate-500 hover:text-white">
                 Negocios
               </Link>
-              <Link href="/admin/leads" className="hover:underline text-slate-500 hover:text-slate-900">
+              <Link href="/admin/leads" className="hover:underline text-slate-500 hover:text-white">
                 Leads
               </Link>
             </nav>
           </div>
-          <Link href="/orders" className="text-sm text-slate-500 hover:text-slate-900">
+          <Link href="/orders" className="text-sm text-slate-500 hover:text-white">
             ← Volver al panel
           </Link>
         </div>

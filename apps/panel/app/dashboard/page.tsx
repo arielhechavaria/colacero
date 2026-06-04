@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -54,14 +54,14 @@ function KpiCard({
   href?:     string
 }) {
   const card = (
-    <div className={`bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-1 ${href ? 'transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer' : ''}`}>
+    <div className={`bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5 flex flex-col gap-1 ${href ? 'transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer' : ''}`}>
       <div className="flex items-center justify-between mb-1">
         <span className="text-xl">{icon}</span>
         <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
           {label}
         </span>
       </div>
-        <p className={`text-2xl sm:text-3xl font-black font-mono ${gradient ? 'text-gradient' : 'text-slate-900'}`}>
+        <p className={`text-2xl sm:text-3xl font-black font-mono ${gradient ? 'text-gradient' : 'text-white'}`}>
         {value}
       </p>
       {sub && (
@@ -77,12 +77,12 @@ function KpiCard({
 
 function FulfillmentBar({ rate, delivered, total }: { rate: number; delivered: number; total: number }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+    <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-sm font-semibold text-slate-900">Tasa de cumplimiento</p>
+        <p className="text-sm font-semibold text-white">Tasa de cumplimiento</p>
         <p className="text-xl font-black font-mono text-gradient">{rate.toFixed(1)}%</p>
       </div>
-      <div className="h-3 rounded-full overflow-hidden bg-slate-100">
+      <div className="h-3 rounded-full overflow-hidden bg-white/10">
         <div
           className="h-full rounded-full bg-gradient-teal-violet transition-all duration-700"
           style={{ width: `${Math.min(rate, 100)}%` }}
@@ -100,7 +100,7 @@ function FulfillmentBar({ rate, delivered, total }: { rate: number; delivered: n
 function TopProductsList({ items }: { items: TopProduct[] }) {
   if (items.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 text-center">
+      <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-8 text-center">
         <p className="text-slate-500">Sin ventas en este período</p>
       </div>
     )
@@ -109,8 +109,8 @@ function TopProductsList({ items }: { items: TopProduct[] }) {
   const maxQty = items[0]?.totalQty ?? 1
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-      <p className="text-sm font-semibold mb-4 text-slate-900">
+    <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5">
+      <p className="text-sm font-semibold mb-4 text-white">
         Productos más vendidos
       </p>
       <ul className="flex flex-col gap-3">
@@ -125,7 +125,7 @@ function TopProductsList({ items }: { items: TopProduct[] }) {
                   >
                     {i + 1}
                   </span>
-                  <span className="text-sm font-medium truncate text-slate-900">
+                  <span className="text-sm font-medium truncate text-white">
                     {item.name}
                   </span>
                 </div>
@@ -134,14 +134,14 @@ function TopProductsList({ items }: { items: TopProduct[] }) {
                     ${item.totalRev.toFixed(2)}
                   </span>
                   <span
-                    className="text-xs font-mono px-1.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-600"
+                    className="text-xs font-mono px-1.5 py-0.5 rounded-lg bg-indigo-500/15 text-indigo-400"
                   >
                     {item.totalQty} {item.unitLabel}
                   </span>
                 </div>
               </div>
               {/* Bar */}
-              <div className="h-1.5 rounded-full overflow-hidden bg-slate-100">
+              <div className="h-1.5 rounded-full overflow-hidden bg-white/10">
                 <div
                   className="h-full rounded-full bg-gradient-teal-violet transition-all duration-700"
                   style={{ width: `${pct}%` }}
@@ -163,8 +163,8 @@ function CoPurchasesCard({ pairs }: { pairs: CoPurchasePair[] }) {
   const max = pairs[0]?.count ?? 1
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-      <p className="text-sm font-semibold mb-1 text-slate-900">
+    <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5">
+      <p className="text-sm font-semibold mb-1 text-white">
         Combos frecuentes
       </p>
       <p className="text-xs mb-4 text-slate-500">
@@ -176,7 +176,7 @@ function CoPurchasesCard({ pairs }: { pairs: CoPurchasePair[] }) {
           return (
             <li key={i} className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
-                <span className="text-sm truncate text-slate-900">
+                <span className="text-sm truncate text-white">
                   {pair.nameA}
                   <span className="mx-1.5 text-slate-500">+</span>
                   {pair.nameB}
@@ -185,7 +185,7 @@ function CoPurchasesCard({ pairs }: { pairs: CoPurchasePair[] }) {
                   {pair.count}×
                 </span>
               </div>
-              <div className="h-1.5 rounded-full overflow-hidden bg-slate-100">
+              <div className="h-1.5 rounded-full overflow-hidden bg-white/10">
                 <div
                   className="h-full rounded-full bg-gradient-teal-violet transition-all duration-700"
                   style={{ width: `${pct}%` }}
@@ -205,8 +205,8 @@ function WeeklyChart({ days }: { days: WeeklyDay[] }) {
   const maxOrders = Math.max(...days.map((d) => d.orders), 1)
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-      <p className="text-sm font-semibold mb-1 text-slate-900">
+    <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5">
+      <p className="text-sm font-semibold mb-1 text-white">
         Pedidos por día de la semana
       </p>
       <p className="text-xs mb-5 text-slate-500">
@@ -218,7 +218,7 @@ function WeeklyChart({ days }: { days: WeeklyDay[] }) {
           return (
             <div key={day.day} className="flex flex-1 flex-col items-center gap-1">
               <span
-                className={`text-[10px] font-mono font-semibold ${day.orders > 0 ? 'text-indigo-600' : 'text-transparent'}`}
+                className={`text-[10px] font-mono font-semibold ${day.orders > 0 ? 'text-indigo-400' : 'text-transparent'}`}
               >
                 {day.orders}
               </span>
@@ -242,7 +242,7 @@ function WeeklyChart({ days }: { days: WeeklyDay[] }) {
 function StockAlertsList({ alerts }: { alerts: StockAlert[] }) {
   if (alerts.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-center gap-3">
+      <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5 flex items-center gap-3">
         <span className="text-xl">✅</span>
         <p className="text-sm font-semibold text-emerald-600">
           Todo el stock en orden
@@ -252,9 +252,9 @@ function StockAlertsList({ alerts }: { alerts: StockAlert[] }) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+    <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm font-semibold text-slate-900">
+        <p className="text-sm font-semibold text-white">
           Alertas de stock
         </p>
         <Badge variant="destructive">
@@ -265,7 +265,7 @@ function StockAlertsList({ alerts }: { alerts: StockAlert[] }) {
         {alerts.map((a) => (
           <li key={a.productId}>
             <Link href="/products" className="flex items-center justify-between text-sm transition-opacity hover:opacity-70">
-              <span className="text-slate-900">{a.name}</span>
+              <span className="text-white">{a.name}</span>
               <Badge variant={a.status === 'out' ? 'destructive' : 'warning'} className="ml-3 flex-shrink-0">
                 {a.status === 'out' ? 'Sin stock' : `${a.quantityAvailable} restantes`}
               </Badge>
@@ -348,11 +348,11 @@ export default function DashboardPage() {
     <main className="min-h-screen">
       {/* Header */}
       <header
-        className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white flex items-center justify-between"
+        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-white flex items-center justify-between"
       >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between w-full">
           <div>
-            <h1 className="text-lg font-bold text-slate-900">
+            <h1 className="text-lg font-bold text-white">
               {greeting}{userLabel ? <>, <span className="text-gradient">{userLabel}</span></> : null}
             </h1>
             {pendingMsg && (
@@ -378,7 +378,7 @@ export default function DashboardPage() {
           <div className="flex flex-col gap-5">
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-3">
+                <div key={i} className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5 flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <Skeleton className="h-6 w-6 rounded-full" />
                     <Skeleton className="h-3 w-16" />
@@ -388,12 +388,12 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+            <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5">
               <Skeleton className="h-3 w-32 mb-3" />
               <Skeleton className="h-3 w-full rounded-full" />
               <Skeleton className="h-3 w-24 mt-2" />
             </div>
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-3">
+            <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5 flex flex-col gap-3">
               <Skeleton className="h-3 w-40 mb-1" />
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="flex flex-col gap-1">

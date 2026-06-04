@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -163,7 +163,7 @@ export default function WindowsPage() {
       <main className="min-h-screen px-6 py-8 max-w-5xl mx-auto">
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
+            <div key={i} className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5 flex items-center gap-4">
               <Skeleton className="h-12 w-12 rounded-xl" />
               <div className="flex-1 space-y-2">
                 <Skeleton className="h-4 w-32" />
@@ -182,7 +182,7 @@ export default function WindowsPage() {
   return (
     <main className="min-h-screen">
       <header
-        className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white"
+        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-white"
       >
         <div className="flex items-center justify-between gap-4">
           <div>
@@ -225,10 +225,10 @@ export default function WindowsPage() {
         {showForm && (
           <form
             onSubmit={(e) => void handleCreate(e)}
-            className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-3"
+            className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5 flex flex-col gap-3"
           >
             <p
-              className="font-semibold text-slate-900"
+              className="font-semibold text-white"
             >
               Nueva ventana
             </p>
@@ -289,9 +289,9 @@ export default function WindowsPage() {
 
         {/* Windows grouped by date */}
         {Object.keys(grouped).length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-10 text-center flex flex-col items-center gap-3">
+          <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-10 text-center flex flex-col items-center gap-3">
             <span className="text-4xl">📅</span>
-            <p className="font-semibold text-slate-900">No hay ventanas configuradas</p>
+            <p className="font-semibold text-white">No hay ventanas configuradas</p>
             <p className="text-sm max-w-xs text-slate-500">
               Sin ventanas, los clientes no pueden confirmar pedidos.
             </p>
@@ -313,7 +313,7 @@ export default function WindowsPage() {
           Object.entries(grouped).map(([date, wins]) => (
             <section
               key={date}
-              className="bg-white rounded-xl border border-slate-200 shadow-sm p-4"
+              className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-4"
             >
               <p
                 className="mb-3 text-sm font-semibold capitalize text-slate-500"
@@ -324,11 +324,11 @@ export default function WindowsPage() {
                 {wins.map((w) => (
                   <div
                     key={w.id}
-                    className={`flex items-center justify-between rounded-xl px-4 py-3 bg-slate-50 border border-slate-200 ${w.isOpen ? '' : 'opacity-50'}`}
+                    className={`flex items-center justify-between rounded-xl px-4 py-3 bg-[#0B0F1A] border border-white/[0.08] ${w.isOpen ? '' : 'opacity-50'}`}
                   >
                     <div>
                       <p
-                        className="font-medium font-mono text-slate-900"
+                        className="font-medium font-mono text-white"
                       >
                         {w.startTime} – {w.endTime}
                       </p>

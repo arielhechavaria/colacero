@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -15,10 +15,10 @@ const statusLabel: Record<LeadStatus, string> = {
 
 const statusColor: Record<LeadStatus, string> = {
   NEW:        'bg-blue-100 text-blue-700 border-blue-200',
-  CONTACTED:  'bg-amber-100 text-amber-700 border-amber-200',
+  CONTACTED:  'bg-amber-100 text-amber-400 border-amber-500/30',
   TRIAL:      'bg-violet-100 text-violet-700 border-violet-200',
-  CONVERTED:  'bg-emerald-100 text-emerald-700 border-emerald-200',
-  LOST:       'bg-slate-100 text-slate-600 border-slate-200',
+  CONVERTED:  'bg-emerald-100 text-emerald-400 border-emerald-200',
+  LOST:       'bg-white/10 text-slate-600 border-white/[0.08]',
 }
 
 const STATUS_VALUES: LeadStatus[] = ['NEW', 'CONTACTED', 'TRIAL', 'CONVERTED', 'LOST']
@@ -92,7 +92,7 @@ export default function AdminLeadsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">
+          <h2 className="text-2xl font-bold text-white">
             Leads ({leads.length})
           </h2>
           <p className="text-sm text-slate-500">
@@ -102,7 +102,7 @@ export default function AdminLeadsPage() {
         {leads.length > 0 && (
           <button
             onClick={() => downloadCsv(filtered)}
-            className="rounded-xl px-4 py-2 text-sm font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors"
+            className="rounded-xl px-4 py-2 text-sm font-medium bg-white border border-white/[0.08] text-slate-300 hover:bg-[#0B0F1A] transition-colors"
           >
             ↓ Exportar CSV{filter !== 'ALL' ? ` (${filter})` : ''}
           </button>
@@ -115,8 +115,8 @@ export default function AdminLeadsPage() {
           onClick={() => setFilter('ALL')}
           className={`rounded-full px-3 py-1 text-xs font-semibold border transition-all ${
             filter === 'ALL'
-              ? 'bg-indigo-50 text-indigo-600 border-indigo-200'
-              : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
+              ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30'
+              : 'bg-white text-slate-500 border-white/[0.08] hover:border-slate-300'
           }`}
         >
           Todos ({leads.length})
@@ -127,8 +127,8 @@ export default function AdminLeadsPage() {
             onClick={() => setFilter(s)}
             className={`rounded-full px-3 py-1 text-xs font-semibold border transition-all ${
               filter === s
-                ? 'bg-indigo-50 text-indigo-600 border-indigo-200'
-                : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
+                ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30'
+                : 'bg-white text-slate-500 border-white/[0.08] hover:border-slate-300'
             }`}
           >
             {statusLabel[s]} ({stats[s]})
@@ -139,9 +139,9 @@ export default function AdminLeadsPage() {
       {loading ? (
         <p className="text-slate-500">Cargando…</p>
       ) : filtered.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+        <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] p-12 text-center">
           <p className="text-4xl mb-3">📭</p>
-          <p className="font-semibold text-slate-900">Sin leads en este filtro</p>
+          <p className="font-semibold text-white">Sin leads en este filtro</p>
           <p className="text-sm mt-1 text-slate-500">
             Cuando alguien complete el form de contacto, va a aparecer acá.
           </p>
@@ -151,11 +151,11 @@ export default function AdminLeadsPage() {
           {filtered.map((lead) => (
             <div
               key={lead.id}
-              className="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
+              className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5"
             >
               <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                 <div>
-                  <p className="font-semibold text-slate-900">
+                  <p className="font-semibold text-white">
                     <a href={`mailto:${lead.email}`} className="hover:underline">{lead.email}</a>
                   </p>
                   <p className="text-xs mt-1 text-slate-500">
@@ -168,7 +168,7 @@ export default function AdminLeadsPage() {
               </div>
 
               {lead.message && (
-                <p className="mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm leading-relaxed text-slate-600">
+                <p className="mb-3 rounded-xl border border-white/[0.08] bg-[#0B0F1A] p-3 text-sm leading-relaxed text-slate-600">
                   {lead.message}
                 </p>
               )}
@@ -181,8 +181,8 @@ export default function AdminLeadsPage() {
                     disabled={lead.status === s}
                     className={`rounded-lg px-3 py-1 text-xs font-medium border transition-all disabled:opacity-40 ${
                       lead.status === s
-                        ? 'bg-indigo-50 text-indigo-600 border-indigo-200'
-                        : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300 hover:text-slate-700'
+                        ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30'
+                        : 'bg-white text-slate-500 border-white/[0.08] hover:border-slate-300 hover:text-slate-300'
                     }`}
                   >
                     → {statusLabel[s]}

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -91,13 +91,13 @@ export function AnnouncementAiModal({ open, onClose, onSelect, productIds, produ
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white border border-slate-200 shadow-xl p-6"
+        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white border border-white/[0.08] shadow-xl p-6"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-5">
           <div>
-            <h2 className="text-xl font-bold text-slate-900">✨ Generar con IA</h2>
+            <h2 className="text-xl font-bold text-white">✨ Generar con IA</h2>
             <p className="text-sm text-slate-500">Claude genera 3 variantes para que elijas la mejor.</p>
           </div>
           <button onClick={onClose} className="text-2xl leading-none text-slate-400 hover:text-slate-600" aria-label="Cerrar">×</button>
@@ -114,11 +114,11 @@ export function AnnouncementAiModal({ open, onClose, onSelect, productIds, produ
                 onClick={() => setType(t.id)}
                 className={cn(
                   'flex items-center gap-2 rounded-xl border p-3 text-left transition-colors',
-                  active ? 'bg-indigo-50 border-indigo-300' : 'bg-white border-slate-200 hover:border-slate-300',
+                  active ? 'bg-indigo-50 border-indigo-300' : 'bg-white border-white/[0.08] hover:border-slate-300',
                 )}
               >
                 <span className="text-lg">{t.icon}</span>
-                <span className={cn('text-xs font-semibold', active ? 'text-indigo-600' : 'text-slate-700')}>
+                <span className={cn('text-xs font-semibold', active ? 'text-indigo-400' : 'text-slate-300')}>
                   {t.label}
                 </span>
               </button>
@@ -137,10 +137,10 @@ export function AnnouncementAiModal({ open, onClose, onSelect, productIds, produ
                 onClick={() => setTone(t.id)}
                 className={cn(
                   'rounded-xl border p-3 text-left transition-colors',
-                  active ? 'bg-indigo-50 border-indigo-300' : 'bg-white border-slate-200 hover:border-slate-300',
+                  active ? 'bg-indigo-50 border-indigo-300' : 'bg-white border-white/[0.08] hover:border-slate-300',
                 )}
               >
-                <p className={cn('text-xs font-semibold', active ? 'text-indigo-600' : 'text-slate-700')}>
+                <p className={cn('text-xs font-semibold', active ? 'text-indigo-400' : 'text-slate-300')}>
                   {t.label}
                 </p>
                 <p className="mt-0.5 text-[10px] text-slate-500">{t.desc}</p>
@@ -166,7 +166,7 @@ export function AnnouncementAiModal({ open, onClose, onSelect, productIds, produ
 
         {/* Products info */}
         {productIds.length > 0 && (
-          <p className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+          <p className="mb-4 rounded-lg border border-white/[0.08] bg-[#0B0F1A] p-3 text-xs text-slate-600">
             💡 La IA va a tener en cuenta los <strong>{productIds.length} productos</strong> seleccionados
             {productNames.length > 0 && `: ${productNames.slice(0, 3).join(', ')}${productNames.length > 3 ? '…' : ''}`}.
           </p>
@@ -200,14 +200,14 @@ export function AnnouncementAiModal({ open, onClose, onSelect, productIds, produ
                 <button
                   key={i}
                   onClick={() => pickVariant(v)}
-                  className="block w-full rounded-xl border border-slate-200 bg-white p-4 text-left transition-all hover:border-indigo-400 hover:shadow-sm"
+                  className="block w-full rounded-xl border border-white/[0.08] bg-white p-4 text-left transition-all hover:border-indigo-400 hover:shadow-sm"
                 >
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-indigo-600">VARIANTE {i + 1}</span>
+                    <span className="text-[11px] font-bold text-indigo-400">VARIANTE {i + 1}</span>
                     <span className="text-[11px] text-slate-400">{v.length} chars</span>
                   </div>
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{v}</p>
-                  <p className="mt-2 text-[11px] underline text-indigo-600">Usar esta →</p>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-300">{v}</p>
+                  <p className="mt-2 text-[11px] underline text-indigo-400">Usar esta →</p>
                 </button>
               ))}
             </div>

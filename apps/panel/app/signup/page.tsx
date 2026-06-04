@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
@@ -123,8 +123,8 @@ export default function SignupPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8">
-          <h1 className="mb-1 text-xl font-bold text-slate-900">
+        <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-8">
+          <h1 className="mb-1 text-xl font-bold text-white">
             Crear mi negocio
           </h1>
           <p className="mb-6 text-sm text-slate-500">
@@ -229,7 +229,7 @@ export default function SignupPage() {
 
           <p className="mt-5 text-center text-sm text-slate-500">
             ¿Ya tenés cuenta?{' '}
-            <Link href="/login" className="text-indigo-600">
+            <Link href="/login" className="text-indigo-400">
               Iniciá sesión
             </Link>
           </p>

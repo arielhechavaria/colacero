@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
@@ -263,7 +263,7 @@ export default function AnnouncementsPage() {
   return (
     <main className="min-h-screen">
       <header
-        className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white"
+        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-white"
       >
         <div className="flex items-center justify-between gap-4">
           <div>
@@ -283,9 +283,9 @@ export default function AnnouncementsPage() {
         <div className="flex flex-col gap-4">
 
           {/* Plantillas */}
-          <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <section className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold text-slate-900">
+              <p className="text-sm font-semibold text-white">
                 ⚡ Plantillas
               </p>
               <Button
@@ -303,11 +303,11 @@ export default function AnnouncementsPage() {
                   <button
                     key={tpl.id}
                     onClick={() => applyTemplate(tpl)}
-                    className={`flex flex-col items-start rounded-xl border p-3 text-left transition-all hover:border-indigo-400 ${active ? 'bg-indigo-50 border-indigo-400' : 'bg-white border-slate-200'}`}
+                    className={`flex flex-col items-start rounded-xl border p-3 text-left transition-all hover:border-indigo-400 ${active ? 'bg-indigo-50 border-indigo-400' : 'bg-white border-white/[0.08]'}`}
                   >
                     <span className="text-lg">{tpl.icon}</span>
                     <span
-                      className={`mt-1 text-xs font-semibold leading-tight ${active ? 'text-indigo-600' : 'text-slate-900'}`}
+                      className={`mt-1 text-xs font-semibold leading-tight ${active ? 'text-indigo-400' : 'text-white'}`}
                     >
                       {tpl.name}
                     </span>
@@ -321,16 +321,16 @@ export default function AnnouncementsPage() {
           </section>
 
           {/* Productos */}
-          <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <section className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5">
             <button
               type="button"
               onClick={() => setProdExpanded((v) => !v)}
               className="flex w-full items-center justify-between mb-3"
             >
-              <p className="text-sm font-semibold flex items-center gap-1.5 text-slate-900">
+              <p className="text-sm font-semibold flex items-center gap-1.5 text-white">
                 🛒 Productos a destacar
                 {selectedProd.size > 0 && (
-                  <Badge className="bg-indigo-50 text-indigo-600 border-indigo-200">
+                  <Badge className="bg-indigo-500/15 text-indigo-400 border-indigo-500/30">
                     {selectedProd.size}
                   </Badge>
                 )}
@@ -352,9 +352,9 @@ export default function AnnouncementsPage() {
                       <button
                         key={p.id}
                         onClick={() => toggleProduct(p)}
-                        className={`flex flex-col items-start rounded-xl border p-3 text-left transition-colors ${on ? 'bg-indigo-50 border-indigo-400' : 'bg-white border-slate-200'}`}
+                        className={`flex flex-col items-start rounded-xl border p-3 text-left transition-colors ${on ? 'bg-indigo-50 border-indigo-400' : 'bg-white border-white/[0.08]'}`}
                       >
-                        <span className={`text-xs font-semibold ${on ? 'text-indigo-600' : 'text-slate-900'}`}>
+                        <span className={`text-xs font-semibold ${on ? 'text-indigo-400' : 'text-white'}`}>
                           {on ? '✓ ' : ''}{p.name}
                         </span>
                         <span className="mt-0.5 text-[10px] text-slate-500">
@@ -369,9 +369,9 @@ export default function AnnouncementsPage() {
           </section>
 
           {/* Editor */}
-          <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <section className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold text-slate-900">
+              <p className="text-sm font-semibold text-white">
                 ✏️ Mensaje
               </p>
               <span className={`text-xs ${charsLeft < 200 ? 'text-amber-600' : 'text-slate-500'}`}>
@@ -414,7 +414,7 @@ export default function AnnouncementsPage() {
                 onChange={(e) => setScheduledAt(e.target.value)}
                 suppressHydrationWarning
                 min={new Date().toISOString().slice(0, 16)}
-                className="rounded-lg border border-slate-200 bg-transparent px-3 py-1.5 text-sm text-slate-900"
+                className="rounded-lg border border-white/[0.08] bg-transparent px-3 py-1.5 text-sm text-white"
               />
               {scheduledAt && (
                 <button onClick={() => setScheduledAt('')} className="text-xs underline text-slate-500">
@@ -462,21 +462,21 @@ export default function AnnouncementsPage() {
         <div className="mt-4 flex flex-col gap-4 lg:mt-0">
 
           {/* Preview */}
-          <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <section className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold text-slate-900">
+              <p className="text-sm font-semibold text-white">
                 👁 Preview
               </p>
-              <div className="flex rounded-lg border border-slate-200 p-0.5">
+              <div className="flex rounded-lg border border-white/[0.08] p-0.5">
                 <button
                   onClick={() => setPreviewMode('text')}
-                  className={`rounded px-2 py-1 text-xs font-medium transition-colors ${previewMode === 'text' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500'}`}
+                  className={`rounded px-2 py-1 text-xs font-medium transition-colors ${previewMode === 'text' ? 'bg-indigo-500/15 text-indigo-400' : 'text-slate-500'}`}
                 >
                   Texto
                 </button>
                 <button
                   onClick={() => setPreviewMode('png')}
-                  className={`rounded px-2 py-1 text-xs font-medium transition-colors ${previewMode === 'png' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500'}`}
+                  className={`rounded px-2 py-1 text-xs font-medium transition-colors ${previewMode === 'png' ? 'bg-indigo-500/15 text-indigo-400' : 'text-slate-500'}`}
                 >
                   🎨 Imagen
                 </button>
@@ -497,16 +497,16 @@ export default function AnnouncementsPage() {
           </section>
 
           {/* Historial */}
-          <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <section className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5">
             <button
               type="button"
               onClick={() => setHistoryExpanded((v) => !v)}
               className="flex w-full items-center justify-between mb-3"
             >
-              <p className="text-sm font-semibold flex items-center gap-1.5 text-slate-900">
+              <p className="text-sm font-semibold flex items-center gap-1.5 text-white">
                 📜 Historial
                 {announcements.length > 0 && (
-                  <Badge className="bg-indigo-50 text-indigo-600 border-indigo-200">
+                  <Badge className="bg-indigo-500/15 text-indigo-400 border-indigo-500/30">
                     {announcements.length}
                   </Badge>
                 )}
@@ -520,7 +520,7 @@ export default function AnnouncementsPage() {
             <div className="mb-3 flex flex-wrap gap-1.5">
               <button
                 onClick={() => setHistoryFilter('ALL')}
-                className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all border border-slate-200 ${historyFilter === 'ALL' ? 'bg-indigo-50 text-indigo-600' : 'bg-transparent text-slate-500'}`}
+                className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all border border-white/[0.08] ${historyFilter === 'ALL' ? 'bg-indigo-500/15 text-indigo-400' : 'bg-transparent text-slate-500'}`}
               >
                 Todos ({announcements.length})
               </button>
@@ -531,7 +531,7 @@ export default function AnnouncementsPage() {
                   <button
                     key={s}
                     onClick={() => setHistoryFilter(s)}
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all border border-slate-200 ${historyFilter === s ? 'bg-indigo-50 text-indigo-600' : 'bg-transparent text-slate-500'}`}
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all border border-white/[0.08] ${historyFilter === s ? 'bg-indigo-500/15 text-indigo-400' : 'bg-transparent text-slate-500'}`}
                   >
                     {statusLabel[s]} ({count})
                   </button>
@@ -554,7 +554,7 @@ export default function AnnouncementsPage() {
                 {filteredHistory.map((a) => (
                   <div
                     key={a.id}
-                    className="rounded-xl border border-slate-200 bg-slate-50 p-3"
+                    className="rounded-xl border border-white/[0.08] bg-[#0B0F1A] p-3"
                   >
                     <div className="mb-1.5 flex items-start justify-between gap-2">
                       <Badge className={statusColor[a.status]}>{statusLabel[a.status]}</Badge>
@@ -567,7 +567,7 @@ export default function AnnouncementsPage() {
                       </span>
                     </div>
                     <p
-                      className="whitespace-pre-wrap break-words text-xs text-slate-900 line-clamp-4"
+                      className="whitespace-pre-wrap break-words text-xs text-white line-clamp-4"
                     >
                       {a.text}
                     </p>
@@ -584,10 +584,10 @@ export default function AnnouncementsPage() {
                     <div className="mt-2 flex gap-1.5 flex-wrap">
                       {(a.status === 'DRAFT' || a.status === 'SCHEDULED') && (
                         <>
-                          <button onClick={() => void handleSendDraft(a.id)} className="text-[10px] underline text-indigo-600">
+                          <button onClick={() => void handleSendDraft(a.id)} className="text-[10px] underline text-indigo-400">
                             Enviar ahora
                           </button>
-                          <button onClick={() => void handleRegenImage(a.id)} className="text-[10px] underline text-indigo-600">
+                          <button onClick={() => void handleRegenImage(a.id)} className="text-[10px] underline text-indigo-400">
                             {a.generatedPng ? 'Regenerar imagen' : 'Generar imagen'}
                           </button>
                           <button onClick={() => void handleCancelAnnouncement(a.id)} className="text-[10px] underline text-slate-500">
@@ -596,7 +596,7 @@ export default function AnnouncementsPage() {
                         </>
                       )}
                       {a.status === 'FAILED' && (
-                        <button onClick={() => void handleRetry(a)} className="text-[10px] underline text-indigo-600">
+                        <button onClick={() => void handleRetry(a)} className="text-[10px] underline text-indigo-400">
                           Reintentar
                         </button>
                       )}

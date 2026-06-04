@@ -29,10 +29,10 @@ export function OrderCard({ order, onAction, loading }: Props) {
 
   return (
     <motion.div
-      className={`bg-white rounded-xl border border-slate-200 p-3 ${isDone ? 'opacity-40' : ''}`}
+      className={`bg-white/[0.04] rounded-xl border border-white/[0.08] p-3 ${isDone ? 'opacity-40' : ''}`}
       whileHover={isDone ? {} : {
         y: -2,
-        boxShadow: '0 4px 12px rgba(15,23,42,0.08), 0 1px 4px rgba(15,23,42,0.05)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1)',
       }}
       whileTap={isDone ? {} : { scale: 0.98 }}
       transition={{ type: 'spring', stiffness: 400, damping: 28 }}
@@ -40,7 +40,7 @@ export function OrderCard({ order, onAction, loading }: Props) {
       {/* Code + customer + status dot */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0">
-          <span className="text-sm font-bold font-mono block text-indigo-600 tracking-wide">
+          <span className="text-sm font-bold font-mono block text-indigo-400 tracking-wide">
             {order.pickupCode ?? '—'}
           </span>
           <p className="text-[11px] truncate mt-0.5 text-slate-500">
@@ -51,23 +51,23 @@ export function OrderCard({ order, onAction, loading }: Props) {
       </div>
 
       {/* Items */}
-      <ul className="flex flex-col gap-0.5 mb-2 pt-2 border-t border-slate-100">
+      <ul className="flex flex-col gap-0.5 mb-2 pt-2 border-t border-white/[0.06]">
         {order.items.map((item) => (
           <li key={item.id} className="flex items-center text-[11px]">
-            <span className="text-slate-900">{item.name}</span>
+            <span className="text-slate-200">{item.name}</span>
             <span className="ml-1 text-slate-500">× {item.quantity}</span>
           </li>
         ))}
       </ul>
 
       {/* Total */}
-      <p className="text-xs font-semibold font-mono mb-2 text-slate-900">
+      <p className="text-xs font-semibold font-mono mb-2 text-slate-300">
         ${order.subtotal.toFixed(2)}
       </p>
 
       {/* Notas del cliente */}
       {order.notes && (
-        <p className="mb-2 rounded-lg px-2 py-1.5 text-[11px] leading-snug bg-amber-50 text-amber-700 border-l-2 border-amber-400">
+        <p className="mb-2 rounded-lg px-2 py-1.5 text-[11px] leading-snug bg-amber-500/10 text-amber-400 border-l-2 border-amber-500/50">
           📝 {order.notes}
         </p>
       )}

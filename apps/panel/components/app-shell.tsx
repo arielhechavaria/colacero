@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, Fragment } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
@@ -59,8 +59,8 @@ function NavItem({
             className={cn(
                 'flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 transition-all min-w-0 flex-1 text-[10px] font-semibold leading-none',
                 isActive
-                    ? 'bg-indigo-50 text-indigo-600'
-                    : 'text-slate-400 hover:text-slate-700 hover:bg-slate-50',
+                    ? 'bg-indigo-500/15 text-indigo-400'
+                    : 'text-slate-500 hover:text-slate-200 hover:bg-white/5',
             )}
         >
             <span className="text-xl leading-none">{icon}</span>
@@ -86,9 +86,9 @@ function MoreSheet({
 }) {
     return (
         <Sheet open={open} onOpenChange={(v) => { if (!v) onClose() }}>
-            <SheetContent side="bottom" className="rounded-t-3xl pb-safe bg-white border-t border-slate-200">
+            <SheetContent side="bottom" className="rounded-t-3xl pb-safe bg-[#111827] border-t border-white/10">
                 <SheetHeader className="mb-4">
-                    <SheetTitle className="text-slate-900">Más opciones</SheetTitle>
+                    <SheetTitle className="text-white">Más opciones</SheetTitle>
                 </SheetHeader>
 
                 <div className="grid grid-cols-4 gap-3 pb-6">
@@ -102,8 +102,8 @@ function MoreSheet({
                                 className={cn(
                                     'flex flex-col items-center gap-2 rounded-2xl p-4 transition-all border',
                                     isActive
-                                        ? 'bg-indigo-50 border-indigo-200 text-indigo-600'
-                                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50',
+                                        ? 'bg-indigo-500/15 border-indigo-500/30 text-indigo-400'
+                                        : 'bg-white/[0.04] border-white/[0.08] text-slate-300 hover:bg-white/[0.08]',
                                 )}
                             >
                                 <span className="text-2xl">{item.icon}</span>
@@ -113,7 +113,7 @@ function MoreSheet({
                     })}
                     <button
                         onClick={onLogout}
-                        className="flex flex-col items-center gap-2 rounded-2xl p-4 transition-all bg-white border border-slate-200 text-red-500 hover:bg-red-50"
+                        className="flex flex-col items-center gap-2 rounded-2xl p-4 transition-all bg-white/[0.04] border border-white/[0.08] text-red-400 hover:bg-red-500/10"
                     >
                         <span className="text-2xl">🚪</span>
                         <span className="text-xs font-semibold text-center leading-tight">Salir</span>
@@ -178,19 +178,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     )
 
     return (
-        <div className="flex min-h-screen bg-slate-50">
+        <div className="flex min-h-screen bg-[#0B0F1A]">
 
             {/* ── Sidebar — desktop (lg+) ────────────────────────────────── */}
             <aside
                 className={cn(
-                    'fixed left-0 top-0 z-20 hidden lg:flex h-full flex-col bg-white border-r border-slate-200 transition-[width] duration-200',
+                    'fixed left-0 top-0 z-20 hidden lg:flex h-full flex-col bg-[#0C1220] border-r border-white/[0.08] transition-[width] duration-200',
                     collapsed ? 'w-[64px]' : 'w-[240px]',
                 )}
             >
                 {/* Logo */}
                 <div
                     className={cn(
-                        'flex h-16 flex-shrink-0 items-center border-b border-slate-100',
+                        'flex h-16 flex-shrink-0 items-center border-b border-white/[0.06]',
                         collapsed ? 'px-3 justify-center' : 'px-5',
                     )}
                 >
@@ -215,7 +215,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         return (
                             <Fragment key={item.href}>
                                 {showDividerBefore && (
-                                    <div className="my-2 mx-1 h-px bg-slate-100" />
+                                    <div className="my-2 mx-1 h-px bg-white/[0.06]" />
                                 )}
                                 <Link
                                     href={item.href}
@@ -224,14 +224,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                                         'relative flex items-center gap-3 rounded-lg text-sm font-medium transition-colors duration-100',
                                         collapsed ? 'px-2 py-2.5 justify-center' : 'px-3 py-2.5',
                                         isActive
-                                            ? 'text-indigo-600'
-                                            : 'text-slate-500 hover:text-slate-800',
+                                            ? 'text-indigo-400'
+                                            : 'text-slate-500 hover:text-white',
                                     )}
                                 >
                                     {isActive && (
                                         <motion.span
                                             layoutId="sidebar-active"
-                                            className="absolute inset-0 rounded-lg bg-indigo-50"
+                                            className="absolute inset-0 rounded-lg bg-indigo-500/[0.12]"
                                             transition={{ type: 'spring', stiffness: 500, damping: 38 }}
                                         />
                                     )}
@@ -246,14 +246,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 {/* Footer */}
                 <div
                     className={cn(
-                        'flex flex-shrink-0 items-center gap-2 py-3 border-t border-slate-100',
+                        'flex flex-shrink-0 items-center gap-2 py-3 border-t border-white/[0.06]',
                         collapsed ? 'flex-col px-2' : 'px-4',
                     )}
                 >
                     <button
                         onClick={toggleCollapsed}
                         title={collapsed ? 'Expandir' : 'Colapsar'}
-                        className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                        className="rounded-lg p-2 text-slate-500 hover:bg-white/5 hover:text-slate-300 transition-colors"
                         aria-label="Toggle sidebar"
                     >
                         <span className="text-sm">{collapsed ? '⇥' : '⇤'}</span>
@@ -262,7 +262,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <button
                         onClick={() => void handleLogout()}
                         title="Cerrar sesión"
-                        className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                        className="rounded-lg p-2 text-slate-500 hover:bg-red-500/10 hover:text-red-400 transition-colors"
                     >
                         <span className="text-sm">🚪</span>
                     </button>
@@ -288,7 +288,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </main>
 
             {/* ── Bottom nav — mobile (<lg) ──────────────────────────────── */}
-            <nav className="fixed bottom-0 left-0 right-0 z-20 lg:hidden bg-white border-t border-slate-200">
+            <nav className="fixed bottom-0 left-0 right-0 z-20 lg:hidden bg-[#0C1220] border-t border-white/[0.08]">
                 <div className="flex items-center justify-around px-1 py-1 pb-safe">
                     {PRIMARY_NAV.map((item) => {
                         const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
@@ -308,8 +308,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         className={cn(
                             'flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 transition-all min-w-0 flex-1 text-[10px] font-semibold leading-none',
                             isSecondaryActive
-                                ? 'bg-indigo-50 text-indigo-600'
-                                : 'text-slate-400 hover:text-slate-700 hover:bg-slate-50',
+                                ? 'bg-indigo-500/15 text-indigo-400'
+                                : 'text-slate-500 hover:text-slate-200 hover:bg-white/5',
                         )}
                     >
                         <span className="text-xl leading-none">···</span>

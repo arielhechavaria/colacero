@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import {useState, useEffect, useCallback, useRef} from 'react'
 import {useRouter} from 'next/navigation'
@@ -130,13 +130,13 @@ export default function OrdersPage() {
             <main className="min-h-screen">
                 <div className="px-6 py-5 flex flex-col gap-4">
                     {Array.from({length: 3}).map((_, i) => (
-                        <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-3">
+                        <div key={i} className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5 flex flex-col gap-3">
                             <div className="flex items-center justify-between">
                                 <Skeleton className="h-5 w-32"/>
                                 <Skeleton className="h-5 w-20"/>
                             </div>
                             {Array.from({length: 2}).map((_, j) => (
-                                <div key={j} className="flex items-center gap-3 rounded-xl border border-slate-200 p-3">
+                                <div key={j} className="flex items-center gap-3 rounded-xl border border-white/[0.08] p-3">
                                     <Skeleton className="h-10 w-10 rounded-full flex-shrink-0"/>
                                     <div className="flex-1 flex flex-col gap-1.5">
                                         <Skeleton className="h-4 w-28"/>
@@ -155,10 +155,10 @@ export default function OrdersPage() {
     return (
         <main className="min-h-screen">
             {/* Header */}
-            <header className="sticky top-0 z-10 px-6 pt-4 pb-3 border-b border-slate-200 bg-white">
+            <header className="sticky top-0 z-10 px-6 pt-4 pb-3 border-b border-white/[0.08] bg-white">
                 {/* Row 1: título + timestamp + refresh */}
                 <div className="flex items-center justify-between gap-4 mb-3">
-                    <h1 className="text-lg font-bold text-slate-900">Pedidos</h1>
+                    <h1 className="text-lg font-bold text-white">Pedidos</h1>
                     <div className="flex items-center gap-2">
                         {lastUpdated && (
                             <span className="text-xs font-mono hidden sm:inline text-slate-400">

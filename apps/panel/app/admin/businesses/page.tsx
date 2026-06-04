@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useMemo } from 'react'
 import { toast } from 'sonner'
@@ -81,7 +81,7 @@ export default function AdminBusinessesPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">
+          <h2 className="text-2xl font-bold text-white">
             Negocios ({businesses.length})
           </h2>
           <p className="text-sm text-slate-500">
@@ -103,10 +103,10 @@ export default function AdminBusinessesPage() {
       ) : filtered.length === 0 ? (
         <p className="text-slate-500">No hay negocios que coincidan.</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+        <div className="overflow-x-auto rounded-xl border border-white/[0.08] shadow-lg">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-slate-500 border-b border-slate-200">
+              <tr className="text-left text-xs uppercase tracking-wide text-slate-500 border-b border-white/[0.08]">
                 <th className="px-4 py-3">Negocio</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3 text-right">Productos</th>
@@ -119,10 +119,10 @@ export default function AdminBusinessesPage() {
             </thead>
             <tbody>
               {filtered.map((b) => (
-                <tr key={b.id} className="border-t border-slate-200">
+                <tr key={b.id} className="border-t border-white/[0.08]">
                   <td className="px-4 py-3">
                     <div className="flex flex-col">
-                      <span className="font-semibold text-slate-900">{b.name}</span>
+                      <span className="font-semibold text-white">{b.name}</span>
                       <a
                         href={`https://${b.slug}.colacero.com`}
                         target="_blank"

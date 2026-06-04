@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -31,7 +31,7 @@ function CustomerCard({ c }: { c: CustomerSummary }) {
 
   return (
     <Link href={`/customers/${c.id}`}>
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex items-center gap-4 hover:scale-[1.01] transition-transform cursor-pointer">
+      <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-4 flex items-center gap-4 hover:scale-[1.01] transition-transform cursor-pointer">
         {/* Avatar */}
         <div
           className="flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center text-white font-bold text-sm bg-gradient-teal-violet"
@@ -42,7 +42,7 @@ function CustomerCard({ c }: { c: CustomerSummary }) {
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold truncate text-slate-900">{name}</p>
+            <p className="text-sm font-semibold truncate text-white">{name}</p>
             {c.isVip && <Badge variant="secondary" className="flex-shrink-0 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">VIP ⭐</Badge>}
             {c.isActive && !c.isVip && <Badge variant="default" className="flex-shrink-0">activo</Badge>}
           </div>
@@ -121,7 +121,7 @@ export default function CustomersPage() {
     <main className="min-h-screen">
       {/* Header */}
       <header
-        className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white flex items-center justify-between"
+        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-white flex items-center justify-between"
       >
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-lg font-bold text-gradient">Clientes</h1>
@@ -169,7 +169,7 @@ export default function CustomersPage() {
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex items-center gap-4">
+              <div key={i} className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-4 flex items-center gap-4">
                 <Skeleton className="h-10 w-10 rounded-full" />
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-4 w-32" />

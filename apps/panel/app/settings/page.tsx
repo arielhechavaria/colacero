@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -29,7 +29,7 @@ function GlassSelect(props: React.SelectHTMLAttributes<HTMLSelectElement> & { ch
   return (
     <select
       {...props}
-      className="w-full rounded-xl px-4 py-2.5 text-sm outline-none appearance-none bg-white border border-slate-200 text-slate-900"
+      className="w-full rounded-xl px-4 py-2.5 text-sm outline-none appearance-none bg-white border border-white/[0.08] text-white"
     />
   )
 }
@@ -109,8 +109,8 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
       {feedback && <Toast {...feedback} />}
 
       {/* ── QR del catálogo ── */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-        <p className="text-sm font-semibold mb-1 text-slate-900">
+      <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5">
+        <p className="text-sm font-semibold mb-1 text-white">
           Código QR del catálogo
         </p>
         <p className="text-xs mb-4 text-slate-500">
@@ -132,7 +132,7 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
                 Link del catálogo
               </p>
               <p
-                className="text-sm font-mono break-all rounded-lg px-3 py-2 bg-slate-50 text-indigo-600 border border-slate-200"
+                className="text-sm font-mono break-all rounded-lg px-3 py-2 bg-[#0B0F1A] text-indigo-400 border border-white/[0.08]"
               >
                 {catalogUrl}
               </p>
@@ -148,7 +148,7 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-4">
+      <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5 flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="biz-name">Nombre del negocio</Label>
           <Input
@@ -177,14 +177,14 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
         {/* Ubicación del negocio */}
         <div className="flex flex-col gap-3 pt-1">
           <div>
-            <p className="text-sm font-semibold text-slate-900">Ubicación</p>
+            <p className="text-sm font-semibold text-white">Ubicación</p>
             <p className="text-xs mt-0.5 text-slate-500">
               Tus clientes verán un botón "📍 Cómo llegar" en el catálogo.{' '}
               <a
                 href="https://maps.google.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline text-indigo-600"
+                className="underline text-indigo-400"
               >
                 Abrí Google Maps
               </a>
@@ -238,7 +238,7 @@ function BusinessTab({ token, isOwner }: { token: string; isOwner: boolean }) {
               href={`https://www.google.com/maps?q=${form.latitude},${form.longitude}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs w-fit rounded-lg px-3 py-1.5 transition-opacity hover:opacity-80 bg-slate-50 border border-slate-200 text-indigo-600"
+              className="inline-flex items-center gap-1.5 text-xs w-fit rounded-lg px-3 py-1.5 transition-opacity hover:opacity-80 bg-[#0B0F1A] border border-white/[0.08] text-indigo-400"
             >
               📍 Ver ubicación en Maps
             </a>
@@ -338,7 +338,7 @@ function StaffTab({ token, currentUserId, isOwner }: { token: string; currentUse
       {feedback && <Toast {...feedback} />}
 
       {/* Staff list */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg overflow-hidden">
         {loading ? (
           <p className="text-sm py-8 text-center text-slate-500">Cargando…</p>
         ) : (
@@ -346,7 +346,7 @@ function StaffTab({ token, currentUserId, isOwner }: { token: string; currentUse
             {staff.map((u) => (
               <li key={u.id} className="flex items-center justify-between px-5 py-3">
                 <div>
-                  <p className="text-sm font-medium text-slate-900">{u.email}</p>
+                  <p className="text-sm font-medium text-white">{u.email}</p>
                   <p className="text-xs mt-0.5 text-slate-500">
                     {u.role}
                     {u.id === currentUserId && ' · tú'}
@@ -370,8 +370,8 @@ function StaffTab({ token, currentUserId, isOwner }: { token: string; currentUse
       {/* Add member */}
       {isOwner && (
         showForm ? (
-          <form onSubmit={handleAdd} className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-3">
-            <p className="text-sm font-semibold text-slate-900">Nuevo miembro</p>
+          <form onSubmit={handleAdd} className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5 flex flex-col gap-3">
+            <p className="text-sm font-semibold text-white">Nuevo miembro</p>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="staff-email">Email</Label>
               <Input
@@ -462,7 +462,7 @@ function PasswordTab({ token }: { token: string }) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {feedback && <Toast {...feedback} />}
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-4">
+      <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5 flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="pwd-current">Contraseña actual</Label>
           <Input
@@ -563,16 +563,16 @@ function TelegramTab({ token, isOwner }: { token: string; isOwner: boolean }) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {feedback && <Toast {...feedback} />}
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-4">
+      <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5 flex flex-col gap-4">
         <div>
-          <p className="text-sm font-semibold text-slate-900">Bot de Telegram</p>
+          <p className="text-sm font-semibold text-white">Bot de Telegram</p>
           <p className="text-xs mt-1 text-slate-500">
             Creá un bot en{' '}
             <a
               href="https://t.me/BotFather"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline text-indigo-600"
+              className="underline text-indigo-400"
             >
               @BotFather
             </a>
@@ -584,7 +584,7 @@ function TelegramTab({ token, isOwner }: { token: string; isOwner: boolean }) {
           <Label htmlFor="tg-token">
             Token del bot
             {settings.hasBotToken && (
-              <span className="ml-2 text-xs font-normal text-indigo-600">
+              <span className="ml-2 text-xs font-normal text-indigo-400">
                 (ya configurado — dejá vacío para no cambiar)
               </span>
             )}
@@ -680,7 +680,7 @@ export default function SettingsPage() {
     <main className="min-h-screen">
       {/* Header */}
       <header
-        className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white flex items-center justify-between"
+        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-white flex items-center justify-between"
       >
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-lg font-bold text-gradient">Configuración</h1>
@@ -714,12 +714,12 @@ export default function SettingsPage() {
         <div className="px-6 py-5 lg:grid lg:grid-cols-[200px_1fr] lg:gap-6 lg:items-start">
 
           {/* Sidebar — desktop only */}
-          <nav className="hidden lg:flex flex-col gap-1 bg-white rounded-xl border border-slate-200 shadow-sm p-3">
+          <nav className="hidden lg:flex flex-col gap-1 bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-3">
             {TABS.map(({ key, label, icon }) => (
               <button
                 key={key}
                 onClick={() => setTab(key)}
-                className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-left transition-colors ${tab === key ? 'bg-indigo-50 text-indigo-600 font-semibold' : 'text-slate-900'}`}
+                className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-left transition-colors ${tab === key ? 'bg-indigo-500/15 text-indigo-400 font-semibold' : 'text-white'}`}
               >
                 <span>{icon}</span>
                 <span>{label}</span>

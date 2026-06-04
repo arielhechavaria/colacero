@@ -1,216 +1,199 @@
-'use client'
+﻿'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { getCustomerDetail, type CustomerDetail, type CustomerOrder, isAuthenticatedClient } from '../../../lib/api'
-import { Badge } from '@/components/ui/badge'
+import { getCustomers,
+  type CustomerSegment,
+  type CustomerSummary, isAuthenticatedClient, } from '../../../lib/api'
+import { Button }    from '@/components/ui/button'
+import { Badge }     from '@/components/ui/badge'
+import { Input }     from '@/components/ui/input'
+import { Skeleton }  from '@/components/ui/skeleton'
+import { EmptyState } from '@/components/empty-state'
 
-// ── Status badge ──────────────────────────────────────────────────────────────
+// ── Segment tabs ──────────────────────────────────────────────────────────────
 
-const STATUS_META: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'success' | 'warning' | 'outline' }> = {
-  CONFIRMED: { label: 'Confirmado', variant: 'default'     },
-  PREPARING: { label: 'Preparando', variant: 'warning'     },
-  READY:     { label: 'Listo',      variant: 'success'     },
-  PICKED_UP: { label: 'Entregado',  variant: 'success'     },
-  CANCELLED: { label: 'Cancelado',  variant: 'destructive' },
-  EXPIRED:   { label: 'Expirado',   variant: 'secondary'   },
-  DRAFT:     { label: 'Borrador',   variant: 'secondary'   },
-}
+const SEGMENTS: { key: CustomerSegment; label: string; icon: string }[] = [
+  { key: 'all',    label: 'Todos',   icon: '👥' },
+  { key: 'active', label: 'Activos', icon: '🟢' },
+  { key: 'vip',    label: 'VIP',     icon: '⭐' },
+]
 
-function StatusBadge({ status }: { status: string }) {
-  const meta = STATUS_META[status] ?? { label: status, variant: 'outline' as const }
-  return <Badge variant={meta.variant}>{meta.label}</Badge>
-}
+// ── Customer card ─────────────────────────────────────────────────────────────
 
-// ── Order accordion item ──────────────────────────────────────────────────────
-
-function OrderRow({ order }: { order: CustomerOrder }) {
-  const [open, setOpen] = useState(false)
-  const date = order.confirmedAt
-    ? new Date(order.confirmedAt).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })
-    : '—'
+function CustomerCard({ c }: { c: CustomerSummary }) {
+  const name     = c.displayName ?? c.phone ?? c.telegramId ?? 'Cliente anónimo'
+  const contact  = c.phone ?? (c.telegramId ? `TG: ${c.telegramId}` : null)
+  const lastDate = c.lastOrderAt
+    ? new Date(c.lastOrderAt).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })
+    : 'Sin pedidos'
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-      <button
-        className="w-full flex items-center justify-between px-4 py-3 text-left"
-        onClick={() => setOpen((v) => !v)}
-      >
-        <div className="flex items-center gap-3">
-          <StatusBadge status={order.status} />
-          <span className="text-xs font-mono text-slate-500">{date}</span>
-          {order.pickupCode && (
-            <span className="text-xs font-mono font-bold px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-600">
-              #{order.pickupCode}
-            </span>
+    <Link href={`/customers/${c.id}`}>
+      <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-4 flex items-center gap-4 hover:scale-[1.01] transition-transform cursor-pointer">
+        {/* Avatar */}
+        <div
+          className="flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center text-white font-bold text-sm bg-gradient-teal-violet"
+        >
+          {name.charAt(0).toUpperCase()}
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-semibold truncate text-white">{name}</p>
+            {c.isVip && <Badge variant="secondary" className="flex-shrink-0 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">VIP ⭐</Badge>}
+            {c.isActive && !c.isVip && <Badge variant="default" className="flex-shrink-0">activo</Badge>}
+          </div>
+          {contact && (
+            <p className="text-xs mt-0.5 truncate text-slate-500">{contact}</p>
           )}
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-bold font-mono text-indigo-600">
-            ${order.subtotal.toFixed(2)}
-          </span>
-          <span className="text-slate-400">{open ? '▲' : '▼'}</span>
+
+        {/* Stats */}
+        <div className="flex-shrink-0 text-right">
+          <p className="text-sm font-bold font-mono text-gradient">
+            ${c.totalSpent.toLocaleString('es', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </p>
+          <p className="text-xs text-slate-500">
+            {c.totalOrders} pedido{c.totalOrders !== 1 ? 's' : ''}
+          </p>
+          <p className="text-[10px] mt-0.5 text-slate-500">{lastDate}</p>
         </div>
-      </button>
-
-      {open && (
-        <div className="px-4 pb-3 border-t border-slate-100">
-          <ul className="flex flex-col gap-1.5 mt-2">
-            {order.items.map((item) => (
-              <li key={item.id} className="flex justify-between text-xs">
-                <span className="text-slate-900">
-                  {item.name}{' '}
-                  <span className="text-slate-500">×{item.quantity} {item.unitLabel}</span>
-                </span>
-                <span className="font-mono text-slate-500">
-                  ${item.subtotal.toFixed(2)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ── Stat card ─────────────────────────────────────────────────────────────────
-
-function StatCard({ icon, label, value, gradient }: { icon: string; label: string; value: string; gradient?: boolean }) {
-  return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-3 flex flex-col gap-0.5">
-      <span className="text-lg">{icon}</span>
-      <p className={`text-xl font-black font-mono ${gradient ? 'text-indigo-600' : 'text-slate-900'}`}>
-        {value}
-      </p>
-      <p className="text-xs text-slate-500">{label}</p>
-    </div>
+      </div>
+    </Link>
   )
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function CustomerDetailPage() {
+export default function CustomersPage() {
   const router = useRouter()
-  const params = useParams<{ id: string }>()
 
-  const [detail,  setDetail]  = useState<CustomerDetail | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState<string | null>(null)
+  const [segment,   setSegment]   = useState<CustomerSegment>('all')
+  const [search,    setSearch]    = useState('')
+  const [customers, setCustomers] = useState<CustomerSummary[]>([])
+  const [total,     setTotal]     = useState(0)
+  const [loading,   setLoading]   = useState(true)
+  const [error,     setError]     = useState<string | null>(null)
+
+  const tokenRef    = useRef<string | null>(null)
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const load = useCallback(async (tok: string, seg: CustomerSegment, q: string) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await getCustomers(tok, seg, q)
+      setCustomers(res.items)
+      setTotal(res.total)
+    } catch {
+      setError('Error al cargar clientes')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
     const token = (isAuthenticatedClient() ? '1' : null)
     if (!token) { router.replace('/login'); return }
+    tokenRef.current = token
+    void load(token, segment, search)
+  }, [load, router, segment]) // eslint-disable-line react-hooks/exhaustive-deps
 
-    setLoading(true)
-    getCustomerDetail(token, params.id)
-      .then(setDetail)
-      .catch(() => setError('Error al cargar cliente'))
-      .finally(() => setLoading(false))
-  }, [router, params.id])
+  // Debounced search
+  function handleSearch(value: string) {
+    setSearch(value)
+    if (searchTimer.current) clearTimeout(searchTimer.current)
+    searchTimer.current = setTimeout(() => {
+      if (tokenRef.current) void load(tokenRef.current, segment, value)
+    }, 350)
+  }
 
-  const name = detail?.customer.displayName
-    ?? detail?.customer.phone
-    ?? detail?.customer.telegramId
-    ?? 'Cliente anónimo'
-
-  const contact = detail?.customer.phone
-    ?? (detail?.customer.telegramId ? `Telegram: ${detail.customer.telegramId}` : null)
-
-  const joined = detail?.customer.createdAt
-    ? new Date(detail.customer.createdAt).toLocaleDateString('es', { day: '2-digit', month: 'long', year: 'numeric' })
-    : null
-
-  const lastOrder = detail?.stats.lastOrderAt
-    ? new Date(detail.stats.lastOrderAt).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })
-    : 'Nunca'
-
-  const isVip = (detail?.stats.totalOrders ?? 0) >= 5 || (detail?.stats.totalSpent ?? 0) >= 50
+  function changeSegment(s: CustomerSegment) {
+    setSegment(s)
+    setSearch('')
+    // load triggered by effect
+  }
 
   return (
     <main className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-4">
-        <div className="flex items-center gap-3">
-          <Link
-            href="/customers"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-lg border border-slate-200 bg-white hover:bg-slate-50 transition-all"
-          >
-            ←
-          </Link>
-          <h1 className="text-lg font-bold text-slate-900 truncate">{loading ? 'Cargando…' : name}</h1>
-          {isVip && !loading && (
-            <Badge variant="secondary" className="flex-shrink-0 bg-purple-100 text-purple-600">
-              ⭐ VIP
-            </Badge>
-          )}
+      <header
+        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-white flex items-center justify-between"
+      >
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-lg font-bold text-gradient">Clientes</h1>
+          <span className="text-xs font-mono text-slate-500">
+            {total} cliente{total !== 1 ? 's' : ''}
+          </span>
+        </div>
+
+        {/* Segment tabs */}
+        <div className="flex gap-1 mt-3">
+          {SEGMENTS.map(({ key, label, icon }) => (
+            <Button
+              key={key}
+              size="sm"
+              variant={segment === key ? 'default' : 'ghost'}
+              onClick={() => changeSegment(key)}
+            >
+              {icon} {label}
+            </Button>
+          ))}
         </div>
       </header>
 
-      <div className="px-6 py-5 flex flex-col gap-5">
+      <div className="px-6 py-5 flex flex-col gap-4">
+        {/* Search */}
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm pointer-events-none text-slate-500">🔍</span>
+          <Input
+            type="search"
+            placeholder="Buscar por nombre o teléfono…"
+            value={search}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
         {error && (
-          <div className="rounded-xl px-4 py-3 text-sm bg-red-50 text-red-600 border border-red-200">
+          <div
+            className="rounded-xl px-4 py-3 text-sm bg-red-50 text-red-600 border border-red-200"
+          >
             {error}
           </div>
         )}
 
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <p className="text-slate-500">Cargando…</p>
-          </div>
-        ) : detail ? (
-          <>
-            {/* Contact info */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col gap-1">
-              <div className="flex items-center gap-3 mb-1">
-                <div className="h-12 w-12 rounded-full flex items-center justify-center text-white font-bold text-lg bg-indigo-600 flex-shrink-0">
-                  {name.charAt(0).toUpperCase()}
+          <div className="space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-4 flex items-center gap-4">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-24" />
                 </div>
-                <div className="min-w-0">
-                  <p className="font-semibold truncate text-slate-900">{name}</p>
-                  {contact && (
-                    <p className="text-sm text-slate-500">{contact}</p>
-                  )}
-                  {joined && (
-                    <p className="text-xs mt-0.5 text-slate-500">
-                      Cliente desde {joined}
-                    </p>
-                  )}
-                </div>
+                <Skeleton className="h-4 w-16" />
               </div>
-            </div>
-
-            {/* Stats grid */}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <StatCard
-                icon="💰"
-                label="Total gastado"
-                value={`$${(detail.stats.totalSpent).toLocaleString('es', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                gradient
-              />
-              <StatCard icon="📦" label="Pedidos"    value={String(detail.stats.totalOrders)} />
-              <StatCard icon="❌" label="Cancelados" value={String(detail.stats.cancelledCount)} />
-              <StatCard icon="🕐" label="Último pedido" value={lastOrder} />
-            </div>
-
-            {/* Orders history */}
-            <div>
-              <p className="text-sm font-semibold mb-3 text-slate-900">
-                Historial de pedidos
-              </p>
-              {detail.orders.length === 0 ? (
-                <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
-                  <p className="text-slate-500">Sin pedidos registrados</p>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  {detail.orders.map((o) => <OrderRow key={o.id} order={o} />)}
-                </div>
-              )}
-            </div>
-          </>
-        ) : null}
+            ))}
+          </div>
+        ) : customers.length === 0 ? (
+          <EmptyState
+            icon={search ? '🔍' : '👥'}
+            title={search ? 'Sin resultados' : 'Sin clientes en este segmento'}
+            description={
+              search
+                ? `No encontramos clientes que coincidan con "${search}".`
+                : 'Cuando alguien haga su primer pedido va a aparecer acá.'
+            }
+          />
+        ) : (
+          <div className="flex flex-col gap-3">
+            {customers.map((c) => <CustomerCard key={c.id} c={c} />)}
+          </div>
+        )}
       </div>
     </main>
   )

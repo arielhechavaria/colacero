@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
@@ -127,7 +127,7 @@ function InventoryAdjuster({
         onBlur={handleBlur}
         onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
         disabled={loading}
-        className={`${inputSz} text-xs text-center font-mono rounded border border-slate-200 bg-transparent text-slate-900 disabled:opacity-50`}
+        className={`${inputSz} text-xs text-center font-mono rounded border border-white/[0.08] bg-transparent text-white disabled:opacity-50`}
       />
 
       <button
@@ -161,12 +161,12 @@ function ProductCard({
 }) {
   return (
     <div
-      className={`bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col gap-2 transition-all ${!product.isActive ? 'opacity-50' : ''}`}
+      className={`bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-4 flex flex-col gap-2 transition-all ${!product.isActive ? 'opacity-50' : ''}`}
     >
       {/* Header row */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <p className="font-semibold text-sm leading-snug text-slate-900">
+          <p className="font-semibold text-sm leading-snug text-white">
             {product.name}
           </p>
           {product.sku && (
@@ -183,7 +183,7 @@ function ProductCard({
         {/* Active toggle */}
         <button
           onClick={() => onToggle(product)}
-          className={`flex-shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold transition-all ${product.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}
+          className={`flex-shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold transition-all ${product.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-white/10 text-slate-500'}`}
           title={product.isActive ? 'Desactivar producto' : 'Activar producto'}
         >
           {product.isActive ? 'Activo' : 'Inactivo'}
@@ -205,7 +205,7 @@ function ProductCard({
       <InventoryAdjuster product={product} token={token} onUpdated={onUpdated} />
 
       {/* Actions */}
-      <div className="flex gap-2 mt-1 pt-3 border-t border-slate-200">
+      <div className="flex gap-2 mt-1 pt-3 border-t border-white/[0.08]">
         <Button
           variant="outline"
           size="sm"
@@ -245,11 +245,11 @@ function ProductTableRow({
 }) {
   return (
     <tr
-      className={`border-b border-slate-200 transition-colors hover:bg-slate-50 ${!product.isActive ? 'opacity-50' : ''}`}
+      className={`border-b border-white/[0.08] transition-colors hover:bg-[#0B0F1A] ${!product.isActive ? 'opacity-50' : ''}`}
     >
       {/* Nombre + SKU */}
       <td className="px-4 py-3">
-        <p className="font-medium text-sm leading-snug text-slate-900">
+        <p className="font-medium text-sm leading-snug text-white">
           {product.name}
         </p>
         {product.sku && (
@@ -268,7 +268,7 @@ function ProductTableRow({
       <td className="px-4 py-3 hidden md:table-cell">
         {product.category ? (
           <span
-            className="text-xs px-2 py-0.5 rounded-full bg-slate-50 border border-slate-200 text-slate-500"
+            className="text-xs px-2 py-0.5 rounded-full bg-[#0B0F1A] border border-white/[0.08] text-slate-500"
           >
             {product.category}
           </span>
@@ -296,7 +296,7 @@ function ProductTableRow({
       <td className="px-4 py-3 hidden sm:table-cell">
         <button
           onClick={() => onToggle(product)}
-          className={`rounded-full px-2 py-0.5 text-[11px] font-semibold transition-all ${product.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}
+          className={`rounded-full px-2 py-0.5 text-[11px] font-semibold transition-all ${product.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-white/10 text-slate-500'}`}
         >
           {product.isActive ? 'Activo' : 'Inactivo'}
         </button>
@@ -338,10 +338,10 @@ function ProductsTable({
 }) {
   const rowProps = { token, onEdit, onToggle, onDelete, onUpdated }
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+    <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg overflow-x-auto">
       <table className="w-full text-sm border-collapse">
         <thead>
-          <tr className="border-b border-slate-200">
+          <tr className="border-b border-white/[0.08]">
             {(['Producto', 'Categoría', 'Precio', 'Stock', 'Estado', 'Acciones'] as const).map((h, i) => (
               <th
                 key={h}
@@ -359,7 +359,7 @@ function ProductsTable({
         <tbody>
           {active.length > 0 && (
             <>
-              <tr className="bg-slate-50">
+              <tr className="bg-[#0B0F1A]">
                 <td colSpan={6} className="px-4 py-2">
                   <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                     Activos ({active.length})
@@ -373,7 +373,7 @@ function ProductsTable({
           )}
           {inactive.length > 0 && (
             <>
-              <tr className="border-t-2 border-slate-200 bg-slate-50">
+              <tr className="border-t-2 border-white/[0.08] bg-[#0B0F1A]">
                 <td colSpan={6} className="px-4 py-2">
                   <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                     Inactivos ({inactive.length})
@@ -553,7 +553,7 @@ function ProductModal({
                     set('unitLabel', e.target.value)
                   }
                 }}
-                className="h-9 w-full rounded-md border border-slate-200 px-2 text-sm bg-white text-slate-900"
+                className="h-9 w-full rounded-md border border-white/[0.08] px-2 text-sm bg-white text-white"
               >
                 {UNIT_OPTIONS.map((u) => (
                   <option key={u} value={u}>{u}</option>
@@ -730,7 +730,7 @@ function DeleteDialog({
         <DialogHeader>
           <DialogTitle>¿Desactivar producto?</DialogTitle>
           <DialogDescription>
-            <strong className="text-slate-900">{product?.name}</strong> se ocultará del catálogo.
+            <strong className="text-white">{product?.name}</strong> se ocultará del catálogo.
             Podés reactivarlo luego.
           </DialogDescription>
         </DialogHeader>
@@ -869,7 +869,7 @@ export default function ProductsPage() {
       <main className="min-h-screen">
         <div className="px-6 py-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-3">
+            <div key={i} className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5 flex flex-col gap-3">
               <div className="flex items-start justify-between">
                 <div className="flex flex-col gap-2 flex-1">
                   <Skeleton className="h-5 w-32" />
@@ -896,7 +896,7 @@ export default function ProductsPage() {
     <main className="min-h-screen">
       {/* Header */}
       <header
-        className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white flex items-center justify-between"
+        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-white flex items-center justify-between"
       >
         <div className="flex items-center justify-between gap-4">
           <div>
@@ -911,7 +911,7 @@ export default function ProductsPage() {
           <div className="flex items-center gap-2">
             {/* View toggle */}
             <div
-              className="flex items-center gap-0.5 rounded-lg p-1 bg-slate-100 border border-slate-200"
+              className="flex items-center gap-0.5 rounded-lg p-1 bg-white/10 border border-white/[0.08]"
             >
               <button
                 onClick={() => { setView('grid'); localStorage.setItem('panel.products.view', 'grid') }}
@@ -955,7 +955,7 @@ export default function ProductsPage() {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="h-9 rounded-md border border-slate-200 px-3 text-sm bg-white text-slate-900"
+              className="h-9 rounded-md border border-white/[0.08] px-3 text-sm bg-white text-white"
             >
               <option value="">Todas las categorías</option>
               {categories.map((c) => (
@@ -968,7 +968,7 @@ export default function ProductsPage() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="h-9 rounded-md border border-slate-200 px-3 text-sm bg-white text-slate-900"
+            className="h-9 rounded-md border border-white/[0.08] px-3 text-sm bg-white text-white"
           >
             <option value="name-asc">Nombre A-Z</option>
             <option value="price-asc">Precio ↑</option>

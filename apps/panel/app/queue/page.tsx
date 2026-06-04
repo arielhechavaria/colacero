@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -84,7 +84,7 @@ export default function QueuePage() {
     return (
       <main className="min-h-screen px-6 py-8 max-w-4xl mx-auto space-y-3">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+          <div key={i} className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-4">
             <Skeleton className="h-5 w-40 mb-3" />
             <Skeleton className="h-4 w-full mb-2" />
             <Skeleton className="h-4 w-3/4" />
@@ -97,7 +97,7 @@ export default function QueuePage() {
   return (
     <main className="min-h-screen">
       <header
-        className="sticky top-0 z-10 px-6 py-5 border-b border-slate-200 bg-white"
+        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-white"
       >
         <div className="flex items-center justify-between gap-4">
           <div>
@@ -131,9 +131,9 @@ export default function QueuePage() {
         )}
 
         {queue.length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-10 text-center">
+          <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-10 text-center">
             <p className="text-3xl mb-2">✅</p>
-            <p className="font-semibold text-slate-900">No hay pedidos pendientes</p>
+            <p className="font-semibold text-white">No hay pedidos pendientes</p>
             <p className="text-sm mt-1 text-slate-500">
               Todos los pedidos están listos o entregados
             </p>
@@ -150,20 +150,20 @@ export default function QueuePage() {
             return (
               <div
                 key={order.id}
-                className="bg-white rounded-xl shadow-sm p-4 border-2"
+                className="bg-[#111827] rounded-xl shadow-sm p-4 border-2"
                 style={{ borderColor }}
               >
                 {/* Position + code */}
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div className="flex items-center gap-3">
                     <span
-                      className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold flex-shrink-0 bg-indigo-50 text-indigo-600"
+                      className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold flex-shrink-0 bg-indigo-500/15 text-indigo-400"
                     >
                       {idx + 1}
                     </span>
                     <div>
                       <p
-                        className="text-xl font-bold tracking-widest font-mono text-indigo-600"
+                        className="text-xl font-bold tracking-widest font-mono text-indigo-400"
                       >
                         {order.pickupCode ?? '—'}
                       </p>
@@ -188,11 +188,11 @@ export default function QueuePage() {
 
                 {/* Items */}
                 <ul
-                  className="mb-3 flex flex-col gap-1 border-t border-slate-200 pt-3"
+                  className="mb-3 flex flex-col gap-1 border-t border-white/[0.08] pt-3"
                 >
                   {order.items.map((item) => (
                     <li key={item.id} className="flex justify-between text-sm">
-                      <span className="text-slate-900">
+                      <span className="text-white">
                         {item.name}
                         <span className="ml-1 text-slate-500">× {item.quantity} {item.unitLabel}</span>
                       </span>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import type { PickupWindowGroup, Order, OrderStatus } from '../lib/api'
@@ -33,9 +33,9 @@ const COLUMNS: {
     bgClass:  string
     borderClass: string
 }[] = [
-    { key: 'pending',   label: 'Por preparar', statuses: ['CONFIRMED'],           dotClass: 'bg-amber-400',   textClass: 'text-amber-700',   bgClass: 'bg-amber-50',   borderClass: 'border-amber-100' },
-    { key: 'preparing', label: 'Preparando',   statuses: ['PREPARING'],           dotClass: 'bg-indigo-500',  textClass: 'text-indigo-700',  bgClass: 'bg-indigo-50',  borderClass: 'border-indigo-100' },
-    { key: 'ready',     label: 'Listos',       statuses: ['READY', 'PICKED_UP'],  dotClass: 'bg-emerald-500', textClass: 'text-emerald-700', bgClass: 'bg-emerald-50', borderClass: 'border-emerald-100' },
+    { key: 'pending',   label: 'Por preparar', statuses: ['CONFIRMED'],           dotClass: 'bg-amber-400',   textClass: 'text-amber-400',   bgClass: 'bg-amber-500/10',   borderClass: 'border-amber-500/20' },
+    { key: 'preparing', label: 'Preparando',   statuses: ['PREPARING'],           dotClass: 'bg-indigo-400',  textClass: 'text-indigo-400',  bgClass: 'bg-indigo-500/10',  borderClass: 'border-indigo-500/20' },
+    { key: 'ready',     label: 'Listos',       statuses: ['READY', 'PICKED_UP'],  dotClass: 'bg-emerald-400', textClass: 'text-emerald-400', bgClass: 'bg-emerald-500/10', borderClass: 'border-emerald-500/20' },
 ]
 
 // ── Mobile: acción primaria según status ──────────────────────────────────────
@@ -79,10 +79,10 @@ function MobileOrderRow({ order, onAction, loading }: {
     if (isDone) return null
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200 p-3 flex items-center gap-3">
+        <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] p-3 flex items-center gap-3">
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-sm font-bold text-indigo-600 tracking-wide">
+                    <span className="font-mono text-sm font-bold text-indigo-400 tracking-wide">
                         {order.pickupCode ?? '—'}
                     </span>
                     <MobileStatusBadge status={order.status} />
@@ -119,11 +119,11 @@ export function WindowGroup({ window: w, onAction, loading }: Props) {
     const readyCount     = activeOrders.filter(o => o.status === 'READY' || o.status === 'PICKED_UP').length
 
     return (
-        <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <section className="bg-white/[0.03] rounded-xl border border-white/[0.08] shadow-lg overflow-hidden">
             {/* Window header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
                 <div className="flex items-center gap-3 flex-wrap">
-                    <span className="rounded-lg px-2.5 py-1 text-xs font-semibold font-mono bg-indigo-50 text-indigo-600 border border-indigo-100">
+                    <span className="rounded-lg px-2.5 py-1 text-xs font-semibold font-mono bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
                         {w.startTime} – {w.endTime}
                     </span>
                     <span className="text-sm text-slate-500">
@@ -138,7 +138,7 @@ export function WindowGroup({ window: w, onAction, loading }: Props) {
 
                 {/* Occupancy bar — solo desktop */}
                 <div className="hidden lg:flex items-center gap-2">
-                    <div className="h-1.5 w-24 rounded-full overflow-hidden bg-slate-100">
+                    <div className="h-1.5 w-24 rounded-full overflow-hidden bg-white/10">
                         <div
                             className="h-full rounded-full transition-all"
                             style={{
@@ -172,9 +172,9 @@ export function WindowGroup({ window: w, onAction, loading }: Props) {
                         return (
                             <div
                                 key={col.key}
-                                className={`flex flex-col ${i > 0 ? 'border-l border-slate-100' : ''}`}
+                                className={`flex flex-col ${i > 0 ? 'border-l border-white/[0.06]' : ''}`}
                             >
-                                <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100">
+                                <div className="flex items-center gap-2 px-3 py-2 border-b border-white/[0.06]">
                                     <span className={`inline-block h-2 w-2 rounded-full flex-shrink-0 ${col.dotClass}`} />
                                     <span className={`text-[11px] font-semibold uppercase tracking-wide ${col.textClass}`}>
                                         {col.label}

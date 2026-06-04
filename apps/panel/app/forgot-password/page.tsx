@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -41,10 +41,10 @@ export default function ForgotPasswordPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8">
+        <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-8">
           {!sent ? (
             <>
-              <h1 className="mb-1 text-xl font-bold text-slate-900">
+              <h1 className="mb-1 text-xl font-bold text-white">
                 Recuperar contraseña
               </h1>
               <p className="mb-6 text-sm text-slate-500">
@@ -82,7 +82,7 @@ export default function ForgotPasswordPage() {
             </>
           ) : (
             <>
-              <h1 className="mb-2 text-xl font-bold text-slate-900">
+              <h1 className="mb-2 text-xl font-bold text-white">
                 Revisá tu email
               </h1>
               <p className="mb-6 text-sm text-slate-500">

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -53,8 +53,8 @@ export default function LoginPage() {
         </div>
 
         {/* Glass card */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8">
-          <h1 className="mb-1 text-xl font-bold text-slate-900">
+        <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-8">
+          <h1 className="mb-1 text-xl font-bold text-white">
             Acceso al panel
           </h1>
           <p className="mb-6 text-sm text-slate-500">
@@ -111,7 +111,7 @@ export default function LoginPage() {
 
           <p className="mt-5 text-center text-sm text-slate-500">
             ¿No tenés cuenta?{' '}
-            <Link href="/signup" className="text-indigo-600">
+            <Link href="/signup" className="text-indigo-400">
               Creá tu negocio gratis
             </Link>
           </p>

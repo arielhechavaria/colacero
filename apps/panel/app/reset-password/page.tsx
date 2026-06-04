@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -23,7 +23,7 @@ function ResetPasswordForm() {
   if (!token) {
     return (
       <>
-        <h1 className="mb-2 text-xl font-bold text-slate-900">Link inválido</h1>
+        <h1 className="mb-2 text-xl font-bold text-white">Link inválido</h1>
         <p className="mb-6 text-sm text-slate-500">
           Este link de reset no es válido. Solicitá uno nuevo.
         </p>
@@ -67,7 +67,7 @@ function ResetPasswordForm() {
   if (done) {
     return (
       <>
-        <h1 className="mb-2 text-xl font-bold text-slate-900">
+        <h1 className="mb-2 text-xl font-bold text-white">
           ¡Contraseña actualizada!
         </h1>
         <p className="text-sm text-slate-500">
@@ -79,7 +79,7 @@ function ResetPasswordForm() {
 
   return (
     <>
-      <h1 className="mb-1 text-xl font-bold text-slate-900">
+      <h1 className="mb-1 text-xl font-bold text-white">
         Nueva contraseña
       </h1>
       <p className="mb-6 text-sm text-slate-500">
@@ -155,7 +155,7 @@ export default function ResetPasswordPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8">
+        <div className="bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-8">
           <Suspense fallback={<p className="text-slate-500">Cargando…</p>}>
             <ResetPasswordForm />
           </Suspense>

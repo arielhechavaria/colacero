@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useMemo, useState } from 'react'
 import { CalendarIcon, ChevronDown } from 'lucide-react'
@@ -114,7 +114,7 @@ export function PeriodSelector({ range, onChange }: Props) {
         className="flex flex-col sm:flex-row p-0 overflow-hidden"
       >
         {/* Sidebar de presets */}
-        <div className="flex flex-col p-2 sm:w-44 border-r border-slate-200" style={{ minWidth: 176 }}>
+        <div className="flex flex-col p-2 sm:w-44 border-r border-white/[0.08]" style={{ minWidth: 176 }}>
           <p className="text-[10px] font-bold uppercase tracking-widest px-2 pb-2 text-slate-500">
             Atajos
           </p>
@@ -127,8 +127,8 @@ export function PeriodSelector({ range, onChange }: Props) {
                 className={cn(
                   'text-left text-sm rounded-lg px-3 py-2 transition-colors',
                   isActive
-                    ? 'font-semibold bg-indigo-50 text-indigo-600'
-                    : 'text-slate-700 hover:bg-slate-50',
+                    ? 'font-semibold bg-indigo-500/15 text-indigo-400'
+                    : 'text-slate-300 hover:bg-[#0B0F1A]',
                 )}
               >
                 {p.label}
@@ -147,7 +147,7 @@ export function PeriodSelector({ range, onChange }: Props) {
             disabled={{ after: new Date() }}
             locale={es}
           />
-          <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-slate-200">
+          <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-white/[0.08]">
             <p className="text-xs text-slate-500">
               {customRange?.from && customRange.to
                 ? formatRangeLabel(customRange.from, customRange.to)
