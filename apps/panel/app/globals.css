@@ -6,11 +6,32 @@
 :root {
   --radius: 0.5rem;
 
+  /* ── shadcn/ui dark theme vars (HSL, no wrapper) ─────────────────────── */
+  --background:         230 43% 8%;      /* #0B0F1A */
+  --foreground:         210 40% 96%;     /* #F1F5F9 */
+  --card:               222 47% 11%;     /* #111827 */
+  --card-foreground:    210 40% 96%;
+  --popover:            222 47% 11%;     /* #111827 — Popover & Calendar bg */
+  --popover-foreground: 210 40% 96%;
+  --primary:            237 89% 74%;     /* #818CF8 indigo-400 */
+  --primary-foreground: 222 47% 11%;
+  --secondary:          217 33% 17%;     /* #1e293b slate-800 */
+  --secondary-foreground: 210 40% 96%;
+  --muted:              217 33% 17%;
+  --muted-foreground:   215 19% 47%;     /* #64748B slate-500 */
+  --accent:             237 50% 20%;     /* indigo dim */
+  --accent-foreground:  210 40% 96%;
+  --destructive:        0 63% 50%;       /* red */
+  --destructive-foreground: 210 40% 96%;
+  --border:             217 33% 20%;     /* subtle border */
+  --input:              217 33% 17%;
+  --ring:               237 89% 74%;
+
   /* Brand */
-  --primary:       #818CF8;
-  --primary-dark:  #6366F1;
-  --primary-light: rgba(129, 140, 248, 0.15);
-  --primary-dim:   rgba(129, 140, 248, 0.08);
+  --primary-color:     #818CF8;
+  --primary-dark:      #6366F1;
+  --primary-light:     rgba(129, 140, 248, 0.15);
+  --primary-dim:       rgba(129, 140, 248, 0.08);
 
   /* Semantic */
   --success: #34D399;

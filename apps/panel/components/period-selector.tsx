@@ -111,7 +111,7 @@ export function PeriodSelector({ range, onChange }: Props) {
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="flex flex-col sm:flex-row p-0 overflow-hidden"
+        className="flex flex-col sm:flex-row p-0 overflow-hidden bg-[#111827] border border-white/[0.10] shadow-2xl"
       >
         {/* Sidebar de presets */}
         <div className="flex flex-col p-2 sm:w-44 border-r border-white/[0.08]" style={{ minWidth: 176 }}>
