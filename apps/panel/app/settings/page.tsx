@@ -29,7 +29,7 @@ function GlassSelect(props: React.SelectHTMLAttributes<HTMLSelectElement> & { ch
   return (
     <select
       {...props}
-      className="w-full rounded-xl px-4 py-2.5 text-sm outline-none appearance-none bg-white border border-white/[0.08] text-white"
+      className="w-full rounded-xl px-4 py-2.5 text-sm outline-none appearance-none bg-white/[0.06] border border-white/[0.08] text-white"
     />
   )
 }
@@ -680,7 +680,7 @@ export default function SettingsPage() {
     <main className="min-h-screen">
       {/* Header */}
       <header
-        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-white flex items-center justify-between"
+        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-[#0B0F1A] flex items-center justify-between"
       >
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-lg font-bold text-gradient">Configuración</h1>

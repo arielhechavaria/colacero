@@ -182,7 +182,7 @@ export default function WindowsPage() {
   return (
     <main className="min-h-screen">
       <header
-        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-white"
+        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-[#0B0F1A]"
       >
         <div className="flex items-center justify-between gap-4">
           <div>
@@ -215,7 +215,7 @@ export default function WindowsPage() {
         )}
         {success != null && (
           <div
-            className="rounded-xl px-4 py-3 text-sm bg-emerald-50 text-emerald-600 border border-emerald-200"
+            className="rounded-xl px-4 py-3 text-sm bg-emerald-500/10 text-emerald-400 border border-emerald-200"
           >
             {success}
           </div>

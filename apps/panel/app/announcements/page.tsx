@@ -263,7 +263,7 @@ export default function AnnouncementsPage() {
   return (
     <main className="min-h-screen">
       <header
-        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-white"
+        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-[#0B0F1A]"
       >
         <div className="flex items-center justify-between gap-4">
           <div>
@@ -303,7 +303,7 @@ export default function AnnouncementsPage() {
                   <button
                     key={tpl.id}
                     onClick={() => applyTemplate(tpl)}
-                    className={`flex flex-col items-start rounded-xl border p-3 text-left transition-all hover:border-indigo-400 ${active ? 'bg-indigo-50 border-indigo-400' : 'bg-white border-white/[0.08]'}`}
+                    className={`flex flex-col items-start rounded-xl border p-3 text-left transition-all hover:border-indigo-400 ${active ? 'bg-indigo-50 border-indigo-400' : 'bg-white/[0.04] border-white/[0.08]'}`}
                   >
                     <span className="text-lg">{tpl.icon}</span>
                     <span
@@ -352,7 +352,7 @@ export default function AnnouncementsPage() {
                       <button
                         key={p.id}
                         onClick={() => toggleProduct(p)}
-                        className={`flex flex-col items-start rounded-xl border p-3 text-left transition-colors ${on ? 'bg-indigo-50 border-indigo-400' : 'bg-white border-white/[0.08]'}`}
+                        className={`flex flex-col items-start rounded-xl border p-3 text-left transition-colors ${on ? 'bg-indigo-50 border-indigo-400' : 'bg-white/[0.04] border-white/[0.08]'}`}
                       >
                         <span className={`text-xs font-semibold ${on ? 'text-indigo-400' : 'text-white'}`}>
                           {on ? '✓ ' : ''}{p.name}

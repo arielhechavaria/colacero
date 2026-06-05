@@ -114,7 +114,7 @@ export function AnnouncementAiModal({ open, onClose, onSelect, productIds, produ
                 onClick={() => setType(t.id)}
                 className={cn(
                   'flex items-center gap-2 rounded-xl border p-3 text-left transition-colors',
-                  active ? 'bg-indigo-50 border-indigo-300' : 'bg-white border-white/[0.08] hover:border-slate-300',
+                  active ? 'bg-indigo-50 border-indigo-300' : 'bg-white border-white/[0.08] hover:border-white/20',
                 )}
               >
                 <span className="text-lg">{t.icon}</span>
@@ -137,7 +137,7 @@ export function AnnouncementAiModal({ open, onClose, onSelect, productIds, produ
                 onClick={() => setTone(t.id)}
                 className={cn(
                   'rounded-xl border p-3 text-left transition-colors',
-                  active ? 'bg-indigo-50 border-indigo-300' : 'bg-white border-white/[0.08] hover:border-slate-300',
+                  active ? 'bg-indigo-50 border-indigo-300' : 'bg-white border-white/[0.08] hover:border-white/20',
                 )}
               >
                 <p className={cn('text-xs font-semibold', active ? 'text-indigo-400' : 'text-slate-300')}>

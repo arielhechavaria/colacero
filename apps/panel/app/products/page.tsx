@@ -133,7 +133,7 @@ function InventoryAdjuster({
       <button
         onClick={() => step(1)}
         disabled={loading}
-        className={`${btnSz} text-sm font-bold disabled:opacity-30 transition-all bg-emerald-50 text-emerald-600`}
+        className={`${btnSz} text-sm font-bold disabled:opacity-30 transition-all bg-emerald-500/10 text-emerald-400`}
         title="Agregar 1"
       >+</button>
 
@@ -183,7 +183,7 @@ function ProductCard({
         {/* Active toggle */}
         <button
           onClick={() => onToggle(product)}
-          className={`flex-shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold transition-all ${product.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-white/10 text-slate-500'}`}
+          className={`flex-shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold transition-all ${product.isActive ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/10 text-slate-500'}`}
           title={product.isActive ? 'Desactivar producto' : 'Activar producto'}
         >
           {product.isActive ? 'Activo' : 'Inactivo'}
@@ -296,7 +296,7 @@ function ProductTableRow({
       <td className="px-4 py-3 hidden sm:table-cell">
         <button
           onClick={() => onToggle(product)}
-          className={`rounded-full px-2 py-0.5 text-[11px] font-semibold transition-all ${product.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-white/10 text-slate-500'}`}
+          className={`rounded-full px-2 py-0.5 text-[11px] font-semibold transition-all ${product.isActive ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/10 text-slate-500'}`}
         >
           {product.isActive ? 'Activo' : 'Inactivo'}
         </button>
@@ -553,7 +553,7 @@ function ProductModal({
                     set('unitLabel', e.target.value)
                   }
                 }}
-                className="h-9 w-full rounded-md border border-white/[0.08] px-2 text-sm bg-white text-white"
+                className="h-9 w-full rounded-md border border-white/[0.08] px-2 text-sm bg-white/[0.06] text-white"
               >
                 {UNIT_OPTIONS.map((u) => (
                   <option key={u} value={u}>{u}</option>
@@ -896,7 +896,7 @@ export default function ProductsPage() {
     <main className="min-h-screen">
       {/* Header */}
       <header
-        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-white flex items-center justify-between"
+        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-[#0B0F1A] flex items-center justify-between"
       >
         <div className="flex items-center justify-between gap-4">
           <div>
@@ -955,7 +955,7 @@ export default function ProductsPage() {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="h-9 rounded-md border border-white/[0.08] px-3 text-sm bg-white text-white"
+              className="h-9 rounded-md border border-white/[0.08] px-3 text-sm bg-white/[0.06] text-white"
             >
               <option value="">Todas las categorías</option>
               {categories.map((c) => (
@@ -968,7 +968,7 @@ export default function ProductsPage() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="h-9 rounded-md border border-white/[0.08] px-3 text-sm bg-white text-white"
+            className="h-9 rounded-md border border-white/[0.08] px-3 text-sm bg-white/[0.06] text-white"
           >
             <option value="name-asc">Nombre A-Z</option>
             <option value="price-asc">Precio ↑</option>

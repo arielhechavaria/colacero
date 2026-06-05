@@ -32,7 +32,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b border-white/[0.08] bg-white">
+      <header className="border-b border-white/[0.08] bg-[#0B0F1A]">
         <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <h1 className="text-lg font-bold text-white">

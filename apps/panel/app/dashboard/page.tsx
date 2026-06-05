@@ -348,7 +348,7 @@ export default function DashboardPage() {
     <main className="min-h-screen">
       {/* Header */}
       <header
-        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-white flex items-center justify-between"
+        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-[#0B0F1A] flex items-center justify-between"
       >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between w-full">
           <div>

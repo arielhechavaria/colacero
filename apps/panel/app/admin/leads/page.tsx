@@ -102,7 +102,7 @@ export default function AdminLeadsPage() {
         {leads.length > 0 && (
           <button
             onClick={() => downloadCsv(filtered)}
-            className="rounded-xl px-4 py-2 text-sm font-medium bg-white border border-white/[0.08] text-slate-300 hover:bg-[#0B0F1A] transition-colors"
+            className="rounded-xl px-4 py-2 text-sm font-medium bg-white/[0.04] border border-white/[0.08] text-slate-300 hover:bg-[#0B0F1A] transition-colors"
           >
             ↓ Exportar CSV{filter !== 'ALL' ? ` (${filter})` : ''}
           </button>
@@ -116,7 +116,7 @@ export default function AdminLeadsPage() {
           className={`rounded-full px-3 py-1 text-xs font-semibold border transition-all ${
             filter === 'ALL'
               ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30'
-              : 'bg-white text-slate-500 border-white/[0.08] hover:border-slate-300'
+              : 'bg-white/5 text-slate-400 border-white/[0.08] hover:border-white/20'
           }`}
         >
           Todos ({leads.length})
@@ -128,7 +128,7 @@ export default function AdminLeadsPage() {
             className={`rounded-full px-3 py-1 text-xs font-semibold border transition-all ${
               filter === s
                 ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30'
-                : 'bg-white text-slate-500 border-white/[0.08] hover:border-slate-300'
+                : 'bg-white/5 text-slate-400 border-white/[0.08] hover:border-white/20'
             }`}
           >
             {statusLabel[s]} ({stats[s]})
@@ -182,7 +182,7 @@ export default function AdminLeadsPage() {
                     className={`rounded-lg px-3 py-1 text-xs font-medium border transition-all disabled:opacity-40 ${
                       lead.status === s
                         ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30'
-                        : 'bg-white text-slate-500 border-white/[0.08] hover:border-slate-300 hover:text-slate-300'
+                        : 'bg-white/5 text-slate-400 border-white/[0.08] hover:border-white/20 hover:text-slate-200'
                     }`}
                   >
                     → {statusLabel[s]}

@@ -155,7 +155,7 @@ export default function OrdersPage() {
     return (
         <main className="min-h-screen">
             {/* Header */}
-            <header className="sticky top-0 z-10 px-6 pt-4 pb-3 border-b border-white/[0.08] bg-white">
+            <header className="sticky top-0 z-10 px-6 pt-4 pb-3 border-b border-white/[0.08] bg-[#0B0F1A]">
                 {/* Row 1: título + timestamp + refresh */}
                 <div className="flex items-center justify-between gap-4 mb-3">
                     <h1 className="text-lg font-bold text-white">Pedidos</h1>

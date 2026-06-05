@@ -97,7 +97,7 @@ export default function QueuePage() {
   return (
     <main className="min-h-screen">
       <header
-        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-white"
+        className="sticky top-0 z-10 px-6 py-5 border-b border-white/[0.08] bg-[#0B0F1A]"
       >
         <div className="flex items-center justify-between gap-4">
           <div>
