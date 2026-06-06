@@ -196,7 +196,7 @@ export default function OrdersPage() {
                                 )}
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent align="start" className="w-auto p-0">
+                        <PopoverContent align="start" className="w-auto p-0 bg-[#111827] border border-white/[0.10] shadow-2xl">
                             <Calendar
                                 mode="single"
                                 selected={parseISO(selectedDate)}

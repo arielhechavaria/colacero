@@ -6,26 +6,26 @@
 :root {
   --radius: 0.5rem;
 
-  /* ── shadcn/ui dark theme vars (HSL, no wrapper) ─────────────────────── */
-  --background:         230 43% 8%;      /* #0B0F1A */
-  --foreground:         210 40% 96%;     /* #F1F5F9 */
-  --card:               222 47% 11%;     /* #111827 */
-  --card-foreground:    210 40% 96%;
-  --popover:            222 47% 11%;     /* #111827 — Popover & Calendar bg */
-  --popover-foreground: 210 40% 96%;
-  --primary:            237 89% 74%;     /* #818CF8 indigo-400 */
-  --primary-foreground: 222 47% 11%;
-  --secondary:          217 33% 17%;     /* #1e293b slate-800 */
-  --secondary-foreground: 210 40% 96%;
-  --muted:              217 33% 17%;
-  --muted-foreground:   215 19% 47%;     /* #64748B slate-500 */
-  --accent:             237 50% 20%;     /* indigo dim */
-  --accent-foreground:  210 40% 96%;
-  --destructive:        0 63% 50%;       /* red */
-  --destructive-foreground: 210 40% 96%;
-  --border:             217 33% 20%;     /* subtle border */
-  --input:              217 33% 17%;
-  --ring:               237 89% 74%;
+  /* ── shadcn/ui theme vars (colores directos para var() inline) ──────── */
+  --background:         #0B0F1A;
+  --foreground:         #F1F5F9;
+  --card:               #111827;
+  --card-foreground:    #F1F5F9;
+  --popover:            #111827;
+  --popover-foreground: #F1F5F9;
+  --primary-fg:         #818CF8;
+  --primary-foreground: #111827;
+  --secondary:          #1e293b;
+  --secondary-foreground: #F1F5F9;
+  --muted:              #1e293b;
+  --muted-foreground:   #64748B;
+  --accent:             rgba(129,140,248,0.12);
+  --accent-foreground:  #F1F5F9;
+  --destructive:        #ef4444;
+  --destructive-foreground: #F1F5F9;
+  --border:             rgba(255,255,255,0.09);
+  --input:              rgba(255,255,255,0.06);
+  --ring:               #818CF8;
 
   /* Brand */
   --primary-color:     #818CF8;
