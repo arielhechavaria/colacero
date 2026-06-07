@@ -17,6 +17,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge }    from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '../../components/empty-state'
+import { Package, Search } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -988,7 +989,7 @@ export default function ProductsPage() {
 
         {products.length === 0 && !error && (
           <EmptyState
-            icon="📦"
+            icon={Package}
             title="Todavía no tenés productos"
             description="Creá tu primer producto para que aparezca en el catálogo y los clientes puedan hacer pedidos."
             action={{ label: '+ Crear primer producto', onClick: openCreate }}

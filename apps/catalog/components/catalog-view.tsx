@@ -8,6 +8,7 @@ import { getProductFallbackImage } from '../lib/product-images'
 import { AddToCartButton } from './add-to-cart-button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Package, Search } from 'lucide-react'
 
 // ── Animation variants ────────────────────────────────────────────────────────
 
@@ -76,7 +77,7 @@ function ProductRow({ product }: { product: CatalogProduct }) {
             onLoad={(e) => (e.currentTarget.parentElement!.style.animation = 'none')}
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-3xl">📦</div>
+          <div className="flex h-full items-center justify-center"><Package className="h-8 w-8 text-slate-600" strokeWidth={1.25} /></div>
         )}
       </div>
 
@@ -176,7 +177,7 @@ export function CatalogView({ products }: Props) {
           className="absolute left-3 top-1/2 -translate-y-1/2 text-sm"
           style={{ color: 'var(--muted)' }}
         >
-          🔍
+          <Search className="h-4 w-4" />
         </span>
         <Input
           value={search}

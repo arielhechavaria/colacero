@@ -22,6 +22,7 @@ import { TEMPLATES, type TemplateDef } from '../../lib/announcement-templates'
 import { AnnouncementPreview } from '../../components/announcement-preview'
 import { AnnouncementAiModal } from '../../components/announcement-ai-modal'
 import { EmptyState }   from '@/components/empty-state'
+import { Send }          from 'lucide-react'
 import { Button }       from '@/components/ui/button'
 import { Textarea }     from '@/components/ui/textarea'
 import { Badge }        from '@/components/ui/badge'
@@ -545,7 +546,7 @@ export default function AnnouncementsPage() {
               </div>
             ) : filteredHistory.length === 0 ? (
               <EmptyState
-                icon="📤"
+                icon={Send}
                 title="Sin anuncios"
                 description="Cuando publiques o programes un anuncio, va a aparecer acá."
               />

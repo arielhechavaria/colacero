@@ -19,6 +19,10 @@ import { getStatsSummary,
   isAuthenticatedClient, } from '../../lib/api'
 import { toast } from 'sonner'
 import { motion, type Variants } from 'framer-motion'
+import {
+  DollarSign, ShoppingBag, PackageCheck, Receipt,
+  AlertTriangle, TrendingUp, type LucideIcon,
+} from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PeriodSelector } from '../../components/period-selector'
@@ -39,14 +43,14 @@ const fadeUp: Variants = {
 // ── KPI card ──────────────────────────────────────────────────────────────────
 
 function KpiCard({
-  icon,
+  icon: Icon,
   label,
   value,
   sub,
   gradient,
   href,
 }: {
-  icon:      string
+  icon:      LucideIcon
   label:     string
   value:     string
   sub?:      string
@@ -54,9 +58,11 @@ function KpiCard({
   href?:     string
 }) {
   const card = (
-    <div className={`bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5 flex flex-col gap-1 ${href ? 'transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer' : ''}`}>
+    <div className={`bg-white/[0.04] rounded-xl border border-white/[0.08] shadow-lg p-5 flex flex-col gap-1 ${href ? 'transition-all hover:bg-white/[0.07] hover:-translate-y-0.5 cursor-pointer' : ''}`}>
       <div className="flex items-center justify-between mb-1">
-        <span className="text-xl">{icon}</span>
+        <div className="rounded-lg bg-white/[0.07] p-1.5">
+          <Icon className="h-4 w-4 text-indigo-400" strokeWidth={1.75} />
+        </div>
         <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
           {label}
         </span>
@@ -417,7 +423,7 @@ export default function DashboardPage() {
             >
               <motion.div variants={kpiCard}>
                 <KpiCard
-                  icon="💰"
+                  icon={DollarSign}
                   label="Ingresos"
                   value={`$${summary.revenue.toLocaleString('es', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   sub={`${summary.ordersCount} pedido${summary.ordersCount !== 1 ? 's' : ''}`}
@@ -426,7 +432,7 @@ export default function DashboardPage() {
               </motion.div>
               <motion.div variants={kpiCard}>
                 <KpiCard
-                  icon="📦"
+                  icon={ShoppingBag}
                   label="Pedidos"
                   value={String(summary.ordersCount)}
                   sub={`${summary.cancelledCount} cancelado${summary.cancelledCount !== 1 ? 's' : ''}`}
@@ -435,7 +441,7 @@ export default function DashboardPage() {
               </motion.div>
               <motion.div variants={kpiCard}>
                 <KpiCard
-                  icon="✅"
+                  icon={PackageCheck}
                   label="Entregados"
                   value={String(summary.deliveredCount)}
                   sub={`de ${summary.ordersCount + summary.cancelledCount} totales`}
@@ -444,7 +450,7 @@ export default function DashboardPage() {
               </motion.div>
               <motion.div variants={kpiCard}>
                 <KpiCard
-                  icon="🧾"
+                  icon={Receipt}
                   label="Ticket medio"
                   value={summary.ordersCount > 0
                     ? `$${summary.avgTicket.toFixed(2)}`

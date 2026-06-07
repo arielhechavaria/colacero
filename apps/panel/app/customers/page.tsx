@@ -11,6 +11,7 @@ import { Badge }     from '@/components/ui/badge'
 import { Input }     from '@/components/ui/input'
 import { Skeleton }  from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/empty-state'
+import { Search, Users } from 'lucide-react'
 
 // ── Segment tabs ──────────────────────────────────────────────────────────────
 
@@ -181,7 +182,7 @@ export default function CustomersPage() {
           </div>
         ) : customers.length === 0 ? (
           <EmptyState
-            icon={search ? '🔍' : '👥'}
+            icon={search ? Search : Users}
             title={search ? 'Sin resultados' : 'Sin clientes en este segmento'}
             description={
               search

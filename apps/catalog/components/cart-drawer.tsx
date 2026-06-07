@@ -5,6 +5,7 @@ import { useRouter, useParams, usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCartContext } from '../context/cart-context'
 import { reserveStock } from '../lib/client-api'
+import { ShoppingCart } from 'lucide-react'
 
 interface StockInfo {
   products: Array<{
@@ -118,7 +119,7 @@ export function CartDrawer() {
             }}
             aria-label="Ver carrito"
           >
-            <span className="text-lg">🛒</span>
+            <ShoppingCart className="h-5 w-5" strokeWidth={1.75} />
             <motion.span
               key={itemCount}
               initial={{ scale: 1.4 }}
@@ -180,7 +181,7 @@ export function CartDrawer() {
 
                 {items.length === 0 ? (
                   <div className="flex flex-col items-center gap-2 py-10 text-center">
-                    <span className="text-4xl">🛒</span>
+                    <ShoppingCart className="h-10 w-10 text-slate-600" strokeWidth={1.25} />
                     <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Tu carrito está vacío</p>
                     <p className="text-xs" style={{ color: 'var(--muted)' }}>Agregá productos del catálogo</p>
                   </div>

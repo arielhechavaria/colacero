@@ -4,7 +4,7 @@ import {useState, useEffect, useCallback, useRef} from 'react'
 import {useRouter} from 'next/navigation'
 import {format, parseISO, addDays} from 'date-fns'
 import {es} from 'date-fns/locale'
-import {CalendarIcon, ChevronLeft, ChevronRight} from 'lucide-react'
+import { CalendarIcon, ChevronLeft, ChevronRight, Inbox, CalendarDays } from 'lucide-react'
 import {toast} from 'sonner'
 import {getOrders, patchOrderStatus, isAuthenticatedClient} from '../../lib/api'
 import type {DayOrders, OrderStatus} from '../../lib/api'
@@ -238,7 +238,7 @@ export default function OrdersPage() {
 
                 {data == null || data.windows.length === 0 ? (
                     <EmptyState
-                        icon={isToday ? '📭' : '📅'}
+                        icon={isToday ? Inbox : CalendarDays}
                         title={isToday ? 'Sin pedidos por ahora' : 'Ningún pedido este día'}
                         description={isToday
                             ? 'Cuando lleguen pedidos para hoy, los vas a ver acá actualizados cada 15 segundos.'

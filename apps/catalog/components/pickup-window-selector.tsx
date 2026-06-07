@@ -5,6 +5,7 @@ import { Button }   from '@/components/ui/button'
 import { Label }    from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge }    from '@/components/ui/badge'
+import { CalendarX, MapPin } from 'lucide-react'
 
 interface Props {
   windows:       PickupWindow[]
@@ -45,7 +46,7 @@ export function PickupWindowSelector({ windows, selected, onSelect, onConfirm, l
   if (upcomingWindows.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 py-8 text-center">
-        <span className="text-5xl">📅</span>
+        <CalendarX className="h-12 w-12 text-slate-600" strokeWidth={1.25} />
         <div className="flex flex-col gap-1">
           <p className="font-semibold text-base" style={{ color: 'var(--text)' }}>
             No hay horarios de entrega disponibles

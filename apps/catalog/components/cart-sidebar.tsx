@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter, useParams, usePathname } from 'next/navigation'
 import { useCartContext } from '../context/cart-context'
 import { reserveStock } from '../lib/client-api'
+import { ShoppingCart } from 'lucide-react'
 
 export function CartSidebar() {
   const { items, total, itemCount, removeAll, clear } = useCartContext()
@@ -56,7 +57,7 @@ export function CartSidebar() {
       <div className="flex-1 overflow-y-auto px-6 py-4">
         {items.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-12 text-center">
-            <span className="text-4xl">🛒</span>
+            <ShoppingCart className="h-10 w-10 text-slate-600" strokeWidth={1.25} />
             <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
               Tu carrito está vacío
             </p>
