@@ -4,6 +4,21 @@ import { useState, useEffect, Fragment } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import {
+    LayoutDashboard,
+    ClipboardList,
+    ChefHat,
+    CalendarClock,
+    Package,
+    Users,
+    Megaphone,
+    Settings2,
+    ShieldCheck,
+    Inbox,
+    LogOut,
+    MoreHorizontal,
+    type LucideIcon,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getMe, isAuthenticatedClient, logout } from '../lib/api'
 import {
@@ -17,20 +32,22 @@ import { Logo } from './logo'
 
 // ── Navigation config ─────────────────────────────────────────────────────────
 
-const NAV_ITEMS = [
-    { href: '/dashboard',     icon: '📊', label: 'Dashboard'  },
-    { href: '/orders',        icon: '📋', label: 'Pedidos'    },
-    { href: '/queue',         icon: '🍳', label: 'Cola'       },
-    { href: '/windows',       icon: '🕐', label: 'Ventanas'   },
-    { href: '/products',      icon: '📦', label: 'Productos'  },
-    { href: '/customers',     icon: '👥', label: 'Clientes'   },
-    { href: '/announcements', icon: '📣', label: 'Anuncios'   },
-    { href: '/settings',      icon: '⚙️',  label: 'Config.'   },
+type NavItem = { href: string; icon: LucideIcon; label: string }
+
+const NAV_ITEMS: NavItem[] = [
+    { href: '/dashboard',     icon: LayoutDashboard, label: 'Dashboard'  },
+    { href: '/orders',        icon: ClipboardList,   label: 'Pedidos'    },
+    { href: '/queue',         icon: ChefHat,         label: 'Cola'       },
+    { href: '/windows',       icon: CalendarClock,   label: 'Ventanas'   },
+    { href: '/products',      icon: Package,         label: 'Productos'  },
+    { href: '/customers',     icon: Users,           label: 'Clientes'   },
+    { href: '/announcements', icon: Megaphone,       label: 'Anuncios'   },
+    { href: '/settings',      icon: Settings2,       label: 'Config.'    },
 ]
 
-const ADMIN_NAV_ITEMS = [
-    { href: '/admin/businesses', icon: '👑', label: 'Admin' },
-    { href: '/admin/leads',      icon: '📥', label: 'Leads' },
+const ADMIN_NAV_ITEMS: NavItem[] = [
+    { href: '/admin/businesses', icon: ShieldCheck, label: 'Admin' },
+    { href: '/admin/leads',      icon: Inbox,       label: 'Leads' },
 ]
 
 const PRIMARY_NAV   = NAV_ITEMS.slice(0, 4)
@@ -40,13 +57,13 @@ const SECONDARY_NAV = NAV_ITEMS.slice(4)
 
 function NavItem({
     href,
-    icon,
+    icon: Icon,
     label,
     isActive,
     onClick,
 }: {
     href: string
-    icon: string
+    icon: LucideIcon
     label: string
     isActive: boolean
     onClick?: () => void
@@ -57,13 +74,13 @@ function NavItem({
             title={label}
             {...(onClick ? { onClick } : {})}
             className={cn(
-                'flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 transition-all min-w-0 flex-1 text-[10px] font-semibold leading-none',
+                'flex flex-col items-center gap-1 rounded-xl px-2 py-2 transition-all min-w-0 flex-1 text-[10px] font-semibold leading-none',
                 isActive
                     ? 'bg-indigo-500/15 text-indigo-400'
                     : 'text-slate-500 hover:text-slate-200 hover:bg-white/5',
             )}
         >
-            <span className="text-xl leading-none">{icon}</span>
+            <Icon className="h-5 w-5 flex-shrink-0" strokeWidth={1.75} />
             <span className="truncate w-full text-center">{label}</span>
         </Link>
     )
@@ -94,6 +111,7 @@ function MoreSheet({
                 <div className="grid grid-cols-4 gap-3 pb-6">
                     {items.map((item) => {
                         const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                        const Icon = item.icon
                         return (
                             <Link
                                 key={item.href}
@@ -106,7 +124,7 @@ function MoreSheet({
                                         : 'bg-white/[0.04] border-white/[0.08] text-slate-300 hover:bg-white/[0.08]',
                                 )}
                             >
-                                <span className="text-2xl">{item.icon}</span>
+                                <Icon className="h-6 w-6" strokeWidth={1.5} />
                                 <span className="text-xs font-semibold text-center leading-tight">{item.label}</span>
                             </Link>
                         )
@@ -115,7 +133,7 @@ function MoreSheet({
                         onClick={onLogout}
                         className="flex flex-col items-center gap-2 rounded-2xl p-4 transition-all bg-white/[0.04] border border-white/[0.08] text-red-400 hover:bg-red-500/10"
                     >
-                        <span className="text-2xl">🚪</span>
+                        <LogOut className="h-6 w-6" strokeWidth={1.5} />
                         <span className="text-xs font-semibold text-center leading-tight">Salir</span>
                     </button>
                 </div>
@@ -235,7 +253,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                                             transition={{ type: 'spring', stiffness: 500, damping: 38 }}
                                         />
                                     )}
-                                    <span className="relative z-10 text-base flex-shrink-0">{item.icon}</span>
+                                    {(() => { const Icon = item.icon; return <Icon className="relative z-10 h-[18px] w-[18px] flex-shrink-0" strokeWidth={1.75} /> })()}
                                     {!collapsed && <span className="relative z-10 truncate">{item.label}</span>}
                                 </Link>
                             </Fragment>
@@ -264,7 +282,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         title="Cerrar sesión"
                         className="rounded-lg p-2 text-slate-500 hover:bg-red-500/10 hover:text-red-400 transition-colors"
                     >
-                        <span className="text-sm">🚪</span>
+                        <LogOut className="h-4 w-4" strokeWidth={1.75} />
                     </button>
                 </div>
             </aside>
@@ -306,13 +324,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <button
                         onClick={() => setMoreOpen(true)}
                         className={cn(
-                            'flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 transition-all min-w-0 flex-1 text-[10px] font-semibold leading-none',
+                            'flex flex-col items-center gap-1 rounded-xl px-2 py-2 transition-all min-w-0 flex-1 text-[10px] font-semibold leading-none',
                             isSecondaryActive
                                 ? 'bg-indigo-500/15 text-indigo-400'
                                 : 'text-slate-500 hover:text-slate-200 hover:bg-white/5',
                         )}
                     >
-                        <span className="text-xl leading-none">···</span>
+                        <MoreHorizontal className="h-5 w-5 flex-shrink-0" strokeWidth={1.75} />
                         <span>Más</span>
                     </button>
                 </div>
